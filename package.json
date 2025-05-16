@@ -1,0 +1,21 @@
+{
+  "name": "stronger-market",
+  "version": "1.0.0",
+  "description": "Monorepo for Stronger Market application",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "concurrently \"pnpm run start:frontend\" \"pnpm run start:backend\"",
+    "start:frontend": "pnpm run --filter=frontend start",
+    "start:backend": "pnpm run --filter=backend start",
+    "dev": "concurrently \"pnpm run dev:frontend\" \"pnpm run dev:backend\"",
+    "dev:frontend": "pnpm run --filter=frontend dev",
+    "dev:backend": "pnpm run --filter=backend dev",
+    "build": "pnpm run --filter=* build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
