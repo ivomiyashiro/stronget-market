@@ -1,7 +1,12 @@
-  const Landing = () => {
-  return (
-    <div>Landing</div>
-  )
-}
+import { useTestService } from "@/hooks/use-test-service";
 
-export default Landing
+const Landing = () => {
+  const { data, loading, error } = useTestService();
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  return <div>{JSON.stringify(data)}</div>;
+};
+
+export default Landing;
