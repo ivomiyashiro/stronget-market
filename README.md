@@ -1,11 +1,11 @@
-# Stronger Market
+# Stronget Market
 
 A monorepo containing a React frontend and Node.js Express backend.
 
 ## Project Structure
 
 ```
-stronger-market/
+stronget-market/
 ├── packages/
 │   ├── frontend/     # React application
 │   └── backend/      # Express API server
@@ -51,4 +51,4 @@ Start in production mode:
 
 ```bash
 pnpm start
-``` 
+```

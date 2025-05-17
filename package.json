@@ -1,7 +1,7 @@
 {
-  "name": "stronger-market",
+  "name": "stronget-market",
   "version": "1.0.0",
-  "description": "Monorepo for Stronger Market application",
+  "description": "Stronget Market Application",
   "private": true,
   "workspaces": [
     "packages/*"
