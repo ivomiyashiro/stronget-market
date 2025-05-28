@@ -1,7 +1,12 @@
-import { createBrowserRouter } from "react-router-dom"
+import { createBrowserRouter } from "react-router-dom";
 
-import Landing from "@/components/lading/landing"
-import Login from "@/components/login/login"
+import Layout from "@/layout/layout";
+
+import Login from "@/components/login/login";
+import Landing from "@/components/landing/landing";
+import PasswordRecovery from "@/components/password-recovery/password-recovery";
+import RestorePassword from "@/components/password-recovery/restore-password";
+import SignUp from "@/components/sign-up/sign-up";
 
 const router = createBrowserRouter([
   {
@@ -9,14 +14,46 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Landing />,
+        element: (
+          <Layout showHeader={true} showFooter={true}>
+            <Landing />
+          </Layout>
+        ),
       },
       {
         path: "login",
-        element: <Login />,
+        element: (
+          <Layout showHeader={false} showFooter={true}>
+            <Login />
+          </Layout>
+        ),
+      },
+      {
+        path: "sign-up",
+        element: (
+          <Layout showHeader={false} showFooter={true}>
+            <SignUp />
+          </Layout>
+        ),
+      },
+      {
+        path: "password-recovery",
+        element: (
+          <Layout showHeader={false} showFooter={true}>
+            <PasswordRecovery />
+          </Layout>
+        ),
+      },
+      {
+        path: "restore-password",
+        element: (
+          <Layout showHeader={false} showFooter={true}>
+            <RestorePassword />
+          </Layout>
+        ),
       },
     ],
   },
-])
+]);
 
-export default router
+export default router;
