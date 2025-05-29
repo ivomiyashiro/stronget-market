@@ -11,19 +11,20 @@ const Layout = ({
   showFooter?: boolean;
 }) => {
   return (
-    <body className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen">
       {showHeader && <Header />}
       <main
         role="main"
         className={`
           flex-grow
+          mx-32
           ${
             showHeader && showFooter
-              ? "h-[calc(100vh-4rem-3rem)]"
+              ? "min-h-[calc(100vh-4.5rem-2rem-1px)]"
               : showHeader
-              ? "h-[calc(100vh-4rem)]"
+              ? "min-h-[calc(100vh-4.5rem-1px)]"
               : showFooter
-              ? "h-[calc(100vh-2rem)]"
+              ? "min-h-[calc(100vh-2rem)]"
               : "h-screen"
           }
         `}
@@ -31,7 +32,7 @@ const Layout = ({
         {children}
       </main>
       {showFooter && <Footer />}
-    </body>
+    </div>
   );
 };
 

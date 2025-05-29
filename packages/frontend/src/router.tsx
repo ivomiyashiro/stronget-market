@@ -7,6 +7,7 @@ import Landing from "@/components/landing/landing";
 import PasswordRecovery from "@/components/password-recovery/password-recovery";
 import RestorePassword from "@/components/password-recovery/restore-password";
 import SignUp from "@/components/sign-up/sign-up";
+import TrainerProfile from "@/components/trainer-profile/trainer-profile";
 
 const router = createBrowserRouter([
   {
@@ -49,6 +50,14 @@ const router = createBrowserRouter([
         element: (
           <Layout showHeader={false} showFooter={true}>
             <RestorePassword />
+          </Layout>
+        ),
+      },
+      {
+        path: "trainer-profile/:id",
+        element: (
+          <Layout showHeader={true} showFooter={true}>
+            <TrainerProfile />
           </Layout>
         ),
       },

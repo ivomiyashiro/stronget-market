@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 
 const RestorePassword = () => {
   return (
-    <section className="flex h-screen w-screen items-center justify-center">
+    <section className="flex h-full items-center justify-center">
       <form className="flex flex-col gap-6 rounded-lg border p-8">
         <div className="flex justify-center">
           <Dumbbell className="size-10 text-primary " />
