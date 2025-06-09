@@ -1,25 +1,18 @@
-import express, { Request, Response } from "express";
-import cors from "cors";
-import { config } from "./config.js";
-import router from "./routes/index.js";
+import app from "./app.js";
+import connectDB from "./database/index.js";
+import { config } from "./config";
 
-const app = express();
-const PORT = config.port;
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(config.port, () => {
+      console.log(`🚀 Server running on port ${config.port}`);
+      console.log(`📱 Environment: ${config.nodeEnv}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
+};
 
-// Middleware
-app.use(cors(config.cors));
-app.use(express.json());
-
-// API Routes
-app.use(`/api/${config.apiVersion}`, router);
-
-// Fallback route
-app.use("*", (_req: Request, res: Response) => {
-  res.status(404).json({ error: "Not Found" });
-});
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`API available at ${config.baseUrl}/api/${config.apiVersion}`);
-});
+startServer();
