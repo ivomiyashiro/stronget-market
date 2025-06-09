@@ -23,7 +23,7 @@ router.put(
   userController.updateUser
 );
 
-router.delete("/:id", validateParams(userIdSchema), userController.deleteUser);
+router.delete("/:id", userController.deleteUser);
 
 router.post(
   "/password-recovery",

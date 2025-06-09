@@ -73,10 +73,6 @@ export class UserService {
       throw new Error("Usuario no encontrado.");
     }
 
-    if (updateData.password) {
-      updateData.password = await bcrypt.hash(updateData.password, this.saltRounds);
-    }
-
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { ...updateData, updatedAt: new Date() },
@@ -91,7 +87,6 @@ export class UserService {
       name: updatedUser.name,
       surname: updatedUser.surname,
       email: updatedUser.email,
-      password: "",
       birthDay: updatedUser.birthDay,
       role: updatedUser.role,
     };
