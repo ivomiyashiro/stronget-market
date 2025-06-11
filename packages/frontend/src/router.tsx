@@ -7,7 +7,8 @@ import Landing from "@/components/landing/landing";
 import PasswordRecovery from "@/components/password-recovery/password-recovery";
 import RestorePassword from "@/components/password-recovery/restore-password";
 import SignUp from "@/components/sign-up/sign-up";
-import TrainerProfile from "@/components/trainer-profile/trainer-profile";
+import CreateService from "@/components/create-service/create-service";
+import ServiceExpanded from "@/components/service-expanded/service-expanded";
 
 const router = createBrowserRouter([
   {
@@ -16,7 +17,7 @@ const router = createBrowserRouter([
       {
         index: true,
         element: (
-          <Layout showHeader={true} showFooter={true}>
+          <Layout showHeader showFooter>
             <Landing />
           </Layout>
         ),
@@ -24,7 +25,7 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: (
-          <Layout showHeader={false} showFooter={true}>
+          <Layout showFooter showCentered>
             <Login />
           </Layout>
         ),
@@ -32,7 +33,7 @@ const router = createBrowserRouter([
       {
         path: "sign-up",
         element: (
-          <Layout showHeader={false} showFooter={true}>
+          <Layout showFooter showCentered>
             <SignUp />
           </Layout>
         ),
@@ -40,7 +41,7 @@ const router = createBrowserRouter([
       {
         path: "password-recovery",
         element: (
-          <Layout showHeader={false} showFooter={true}>
+          <Layout showFooter showCentered>
             <PasswordRecovery />
           </Layout>
         ),
@@ -48,7 +49,7 @@ const router = createBrowserRouter([
       {
         path: "restore-password",
         element: (
-          <Layout showHeader={false} showFooter={true}>
+          <Layout showFooter showCentered>
             <RestorePassword />
           </Layout>
         ),
@@ -56,8 +57,16 @@ const router = createBrowserRouter([
       {
         path: "trainer-profile/:id",
         element: (
-          <Layout showHeader={true} showFooter={true}>
-            <TrainerProfile />
+          <Layout showHeader showFooter>
+            <ServiceExpanded />
+          </Layout>
+        ),
+      },
+      {
+        path: "create-service",
+        element: (
+          <Layout showHeader showFooter>
+            <CreateService />
           </Layout>
         ),
       },
