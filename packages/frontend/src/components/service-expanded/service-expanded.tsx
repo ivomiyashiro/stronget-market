@@ -53,7 +53,7 @@ const dummyProfile = {
 const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 const times = ["08:00", "10:00", "12:00", "14:00", "16:00"];
 
-const TrainerProfile = () => {
+const ServiceExpanded = () => {
   const [selectedDay, setSelectedDay] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
 
@@ -225,4 +225,4 @@ const TrainerProfile = () => {
   );
 };
 
-export default TrainerProfile;
+export default ServiceExpanded;
