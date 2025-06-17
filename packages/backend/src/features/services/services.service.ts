@@ -1,6 +1,6 @@
 import Service from "./services.model";
 import { Types } from "mongoose";
-import { CreateServiceRequestDTO, GetServicesParams } from "./dtos";
+import { CreateServiceRequestDTO, GetServicesParams, UpdateServiceRequestDTO } from "./dtos";
 
 export class ServicesService {
     async createService(trainerId: string, serviceData: CreateServiceRequestDTO) {
@@ -58,5 +58,22 @@ export class ServicesService {
 
         await Service.findByIdAndDelete(id);
         return { message: "Service deleted successfully" };
+    }
+
+    async updateService(id: string, trainerId: string, serviceData: UpdateServiceRequestDTO) {
+        const service = await Service.findOne({
+            _id: new Types.ObjectId(id),
+            trainerId: new Types.ObjectId(trainerId),
+        });
+
+        if (!service) {
+            throw new Error(
+                "Service not found or you don't have permission to update it"
+            );
+        }
+
+        Object.assign(service, serviceData);
+        await service.save();
+        return service;
     }
 }
