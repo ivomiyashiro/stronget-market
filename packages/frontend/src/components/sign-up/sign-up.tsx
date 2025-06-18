@@ -1,138 +1,189 @@
+import { useState } from "react";
 import { Dumbbell } from "lucide-react";
 import { Label } from "../ui/label";
-import { Input } from "../ui/input";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Button } from "../ui/button";
-import { Link } from "react-router-dom";
-import userService, { type RegisterDTO } from "@/services/user.service";
-import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/store/auth/auth.hooks";
+import type { RegisterData } from "@/store/auth/auth.types";
+import { RequiredInput } from "../common/required-input";
 
 const SignUp = () => {
-    const [cargando, setCargando] = useState(false);
-    const [data, setData] = useState<RegisterDTO>({
-        name: "",
-        surname: "",
-        email: "",
-        password: "",
-        birthDay: new Date(),
-        role: "cliente",
-    });
+  const navigate = useNavigate();
+  const { registerUser, isLoading, error } = useAuth();
 
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+  const [formData, setFormData] = useState<RegisterData>({
+    name: "",
+    surname: "",
+    email: "",
+    password: "",
+    birthDay: new Date(),
+    role: "cliente",
+  });
 
-        setCargando(false);
-        await userService.registerUser(data);
-        setCargando(true);
-    };
+  const [passwordError, setPasswordError] = useState<string>("");
 
-    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = event.target;
-        setData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
-    };
+  const validatePassword = (password: string): string => {
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
-    return (
-        <section className="flex h-full items-center justify-center">
-            <form
-                className="flex flex-col gap-6 rounded-lg border p-8"
-                onSubmit={handleSubmit}
-            >
-                <div className="flex justify-center">
-                    <Dumbbell className="size-10 text-primary " />
-                </div>
-                <h1 className="text-center text-3xl font-bold break-words max-w">
-                    Registrate
-                </h1>
+    if (password.length < 8) {
+      return "La contraseña debe tener al menos 8 caracteres";
+    }
+    if (!hasLowerCase) {
+      return "La contraseña debe contener al menos 1 minúscula";
+    }
+    if (!hasNumber) {
+      return "La contraseña debe contener al menos 1 número";
+    }
+    if (!hasSpecialChar) {
+      return "La contraseña debe contener al menos 1 caracter especial";
+    }
+    return "";
+  };
 
-                <div className="flex flex-row gap-2">
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor="name">
-                            Nombre<span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                            name="name"
-                            type="text"
-                            placeholder="Ej: Leo"
-                            onChange={handleInputChange}
-                        />
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor="lastname">
-                            Apellido<span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                            name="surname"
-                            type="text"
-                            placeholder="Ej: Messi"
-                            onChange={handleInputChange}
-                        />
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor="birthdate">
-                            Fecha de nacimiento<span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                            name="birthDay"
-                            type="date"
-                            placeholder="Ej: 24/06/1987"
-                            onChange={handleInputChange}
-                        />
-                    </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                    <Label htmlFor="email">
-                        Email<span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                        name="email"
-                        type="email"
-                        placeholder="Ej: example@gmail.com"
-                        onChange={handleInputChange}
-                    />
-                </div>
-                <div className="flex flex-col gap-2">
-                    <Label htmlFor="password">
-                        Contraseña<span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                        name="password"
-                        type="password"
-                        placeholder="Contraseña"
-                        onChange={handleInputChange}
-                    />
-                    <Label className="text-sm justify-end">
-                        * 8 caracteres, 1 minúscula, 1 número y un caracter especial
-                    </Label>
-                    <Label htmlFor="role">Tipo de usuario:</Label>
-                    <RadioGroup
-                        name="role"
-                        defaultValue="client"
-                        className="flex flex-col gap-2"
-                        onChange={handleInputChange}
-                    >
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="client" id="cliente" />
-                            <Label htmlFor="cliente">Cliente</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="trainer" id="entrenador" />
-                            <Label htmlFor="entrenador">Entrenador</Label>
-                        </div>
-                    </RadioGroup>
-                </div>
-                <div className="flex flex-col gap-2 justify-end">
-                    <Button>{cargando ? "Cargando..." : "Registrate"}</Button>
-                    <Link to="/login" className="font-normal text-center">
-                        ¿Ya tenes cuenta?{" "}
-                        <span className="font-bold underline">Iniciar sesión</span>
-                    </Link>
-                </div>
-            </form>
-        </section>
-    );
+  const handleInputChange = (
+    field: keyof RegisterData,
+    value: string | Date
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+
+    // Validate password when it changes
+    if (field === "password") {
+      const error = validatePassword(value as string);
+      setPasswordError(error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate password before submission
+    const passwordValidationError = validatePassword(formData.password);
+    if (passwordValidationError) {
+      setPasswordError(passwordValidationError);
+      return;
+    }
+
+    try {
+      const result = await registerUser(formData);
+      if (result.meta.requestStatus === "fulfilled") {
+        // Registration successful, redirect to login or dashboard
+        navigate("/login");
+      }
+    } catch (error) {
+      // Error is handled by the thunk and stored in Redux state
+      console.error("Registration error:", error);
+    }
+  };
+
+  return (
+    <section className="flex h-full items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-6 rounded-lg border p-8"
+      >
+        <div className="flex justify-center">
+          <Dumbbell className="size-10 text-primary " />
+        </div>
+        <h1 className="text-center text-3xl font-bold break-words max-w">
+          Registrate
+        </h1>
+
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            There was an error registering the user
+          </div>
+        )}
+
+        <div className="flex flex-row gap-2">
+          <RequiredInput
+            label="Nombre"
+            placeholder="Ej: Leo"
+            value={formData.name}
+            onChange={(e) => handleInputChange("name", e.target.value)}
+            required
+            fullSize
+          />
+          <RequiredInput
+            label="Apellido"
+            placeholder="Ej: Messi"
+            value={formData.surname}
+            onChange={(e) => handleInputChange("surname", e.target.value)}
+            required
+            fullSize
+          />
+          <RequiredInput
+            label="Fecha de nacimiento"
+            type="date"
+            placeholder="Ej: 24/06/1987"
+            value={
+              formData.birthDay instanceof Date
+                ? formData.birthDay.toISOString().split("T")[0]
+                : ""
+            }
+            onChange={(e) =>
+              handleInputChange("birthDay", new Date(e.target.value))
+            }
+            required
+            fullSize
+          />
+        </div>
+        <RequiredInput
+          label="Email"
+          type="email"
+          placeholder="Ej: example@gmail.com"
+          value={formData.email}
+          onChange={(e) => handleInputChange("email", e.target.value)}
+          required
+          fullSize
+        />
+        <RequiredInput
+          label="Contraseña"
+          type="password"
+          placeholder="Contraseña"
+          value={formData.password}
+          onChange={(e) => handleInputChange("password", e.target.value)}
+          error={passwordError}
+          required
+          fullSize
+        />
+        <Label className="text-sm justify-end">
+          * 8 caracteres, 1 minúscula, 1 número y un caracter especial
+        </Label>
+        <Label htmlFor="role">Tipo de usuario:</Label>
+        <RadioGroup
+          value={formData.role}
+          onValueChange={(value) =>
+            handleInputChange("role", value as "cliente" | "entrenador")
+          }
+          className="flex flex-col gap-2"
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="cliente" id="cliente" />
+            <Label htmlFor="cliente">Cliente</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="entrenador" id="entrenador" />
+            <Label htmlFor="entrenador">Entrenador</Label>
+          </div>
+        </RadioGroup>
+        <div className="flex flex-col gap-2 justify-end">
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Registrando..." : "Registrate"}
+          </Button>
+          <Link to="/login" className="font-normal text-center">
+            ¿Ya tenes cuenta?{" "}
+            <span className="font-bold underline">Iniciar sesión</span>
+          </Link>
+        </div>
+      </form>
+    </section>
+  );
 };
 
 export default SignUp;
