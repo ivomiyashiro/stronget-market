@@ -1,6 +1,8 @@
 import { createBrowserRouter } from "react-router-dom";
 
 import Layout from "@/layout/layout";
+import ProtectedRoute from "@/components/common/protected-route";
+import PublicOnlyRoute from "@/components/common/public-only-route";
 
 import Login from "@/components/login/login";
 import Landing from "@/components/landing/landing";
@@ -9,6 +11,7 @@ import RestorePassword from "@/components/password-recovery/restore-password";
 import SignUp from "@/components/sign-up/sign-up";
 import CreateService from "@/components/create-service/create-service";
 import ServiceExpanded from "@/components/service-expanded/service-expanded";
+import Profile from "./components/profile/profile";
 
 const router = createBrowserRouter([
   {
@@ -25,49 +28,71 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: (
-          <Layout showFooter showCentered>
-            <Login />
-          </Layout>
+          <PublicOnlyRoute>
+            <Layout showFooter showCentered>
+              <Login />
+            </Layout>
+          </PublicOnlyRoute>
         ),
       },
       {
         path: "sign-up",
         element: (
-          <Layout showFooter showCentered>
-            <SignUp />
-          </Layout>
+          <PublicOnlyRoute>
+            <Layout showFooter showCentered>
+              <SignUp />
+            </Layout>
+          </PublicOnlyRoute>
         ),
       },
       {
         path: "password-recovery",
         element: (
-          <Layout showFooter showCentered>
-            <PasswordRecovery />
-          </Layout>
+          <PublicOnlyRoute>
+            <Layout showFooter showCentered>
+              <PasswordRecovery />
+            </Layout>
+          </PublicOnlyRoute>
         ),
       },
       {
         path: "restore-password",
         element: (
-          <Layout showFooter showCentered>
-            <RestorePassword />
-          </Layout>
+          <PublicOnlyRoute>
+            <Layout showFooter showCentered>
+              <RestorePassword />
+            </Layout>
+          </PublicOnlyRoute>
         ),
       },
       {
         path: "trainer-profile/:id",
         element: (
-          <Layout showHeader showFooter>
-            <ServiceExpanded />
-          </Layout>
+          <ProtectedRoute>
+            <Layout showHeader showFooter>
+              <ServiceExpanded />
+            </Layout>
+          </ProtectedRoute>
         ),
       },
       {
         path: "create-service",
         element: (
-          <Layout showHeader showFooter>
-            <CreateService />
-          </Layout>
+          <ProtectedRoute>
+            <Layout showHeader showFooter>
+              <CreateService />
+            </Layout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "profile/:id",
+        element: (
+          <ProtectedRoute>
+            <Layout showHeader showFooter>
+              <Profile />
+            </Layout>
+          </ProtectedRoute>
         ),
       },
     ],

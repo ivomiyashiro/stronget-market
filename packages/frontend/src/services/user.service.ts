@@ -14,15 +14,21 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface AuthResponse {
+export interface RegisterResponse {
   message: string;
-  user?: {
+}
+
+export interface LoginResponse {
+  token: string;
+  user: {
     id: string;
     name: string;
+    surname: string;
     email: string;
-    role: string;
+    birthDay: string;
+    role: "cliente" | "entrenador";
+    profileImage?: string;
   };
-  token?: string;
 }
 
 export class UserService extends BaseService {
@@ -34,11 +40,11 @@ export class UserService extends BaseService {
     return this.get(`/users/${id}`);
   }
 
-  async register(data: RegisterRequest): Promise<AuthResponse> {
+  async register(data: RegisterRequest): Promise<RegisterResponse> {
     return this.post("/users/register", data);
   }
 
-  async login(data: LoginRequest): Promise<AuthResponse> {
+  async login(data: LoginRequest): Promise<LoginResponse> {
     return this.post("/users/login", data);
   }
 

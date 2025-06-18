@@ -3,8 +3,11 @@ import type { RegisterRequest, LoginRequest } from "@/services/user.service";
 export interface User {
   id: string;
   name: string;
+  surname: string;
   email: string;
-  role: string;
+  birthDay: string;
+  role: "cliente" | "entrenador";
+  profileImage?: string;
 }
 
 export interface AuthState {
@@ -16,4 +19,4 @@ export interface AuthState {
 }
 
 export type RegisterData = RegisterRequest;
-export type LoginData = LoginRequest; 
+export type LoginData = LoginRequest;

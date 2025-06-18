@@ -3,9 +3,16 @@ import { useAppDispatch, useAppSelector } from "../hooks";
 import { register, login, logout } from "./auth.thunks";
 import type { RegisterData, LoginData } from "./auth.types";
 
+// Utility function to check if user is authenticated
+export const isAuthenticated = (): boolean => {
+  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
+  return !!(token && user);
+};
+
 export const useAuth = () => {
   const dispatch = useAppDispatch();
-  const { user, token, isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { user, token, isLoading, error, isAuthenticated: authState } = useAppSelector((state) => state.auth);
 
   const registerUser = useCallback(
     (registerData: RegisterData) => {
@@ -30,7 +37,7 @@ export const useAuth = () => {
     token,
     isLoading,
     error,
-    isAuthenticated,
+    isAuthenticated: authState,
     registerUser,
     loginUser,
     logoutUser,

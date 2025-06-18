@@ -22,6 +22,7 @@ const SignUp = () => {
   });
 
   const [passwordError, setPasswordError] = useState<string>("");
+  const [successMessage, setSuccessMessage] = useState<string>("");
 
   const validatePassword = (password: string): string => {
     const hasLowerCase = /[a-z]/.test(password);
@@ -72,8 +73,11 @@ const SignUp = () => {
     try {
       const result = await registerUser(formData);
       if (result.meta.requestStatus === "fulfilled") {
-        // Registration successful, redirect to login or dashboard
-        navigate("/login");
+        // Registration successful, show success message and redirect to login
+        setSuccessMessage("¡Registro exitoso! Redirigiendo al login...");
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
       }
     } catch (error) {
       // Error is handled by the thunk and stored in Redux state
@@ -96,7 +100,13 @@ const SignUp = () => {
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            There was an error registering the user
+            Error al registrar el usuario
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+            {successMessage}
           </div>
         )}
 

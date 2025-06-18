@@ -1,8 +1,16 @@
 import { Label } from "@radix-ui/react-label";
 import { Dumbbell } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/store/auth/auth.hooks";
+import { Button } from "../ui/button";
 
 const Header = () => {
+  const { isAuthenticated, logoutUser, user } = useAuth();
+
+  const handleLogout = () => {
+    logoutUser();
+  };
+
   return (
     <header className="border-b" role="banner">
       <nav
@@ -19,18 +27,34 @@ const Header = () => {
             Stronget <br /> Market
           </Label>
         </Link>
-        <div
-          className="flex items-center gap-2"
-          role="navigation"
-          aria-label="Acceso de usuario"
-        >
-          <Link to="/login" className="hover:text-primary transition-colors">
-            Iniciar sesión
-          </Link>
-          <Link to="/sign-up" className="hover:text-primary transition-colors">
-            Registrarse
-          </Link>
-        </div>
+        {!isAuthenticated && (
+          <div
+            className="flex items-center gap-2"
+            role="navigation"
+            aria-label="Acceso de usuario"
+          >
+            <Link to="/login" className="hover:text-primary transition-colors">
+              Iniciar sesión
+            </Link>
+            <Link
+              to="/sign-up"
+              className="hover:text-primary transition-colors"
+            >
+              Registrarse
+            </Link>
+          </div>
+        )}
+        {isAuthenticated && (
+          <div className="flex items-center gap-2">
+            <Link to={`/profile/${user?.id}`}>Perfil</Link>
+            <Button
+              onClick={handleLogout}
+              className="hover:text-primary transition-colors"
+            >
+              Cerrar sesión
+            </Button>
+          </div>
+        )}
       </nav>
     </header>
   );

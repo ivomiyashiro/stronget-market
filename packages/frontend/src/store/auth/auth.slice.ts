@@ -3,13 +3,38 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import type { AuthState, User } from "./auth.types";
 import { register, login, logout } from "./auth.thunks";
 
-const initialState: AuthState = {
-  user: null,
-  token: null,
-  isLoading: false,
-  error: null,
-  isAuthenticated: false,
+// Initialize state from localStorage if available
+const getInitialState = (): AuthState => {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  
+  if (token && userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      return {
+        user,
+        token,
+        isLoading: false,
+        error: null,
+        isAuthenticated: true,
+      };
+    } catch {
+      // If parsing fails, clear localStorage and return default state
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
+  }
+  
+  return {
+    user: null,
+    token: null,
+    isLoading: false,
+    error: null,
+    isAuthenticated: false,
+  };
 };
+
+const initialState: AuthState = getInitialState();
 
 export const authSlice = createSlice({
   name: "auth",
@@ -31,16 +56,11 @@ export const authSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(register.fulfilled, (state, action) => {
+      .addCase(register.fulfilled, (state) => {
         state.isLoading = false;
-        if (action.payload.user) {
-          state.user = action.payload.user;
-          state.isAuthenticated = true;
-        }
-        if (action.payload.token) {
-          state.token = action.payload.token;
-        }
         state.error = null;
+        // Registration successful, but user needs to login
+        // Don't set authentication state here
       })
       .addCase(register.rejected, (state, action) => {
         state.isLoading = false;
@@ -55,14 +75,14 @@ export const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false;
-        if (action.payload.user) {
-          state.user = action.payload.user;
-          state.isAuthenticated = true;
-        }
-        if (action.payload.token) {
-          state.token = action.payload.token;
-        }
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
         state.error = null;
+        
+        // Save to localStorage
+        localStorage.setItem('token', action.payload.token);
+        localStorage.setItem('user', JSON.stringify(action.payload.user));
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
@@ -77,6 +97,10 @@ export const authSlice = createSlice({
         state.isAuthenticated = false;
         state.error = null;
         state.isLoading = false;
+        
+        // Clear localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
       });
   },
 });
