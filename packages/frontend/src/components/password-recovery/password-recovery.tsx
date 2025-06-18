@@ -28,7 +28,7 @@ const PasswordRecovery = () => {
           ¿Ya tenes cuenta?{" "}
           <span className="font-bold underline">Iniciar sesión</span>
         </Link>
-        <Link to="/register" className="font-normal text-center">
+        <Link to="/sign-up" className="font-normal text-center">
           No tenés cuenta?{" "}
           <span className="font-bold underline">Registrate</span>
         </Link>

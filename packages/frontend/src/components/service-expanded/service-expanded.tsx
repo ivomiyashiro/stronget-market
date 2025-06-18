@@ -56,6 +56,7 @@ const times = ["08:00", "10:00", "12:00", "14:00", "16:00"];
 const ServiceExpanded = () => {
   const [selectedDay, setSelectedDay] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [showAll, setShowAll] = useState(false);
 
   return (
     <section className="flex flex-col md:flex-row gap-50 mx-auto w-full  py-8">
@@ -168,6 +169,8 @@ const ServiceExpanded = () => {
           <TrainerEvaluations
             evaluations={dummyProfile.evaluations}
             totalEvaluations={dummyProfile.reviews}
+            onShowAll={() => setShowAll(!showAll)}
+            showAll={showAll}
           />
         </section>
       </article>

@@ -67,10 +67,10 @@ export function RequiredInput({
       {inputType === "input" ? (
         <Input
           id={inputId}
-          required={required}
           className={cn(
             sizeClasses[inputSize],
             fullSize && "w-full",
+            error && "border border-destructive focus-visible:ring-destructive",
             className
           )}
           value={value}
@@ -93,6 +93,7 @@ export function RequiredInput({
             className={cn(
               sizeClasses[inputSize],
               fullSize && "w-full",
+              error && "border border-destructive focus-visible:ring-destructive",
               className
             )}
           >

@@ -25,13 +25,13 @@ const Login = () => {
           <Input type="password" placeholder="Contraseña" />
         </div>
         <Link
-          to="/forgot-password"
+          to="/password-recovery"
           className="font-normal text-center underline"
         >
           Olvidé mi contraseña
         </Link>
         <Button>Iniciar sesión</Button>
-        <Link to="/register" className="font-normal text-center">
+        <Link to="/sign-up" className="font-normal text-center">
           No tenés cuenta?{" "}
           <span className="font-bold underline">Registrate</span>
         </Link>

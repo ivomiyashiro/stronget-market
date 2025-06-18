@@ -12,7 +12,8 @@ interface Evaluation {
 interface TrainerEvaluationsProps {
   evaluations: Evaluation[];
   totalEvaluations: number;
-  onShowAll?: () => void;
+  onShowAll: () => void;
+  showAll: boolean;
 }
 
 const TrainerEvaluations = ({

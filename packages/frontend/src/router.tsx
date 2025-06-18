@@ -55,7 +55,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "trainer-profile/:id",
+        path: "service/:id",
         element: (
           <Layout showHeader showFooter>
             <ServiceExpanded />
