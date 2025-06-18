@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import User from "./user.model.js";
-import { config } from "../../config/index.js";
+import User from "./user.model";
+import { config } from "../../config/index";
 import {
   RegisterDTO,
   RegisterResultDTO,
@@ -11,7 +11,7 @@ import {
   UpdateUserResultDTO,
   PasswordResetDTO,
   DeleteUserResultDTO,
-} from "./dtos/index.js";
+} from "./dtos/index";
 
 export class UserService {
   private readonly saltRounds = 10;

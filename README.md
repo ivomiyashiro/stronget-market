@@ -1,6 +1,6 @@
 # Stronget Market
 
-A monorepo containing a React frontend and Node.js Express backend.
+A monorepo containing a React frontend and Node Express backend.
 
 ## Project Structure
 
@@ -15,8 +15,8 @@ stronget-market/
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- pnpm (v7 or higher)
+-   Node (v16 or higher)
+-   pnpm (v7 or higher)
 
 ### Installation
 

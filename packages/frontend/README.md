@@ -6,8 +6,8 @@ This is the frontend application for Stronget Market, built with React, TypeScri
 
 ### Prerequisites
 
-- Node.js (v16+)
-- pnpm (v7+)
+-   Node (v16+)
+-   pnpm (v7+)
 
 ### Installation
 
@@ -44,11 +44,11 @@ The application uses a service-based architecture for API communication:
 
 The `BaseService` provides a wrapper around the Fetch API with:
 
-- Type-safe responses with TypeScript generics
-- Methods for all common HTTP verbs (GET, POST, PUT, PATCH, DELETE)
-- Error handling with custom ApiError class
-- Query parameter support
-- Automatic JSON parsing
+-   Type-safe responses with TypeScript generics
+-   Methods for all common HTTP verbs (GET, POST, PUT, PATCH, DELETE)
+-   Error handling with custom ApiError class
+-   Query parameter support
+-   Automatic JSON parsing
 
 ```typescript
 // Example usage
@@ -59,11 +59,11 @@ const data = await baseService.get<ResponseType>("/endpoint");
 
 // POST with body
 const result = await baseService.post<ResponseType>("/endpoint", {
-  key: "value",
+    key: "value",
 });
 
 // GET with query parameters
 const searchResults = await baseService.get<SearchResults>("/search", {
-  query: "term",
+    query: "term",
 });
 ```
