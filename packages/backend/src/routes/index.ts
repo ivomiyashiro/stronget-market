@@ -10,9 +10,9 @@ const router = Router();
 
 router.use("/users", userRoutes);
 router.use("/trainers", trainersRoutes);
-// router.use("/services", servicesRoutes);
-// router.use("/hirings", hiringRoutes);
-// router.use("/reviews", reviewsRoutes);
-// router.use("/archives", archivesRoutes);
+router.use("/services", servicesRoutes);
+router.use("/hirings", hiringRoutes);
+router.use("/reviews", reviewsRoutes);
+router.use("/archives", archivesRoutes);
 
 export default router;

@@ -1,6 +1,15 @@
 import { Request, Response } from "express";
 import { ReviewsService } from "./reviews.service";
 
+// Type extension for authenticated requests
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+  };
+}
+
 export class ReviewsController {
   private reviewsService: ReviewsService;
 
@@ -8,7 +17,7 @@ export class ReviewsController {
     this.reviewsService = new ReviewsService();
   }
 
-  createReview = async (req: Request, res: Response): Promise<void> => {
+  createReview = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -65,7 +74,7 @@ export class ReviewsController {
     }
   };
 
-  updateReview = async (req: Request, res: Response): Promise<void> => {
+  updateReview = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const userId = req.user?.id;
@@ -84,7 +93,7 @@ export class ReviewsController {
     }
   };
 
-  deleteReview = async (req: Request, res: Response): Promise<void> => {
+  deleteReview = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const userId = req.user?.id;

@@ -1,6 +1,15 @@
 import { Request, Response } from "express";
 import { HiringService } from "./hiring.service";
 
+// Type extension for authenticated requests
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+  };
+}
+
 export class HiringController {
   private hiringService: HiringService;
 
@@ -8,7 +17,7 @@ export class HiringController {
     this.hiringService = new HiringService();
   }
 
-  createHiring = async (req: Request, res: Response): Promise<void> => {
+  createHiring = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const clientId = req.user?.id;
       if (!clientId) {
@@ -25,7 +34,7 @@ export class HiringController {
     }
   };
 
-  getMyHirings = async (req: Request, res: Response): Promise<void> => {
+  getMyHirings = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -42,7 +51,7 @@ export class HiringController {
     }
   };
 
-  getTrainerHirings = async (req: Request, res: Response): Promise<void> => {
+  getTrainerHirings = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { trainerId } = req.params;
       const userId = req.user?.id;
@@ -80,7 +89,10 @@ export class HiringController {
     }
   };
 
-  updateHiringStatus = async (req: Request, res: Response): Promise<void> => {
+  updateHiringStatus = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const { status } = req.body;
@@ -100,7 +112,7 @@ export class HiringController {
     }
   };
 
-  cancelHiring = async (req: Request, res: Response): Promise<void> => {
+  cancelHiring = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const userId = req.user?.id;

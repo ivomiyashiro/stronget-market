@@ -1,6 +1,15 @@
 import { Request, Response } from "express";
 import { ArchivesService } from "./archives.service";
 
+// Type extension for authenticated requests
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+  };
+}
+
 export class ArchivesController {
   private archivesService: ArchivesService;
 
@@ -8,7 +17,7 @@ export class ArchivesController {
     this.archivesService = new ArchivesService();
   }
 
-  uploadFile = async (req: Request, res: Response): Promise<void> => {
+  uploadFile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -33,7 +42,7 @@ export class ArchivesController {
     }
   };
 
-  getFilesByHiring = async (req: Request, res: Response): Promise<void> => {
+  getFilesByHiring = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -51,7 +60,7 @@ export class ArchivesController {
     }
   };
 
-  getFileById = async (req: Request, res: Response): Promise<void> => {
+  getFileById = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -73,7 +82,7 @@ export class ArchivesController {
     }
   };
 
-  deleteFile = async (req: Request, res: Response): Promise<void> => {
+  deleteFile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -91,7 +100,7 @@ export class ArchivesController {
     }
   };
 
-  getUserFiles = async (req: Request, res: Response): Promise<void> => {
+  getUserFiles = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?.id;
       if (!userId) {

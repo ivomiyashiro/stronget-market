@@ -2,6 +2,15 @@ import { Request, Response } from "express";
 import { ServicesService } from "./services.service";
 import { GetServicesParams } from "./dtos";
 
+// Type extension for authenticated requests
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+  };
+}
+
 export class ServicesController {
   private servicesService: ServicesService;
 
@@ -9,7 +18,7 @@ export class ServicesController {
     this.servicesService = new ServicesService();
   }
 
-  createService = async (req: Request, res: Response): Promise<void> => {
+  createService = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const trainerId = req.user?.id; // Assuming you have auth middleware setting user
       if (!trainerId) {
@@ -76,7 +85,7 @@ export class ServicesController {
     }
   };
 
-  deleteService = async (req: Request, res: Response): Promise<void> => {
+  deleteService = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const trainerId = req.user?.id; // Assuming you have auth middleware setting user
@@ -95,7 +104,7 @@ export class ServicesController {
     }
   };
 
-  updateService = async (req: Request, res: Response): Promise<void> => {
+  updateService = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const trainerId = req.user?.id; // Assuming you have auth middleware setting user
