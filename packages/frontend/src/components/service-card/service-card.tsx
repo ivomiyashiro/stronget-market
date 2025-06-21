@@ -18,7 +18,7 @@ const ServiceCard = ({
   amountOfReviews,
 }: ServiceCardProps) => {
   return (
-    <article className="flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md">
+    <article className="flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md cursor-pointer">
       <figure className="relative aspect-video w-full overflow-hidden rounded-t-lg">
         {imageUrl ? (
           <img

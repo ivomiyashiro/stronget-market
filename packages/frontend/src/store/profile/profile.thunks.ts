@@ -30,6 +30,7 @@ export const updateProfile = createAsyncThunk<
   async ({ userId, profileData }, { rejectWithValue }) => {
     try {
       const response = await userService.put(`/users/${userId}`, profileData);
+      console.log(response);
       return response as Profile;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to update profile";

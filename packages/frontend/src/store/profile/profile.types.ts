@@ -4,11 +4,14 @@ export interface Profile {
   email: string;
   avatar?: string;
   bio?: string;
-  // Add other profile fields as needed
+  surname: string;
+  birthDay: string;
+  profileImage: string;
+  role: string;
 }
 
 export interface ProfileState {
   data: Profile | null;
   isLoading: boolean;
   error: string | null;
-} 
+}

@@ -20,6 +20,7 @@ const Layout = ({
         className={`
           flex-grow
           mx-32
+          py-8
           ${
             showCentered
               ? showHeader && showFooter
