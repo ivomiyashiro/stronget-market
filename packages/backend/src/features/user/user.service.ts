@@ -114,7 +114,7 @@ export class UserService {
       surname: updatedUser.surname,
       email: updatedUser.email,
       birthDay: updatedUser.birthDay,
-      avatar: updatedUser.avatarPath || "",
+      avatar: updatedUser.avatar || "",
       role: updatedUser.role,
     };
   }
