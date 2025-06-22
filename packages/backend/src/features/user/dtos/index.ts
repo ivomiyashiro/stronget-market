@@ -3,3 +3,4 @@ export * from "./login.dto";
 export * from "./update-user.dto";
 export * from "./delete-user.dto";
 export * from "./password-reset.dto";
+export * from "./upload-avatar.dto";

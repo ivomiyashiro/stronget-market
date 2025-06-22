@@ -11,6 +11,8 @@ export type LoginResultDTO = {
     surname: string;
     email: string;
     birthDay: Date;
+    avatar?: string;
     role: "cliente" | "entrenador";
+    createdAt: Date;
   };
 };

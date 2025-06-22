@@ -64,4 +64,34 @@ export class UserController {
       });
     }
   };
+
+  uploadAvatar = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      if (!req.file) {
+        res.status(400).json({ message: "No se proporcionó ningún archivo" });
+        return;
+      }
+
+      const result = await this.userService.uploadAvatar(id, req.file);
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(400).json({
+        message: error instanceof Error ? error.message : "Avatar upload failed",
+      });
+    }
+  };
+
+  deleteAvatar = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const result = await this.userService.deleteAvatar(id);
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(400).json({
+        message: error instanceof Error ? error.message : "Avatar delete failed",
+      });
+    }
+  };
 }

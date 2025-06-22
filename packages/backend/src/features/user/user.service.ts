@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "./user.model";
 import { config } from "../../config/index";
+import { StorageService } from "../../services/storage.service";
 import {
   RegisterDTO,
   RegisterResultDTO,
@@ -11,10 +12,26 @@ import {
   UpdateUserResultDTO,
   PasswordResetDTO,
   DeleteUserResultDTO,
+  UploadAvatarResultDTO,
+  DeleteAvatarResultDTO,
 } from "./dtos/index";
+
+interface MulterFile {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+}
 
 export class UserService {
   private readonly saltRounds = 10;
+  private storageService: StorageService;
+
+  constructor() {
+    this.storageService = new StorageService();
+  }
 
   async register(userData: RegisterDTO): Promise<RegisterResultDTO> {
     const existingUser = await User.findOne({ email: userData.email });
@@ -59,7 +76,9 @@ export class UserService {
         surname: user.surname,
         email: user.email,
         birthDay: user.birthDay,
+        avatar: user.avatarPath || "",
         role: user.role,
+        createdAt: user.createdAt,
       },
     };
   }
@@ -75,7 +94,14 @@ export class UserService {
 
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { ...updateData, updatedAt: new Date() },
+      {
+        name: updateData.name,
+        surname: updateData.surname,
+        birthDay: updateData.birthDay,
+        role: updateData.role,
+        avatar: updateData.avatar,
+        updatedAt: new Date(),
+      },
       { new: true }
     );
 
@@ -88,6 +114,7 @@ export class UserService {
       surname: updatedUser.surname,
       email: updatedUser.email,
       birthDay: updatedUser.birthDay,
+      avatar: updatedUser.avatarPath || "",
       role: updatedUser.role,
     };
   }
@@ -121,5 +148,61 @@ export class UserService {
     });
 
     return { message: "Contraseña actualizada exitosamente." };
+  }
+
+  async uploadAvatar(userId: string, file: MulterFile): Promise<UploadAvatarResultDTO> {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error("Usuario no encontrado.");
+    }
+
+    // Delete old avatar if exists
+    if (user.avatarPath) {
+      try {
+        await this.storageService.deleteAvatar(user.avatarPath);
+      } catch (error) {
+        console.warn("Failed to delete old avatar:", error);
+      }
+    }
+
+    // Upload new avatar
+    const { url, path } = await this.storageService.uploadAvatar(userId, file);
+
+    // Update user with new avatar URL and path
+    await User.findByIdAndUpdate(userId, {
+      avatar: url,
+      avatarPath: path,
+      updatedAt: new Date(),
+    });
+
+    return {
+      message: "Avatar subido exitosamente.",
+      avatarUrl: url,
+    };
+  }
+
+  async deleteAvatar(userId: string): Promise<DeleteAvatarResultDTO> {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error("Usuario no encontrado.");
+    }
+
+    if (!user.avatarPath) {
+      throw new Error("El usuario no tiene avatar para eliminar.");
+    }
+
+    // Delete from storage
+    await this.storageService.deleteAvatar(user.avatarPath);
+
+    // Update user to remove avatar
+    await User.findByIdAndUpdate(userId, {
+      avatar: null,
+      avatarPath: null,
+      updatedAt: new Date(),
+    });
+
+    return {
+      message: "Avatar eliminado exitosamente.",
+    };
   }
 }

@@ -1,4 +1,5 @@
 import { BaseService } from "./base.service";
+import { config } from "@/config";
 
 export interface RegisterRequest {
   name: string;
@@ -26,9 +27,18 @@ export interface LoginResponse {
     surname: string;
     email: string;
     birthDay: string;
+    avatar?: string;
     role: "cliente" | "entrenador";
-    profileImage?: string;
   };
+}
+
+export interface UploadAvatarResponse {
+  message: string;
+  avatarUrl: string;
+}
+
+export interface DeleteAvatarResponse {
+  message: string;
 }
 
 export class UserService extends BaseService {
@@ -54,6 +64,36 @@ export class UserService extends BaseService {
 
   async deleteUser(id: string) {
     return this.delete(`/users/${id}`);
+  }
+
+  async uploadAvatar(userId: string, file: File): Promise<UploadAvatarResponse> {
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    // Use fetch directly for file upload to avoid JSON content-type header
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${config.apiUrl}/users/${userId}/avatar`, {
+      method: "POST",
+      body: formData,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Upload failed");
+    }
+
+    return response.json();
+  }
+
+  async deleteAvatar(userId: string): Promise<DeleteAvatarResponse> {
+    return this.delete(`/users/${userId}/avatar`);
+  }
+
+  private getAuthToken(): string | null {
+    return localStorage.getItem("token");
   }
 }
 

@@ -4,6 +4,7 @@ export type UpdateUserDTO = {
   email: string;
   birthDay: Date;
   role: "cliente" | "entrenador";
+  avatar?: string;
 };
 
 export type UpdateUserResultDTO = UpdateUserDTO;

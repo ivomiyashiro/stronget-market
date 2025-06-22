@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { UserController } from "./user.controller";
 import { validateBody, validateParams } from "../../middleware/validation.middleware";
+import { uploadAvatar, handleUploadError } from "../../middleware/upload.middleware";
 import {
   registerSchema,
   loginSchema,
@@ -30,5 +31,16 @@ router.post(
   validateBody(passwordRecoverySchema),
   userController.passwordRecovery
 );
+
+// Avatar routes
+router.post(
+  "/:id/avatar",
+  validateParams(userIdSchema),
+  uploadAvatar,
+  handleUploadError,
+  userController.uploadAvatar
+);
+
+router.delete("/:id/avatar", validateParams(userIdSchema), userController.deleteAvatar);
 
 export default router;

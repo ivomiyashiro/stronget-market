@@ -9,6 +9,8 @@ const envSchema = z.object({
   MONGODB_URI: z.string().url("Invalid MongoDB URI"),
   JWT_SECRET: z.string(),
   FRONTEND_URL: z.string().url("Invalid frontend URL"),
+  SUPABASE_URL: z.string().url("Invalid Supabase URL"),
+  SUPABASE_SERVICE_ROLE_KEY: z.string(),
 });
 
 const envValidation = envSchema.safeParse(process.env);
@@ -28,4 +30,8 @@ export const config = {
   mongoUri: env.MONGODB_URI,
   jwtSecret: env.JWT_SECRET,
   frontendUrl: env.FRONTEND_URL,
+  supabase: {
+    url: env.SUPABASE_URL,
+    serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY,
+  },
 };
