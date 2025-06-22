@@ -7,7 +7,7 @@ export interface User {
   email: string;
   birthDay: string;
   role: "cliente" | "entrenador";
-  profileImage?: string;
+  avatar?: string;
 }
 
 export interface AuthState {

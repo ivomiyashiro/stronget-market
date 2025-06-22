@@ -74,7 +74,7 @@ const Header = () => {
                   <Menu className="size-5 ml-1" />
                   <Avatar className="size-7">
                     <AvatarImage
-                      src={user?.profileImage}
+                      src={user?.avatar}
                       alt={`Foto de ${user?.name}`}
                     />
                     <AvatarFallback>{user?.name?.[0]}</AvatarFallback>

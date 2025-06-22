@@ -6,7 +6,6 @@ export interface Profile {
   bio?: string;
   surname: string;
   birthDay: string;
-  profileImage: string;
   role: string;
 }
 

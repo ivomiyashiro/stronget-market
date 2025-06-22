@@ -1,13 +1,14 @@
 import { useAuth } from "@/store/auth/auth.hooks";
 import { Label } from "../ui/label";
-import { Calendar, Image, Mail, Pencil } from "lucide-react";
+import { Calendar, Image, Mail, Pencil, Upload } from "lucide-react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { RequiredInput } from "../common/required-input";
 import { useAppDispatch } from "@/store/hooks";
-import { updateProfile } from "@/store/profile/profile.thunks";
+import { updateProfile, uploadAvatar } from "@/store/profile/profile.thunks";
 import ServicesData from "./services-data";
+import { useProfile } from "@/store/profile/profile.hooks";
 
 interface EditingForm {
   name: string;
@@ -19,14 +20,16 @@ interface EditingForm {
 
 const Profile = () => {
   const { user } = useAuth();
+  const { isLoading } = useProfile();
   const dispatch = useAppDispatch();
   const [isEditing, setIsEditing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [editingForm, setEditingForm] = useState<EditingForm>({
     name: user?.name || "",
     surname: user?.surname || "",
     email: user?.email || "",
     birthDay: user?.birthDay || "",
-    profileImage: user?.profileImage || "",
+    profileImage: user?.avatar || "",
   });
 
   const formatBirthDay = (birthDay: string) => {
@@ -42,15 +45,43 @@ const Profile = () => {
     };
   }, [editingForm]);
 
-  const handleUpdate = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleUpdate = async () => {
+    console.log("hola");
     if (!user?.id) return;
-    dispatch(updateProfile({ userId: user.id, profileData: editingForm }));
+    await dispatch(
+      updateProfile({ userId: user.id, profileData: editingForm })
+    );
+    setIsEditing(false);
   };
 
   const handleDelete = () => {
     console.log("delete");
   };
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file || !user?.id) return;
+
+    // Dispatch the upload avatar thunk
+    await dispatch(uploadAvatar({ userId: user.id, file }));
+
+    setEditingForm({
+      ...editingForm,
+      profileImage: URL.createObjectURL(file),
+    });
+
+    // Reset the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  console.log(user);
 
   const trainerServices = [
     {
@@ -86,9 +117,9 @@ const Profile = () => {
     <section className="flex h-full p-8 w-full flex-col gap-8">
       <div className="flex flex-row justify-between w-full">
         <div className="flex flex-row gap-4">
-          {user?.profileImage ? (
+          {user?.avatar ? (
             <img
-              src={user?.profileImage}
+              src={user?.avatar}
               alt={`Foto de ${user?.name}`}
               className="h-full w-full object-cover rounded-full h-32 w-32"
             />
@@ -151,19 +182,39 @@ const Profile = () => {
     </section>
   ) : (
     <section className="flex h-full p-8 w-full flex-col">
-      <form className="w-full flex flex-col gap-8" onSubmit={handleUpdate}>
+      <form className="w-full flex flex-col gap-8">
         <div className="flex flex-row gap-8 w-full">
-          {editingForm.profileImage ? (
-            <img
-              src={editingForm.profileImage}
-              alt={`Foto de ${editingForm.name}`}
-              className="h-full w-full object-cover rounded-full h-40 w-40 flex-shrink-0"
-            />
-          ) : (
-            <div className="flex items-center justify-center bg-muted rounded-full h-40 w-40 flex-shrink-0">
-              <Image className="size-12 text-muted-foreground" />
+          <div
+            className="relative group cursor-pointer"
+            onClick={handleAvatarClick}
+          >
+            {editingForm.profileImage ? (
+              <img
+                src={editingForm.profileImage}
+                alt={`Foto de ${editingForm.name}`}
+                className="h-full w-full object-cover rounded-full h-40 w-40 flex-shrink-0 transition-opacity group-hover:opacity-80 max-h-40 max-w-40"
+              />
+            ) : (
+              <div className="flex items-center justify-center bg-muted rounded-full h-40 w-40 flex-shrink-0 transition-opacity group-hover:opacity-80">
+                <Image className="size-12 text-muted-foreground" />
+              </div>
+            )}
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <Upload className="size-10 text-white bg-black/50 rounded-full p-2" />
             </div>
-          )}
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white"></div>
+              </div>
+            )}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
           <div className="grid grid-cols-2 gap-4 flex-1">
             <RequiredInput
               label="Nombre"
@@ -222,8 +273,9 @@ const Profile = () => {
               Cancelar
             </Button>
             <Button
-              type="submit"
+              type="button"
               disabled={Object.values(errors).some(Boolean)}
+              onClick={handleUpdate}
             >
               Actualizar
             </Button>

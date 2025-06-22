@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { ProfileState } from "./profile.types";
-import { fetchProfile, updateProfile, clearProfile } from "./profile.thunks";
+import { fetchProfile, updateProfile, uploadAvatar, clearProfile } from "./profile.thunks";
 
 const initialState: ProfileState = {
   data: null,
@@ -42,11 +42,30 @@ export const profileSlice = createSlice({
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.isLoading = false;
         state.data = action.payload;
-        state.error = null;
+        state.error = null; 
       })
       .addCase(updateProfile.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload || "Failed to update profile";
+      });
+
+    // Upload Avatar
+    builder
+      .addCase(uploadAvatar.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(uploadAvatar.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.error = null;
+        // Update the profile data with the new avatar URL
+        if (state.data) {
+          state.data.avatar = action.payload.avatarUrl;
+        }
+      })
+      .addCase(uploadAvatar.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload || "Failed to upload avatar";
       });
 
     // Clear Profile
