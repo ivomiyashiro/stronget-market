@@ -1,19 +1,18 @@
 export type UpdateHiringStateRequestDTO = {
-    state: "pending" | "confirmed" | "cancelled";
-}
-
+  status: "pending" | "confirmed" | "cancelled" | "completed";
+};
 
 export type UpdateHiringStateResponseDTO = {
+  id: string;
+  serviceId: string;
+  date: Date;
+  status: "pending" | "confirmed" | "cancelled" | "completed";
+  client: {
     id: string;
-    serviceId: string;
-    date: Date;
-    state: "pending" | "confirmed" | "cancelled";
-    client: {
-        id: string;
-        name: string;
-    },
-    trainer: {
-        id: string;
-        name: string;
-    }
-}
+    name: string;
+  };
+  trainer: {
+    id: string;
+    name: string;
+  };
+};

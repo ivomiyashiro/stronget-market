@@ -130,4 +130,79 @@ export class HiringController {
       });
     }
   };
+
+  confirmHiring = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+
+      const hiring = await this.hiringService.confirmHiring(id, userId);
+      res.status(200).json(hiring);
+    } catch (error) {
+      res.status(400).json({
+        message: error instanceof Error ? error.message : "Confirm hiring failed",
+      });
+    }
+  };
+
+  getTrainerAvailableSlots = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { trainerId, date } = req.params;
+
+      // Validate date format
+      if (!date || isNaN(Date.parse(date))) {
+        res.status(400).json({ message: "Invalid date format" });
+        return;
+      }
+
+      const availableSlots = await this.hiringService.getTrainerAvailableSlots(
+        trainerId,
+        date
+      );
+      res.status(200).json({ availableSlots });
+    } catch (error) {
+      res.status(400).json({
+        message: error instanceof Error ? error.message : "Get available slots failed",
+      });
+    }
+  };
+
+  canBookService = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const clientId = req.user?.id;
+      if (!clientId) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+
+      const { serviceId, date } = req.body;
+
+      if (!serviceId || !date) {
+        res.status(400).json({ message: "Service ID and date are required" });
+        return;
+      }
+
+      const bookingDate = new Date(date);
+      if (isNaN(bookingDate.getTime())) {
+        res.status(400).json({ message: "Invalid date format" });
+        return;
+      }
+
+      const result = await this.hiringService.canBookService(
+        clientId,
+        serviceId,
+        bookingDate
+      );
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(400).json({
+        message: error instanceof Error ? error.message : "Booking validation failed",
+      });
+    }
+  };
 }

@@ -33,6 +33,17 @@ export const createHiringSchema = z.object({
     .refine((val) => !isNaN(Date.parse(val)), {
       message: "Invalid date format",
     })
+    .refine(
+      (val) => {
+        const date = new Date(val);
+        const now = new Date();
+        const minBookingTime = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours minimum
+        return date > minBookingTime;
+      },
+      {
+        message: "Booking must be at least 2 hours in advance",
+      }
+    )
     .transform((val) => new Date(val)),
   payment: z.object({
     name: z.string().min(2, "Cardholder name must be at least 2 characters"),
