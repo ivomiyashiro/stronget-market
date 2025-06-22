@@ -47,6 +47,20 @@ const dummyProfile = {
         "Me sentí acompañada en todo el proceso. Resultados visibles y sostenibles.",
       rating: 5,
     },
+    {
+      user: "Juan",
+      date: "10 de enero 2025",
+      comment:
+        "Me sentí acompañada en todo el proceso. Resultados visibles y sostenibles.",
+      rating: 5,
+    },
+    {
+      user: "Juan",
+      date: "10 de enero 2025",
+      comment:
+        "Me sentí acompañada en todo el proceso. Resultados visibles y sostenibles.",
+      rating: 5,
+    },
   ],
 };
 
@@ -168,6 +182,7 @@ const ServiceExpanded = () => {
           <TrainerEvaluations
             evaluations={dummyProfile.evaluations}
             totalEvaluations={dummyProfile.reviews}
+            trainerName={dummyProfile.name}
           />
         </section>
       </article>

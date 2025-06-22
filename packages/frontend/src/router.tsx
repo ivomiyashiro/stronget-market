@@ -12,6 +12,7 @@ import SignUp from "@/components/sign-up/sign-up";
 import CreateService from "@/components/create-service/create-service";
 import ServiceExpanded from "@/components/service-expanded/service-expanded";
 import Profile from "./components/profile/profile";
+import ServicesTable from "./components/services-table/services-table";
 
 const router = createBrowserRouter([
   {
@@ -66,7 +67,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "trainer-profile/:id",
+        path: "service/:id",
         element: (
           <ProtectedRoute>
             <Layout showHeader showFooter>
@@ -76,7 +77,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "create-service",
+        path: "create-service/:id?",
         element: (
           <ProtectedRoute>
             <Layout showHeader showFooter>
@@ -91,6 +92,16 @@ const router = createBrowserRouter([
           <ProtectedRoute>
             <Layout showHeader showFooter>
               <Profile />
+            </Layout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "my-services",
+        element: (
+          <ProtectedRoute>
+            <Layout showHeader showFooter>
+              <ServicesTable />
             </Layout>
           </ProtectedRoute>
         ),

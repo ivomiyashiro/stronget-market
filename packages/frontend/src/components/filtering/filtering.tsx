@@ -21,11 +21,11 @@ const Filtering = () => {
           <Input
             id="trainer-search"
             type="search"
-            placeholder="Explora nuestros entrenadores"
+            placeholder="Explora nuestros servicios"
             className="w-full pr-10 rounded-full px-4"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            aria-label="Buscar entrenadores"
+            aria-label="Buscar servicios"
           />
           <Button
             type="submit"

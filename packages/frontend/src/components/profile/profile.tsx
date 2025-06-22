@@ -7,7 +7,6 @@ import { useMemo, useState, useRef } from "react";
 import { RequiredInput } from "../common/required-input";
 import { useAppDispatch } from "@/store/hooks";
 import { updateProfile, uploadAvatar } from "@/store/profile/profile.thunks";
-import ServicesData from "./services-data";
 import { useProfile } from "@/store/profile/profile.hooks";
 
 interface EditingForm {
@@ -15,7 +14,6 @@ interface EditingForm {
   surname: string;
   email: string;
   birthDay: string;
-  profileImage: string;
 }
 
 const Profile = () => {
@@ -24,12 +22,13 @@ const Profile = () => {
   const dispatch = useAppDispatch();
   const [isEditing, setIsEditing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [editingForm, setEditingForm] = useState<EditingForm>({
     name: user?.name || "",
     surname: user?.surname || "",
     email: user?.email || "",
     birthDay: user?.birthDay || "",
-    profileImage: user?.avatar || "",
   });
 
   const formatBirthDay = (birthDay: string) => {
@@ -46,34 +45,52 @@ const Profile = () => {
   }, [editingForm]);
 
   const handleUpdate = async () => {
-    console.log("hola");
     if (!user?.id) return;
+
+    // First upload avatar if a new file was selected
+    if (selectedFile) {
+      await dispatch(
+        uploadAvatar({ userId: user.id, file: selectedFile })
+      ).unwrap();
+    }
+
+    // Then update profile data
     await dispatch(
       updateProfile({ userId: user.id, profileData: editingForm })
-    );
+    ).unwrap();
+
+    // Reset form state
+    setSelectedFile(null);
+    setPreviewUrl(null);
     setIsEditing(false);
   };
 
   const handleDelete = () => {
     console.log("delete");
   };
+
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !user?.id) return;
+    if (!file) return;
 
-    // Dispatch the upload avatar thunk
-    await dispatch(uploadAvatar({ userId: user.id, file }));
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      alert("Por favor selecciona un archivo de imagen válido");
+      return;
+    }
 
-    setEditingForm({
-      ...editingForm,
-      profileImage: URL.createObjectURL(file),
-    });
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("El archivo es demasiado grande. Máximo 5MB.");
+      return;
+    }
+
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
 
     // Reset the file input
     if (fileInputRef.current) {
@@ -81,37 +98,23 @@ const Profile = () => {
     }
   };
 
+  const handleCancel = () => {
+    // Reset all form state
+    setEditingForm({
+      name: user?.name || "",
+      surname: user?.surname || "",
+      email: user?.email || "",
+      birthDay: user?.birthDay || "",
+    });
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    setIsEditing(false);
+  };
+
+  // Get the current avatar URL to display
+  const currentAvatarUrl = previewUrl || user?.avatar;
+
   console.log(user);
-
-  const trainerServices = [
-    {
-      title: "Servicios totales",
-      number: 10,
-    },
-    {
-      title: "Total de clientes",
-      number: 10,
-    },
-    {
-      title: "Visualizaciones",
-      number: 10,
-    },
-  ];
-
-  const clientServices = [
-    {
-      title: "Servicios contratados",
-      number: 10,
-    },
-    {
-      title: "Servicios cancelados",
-      number: 10,
-    },
-    {
-      title: "Servicios finalizados",
-      number: 10,
-    },
-  ];
 
   return !isEditing ? (
     <section className="flex h-full p-8 w-full flex-col gap-8">
@@ -121,7 +124,7 @@ const Profile = () => {
             <img
               src={user?.avatar}
               alt={`Foto de ${user?.name}`}
-              className="h-full w-full object-cover rounded-full h-32 w-32"
+              className="h-full w-full object-cover rounded-full h-40 w-40 max-h-40 max-w-40"
             />
           ) : (
             <div
@@ -166,19 +169,6 @@ const Profile = () => {
         </div>
       </div>
       <Separator />
-      <div className="grid grid-cols-3 gap-8">
-        {user?.role === "entrenador" ? (
-          trainerServices.map((service) => (
-            <ServicesData key={service.title} {...service} />
-          ))
-        ) : (
-          <div className="grid grid-cols-3 gap-8">
-            {clientServices.map((service) => (
-              <ServicesData key={service.title} {...service} />
-            ))}
-          </div>
-        )}
-      </div>
     </section>
   ) : (
     <section className="flex h-full p-8 w-full flex-col">
@@ -188,9 +178,9 @@ const Profile = () => {
             className="relative group cursor-pointer"
             onClick={handleAvatarClick}
           >
-            {editingForm.profileImage ? (
+            {currentAvatarUrl ? (
               <img
-                src={editingForm.profileImage}
+                src={currentAvatarUrl}
                 alt={`Foto de ${editingForm.name}`}
                 className="h-full w-full object-cover rounded-full h-40 w-40 flex-shrink-0 transition-opacity group-hover:opacity-80 max-h-40 max-w-40"
               />
@@ -265,19 +255,15 @@ const Profile = () => {
             Eliminar usuario
           </Button>
           <div className="flex flex-row gap-4">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setIsEditing(false)}
-            >
+            <Button type="button" variant="secondary" onClick={handleCancel}>
               Cancelar
             </Button>
             <Button
               type="button"
-              disabled={Object.values(errors).some(Boolean)}
+              disabled={Object.values(errors).some(Boolean) || isLoading}
               onClick={handleUpdate}
             >
-              Actualizar
+              {isLoading ? "Actualizando..." : "Actualizar"}
             </Button>
           </div>
         </div>

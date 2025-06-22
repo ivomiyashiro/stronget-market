@@ -63,6 +63,10 @@ export class ServicesService {
       isActive: true,
     }).sort({ createdAt: -1 });
 
+    if (services.length === 0) {
+      return [];
+    }
+
     const image = await User.findById(services[0].trainerId);
 
     return services.map((service) => ({

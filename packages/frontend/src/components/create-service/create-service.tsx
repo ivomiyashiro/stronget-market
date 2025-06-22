@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { RequiredInput } from "@/components/common/required-input";
 import { Button } from "@/components/ui/button";
+import { useServicesActions, useCreateServiceLoading, useCreateServiceError, useCurrentService, useUpdateServiceLoading, useUpdateServiceError } from "@/store/services/services.hooks";
+import type { CreateServiceRequest } from "@/services/services.service";
 
 const DURATION_OPTIONS = ["1 hora", "2 horas"];
 const ZONE_OPTIONS = ["Nuñez", "Palermo"];
 const CATEGORY_OPTIONS = ["Running", "Gimnasio", "Nutrición", "Yoga"];
 const MODALITY_OPTIONS = ["Virtual", "Presencial"];
+const LANGUAGE_OPTIONS = ["Español", "Inglés", "Portugués"];
 
 interface ServiceFormValues {
   description: string;
@@ -17,31 +21,57 @@ interface ServiceFormValues {
   language: string;
 }
 
-interface CreateServiceProps {
-  mode?: "create" | "edit";
-  initialValues?: Partial<ServiceFormValues>;
-  onSubmit?: (values: ServiceFormValues) => void;
-  onCancel?: () => void;
-}
+const CreateService = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const mode = id ? "edit" : "create";
+  
+  const { 
+    createService, 
+    updateService, 
+    getServiceById 
+  } = useServicesActions();
+  
+  const isLoading = useCreateServiceLoading();
+  const updateLoading = useUpdateServiceLoading();
+  const error = useCreateServiceError();
+  const updateError = useUpdateServiceError();
+  const currentService = useCurrentService();
 
-const CreateService = ({
-  mode = "create",
-  initialValues = {},
-  onSubmit,
-  onCancel,
-}: CreateServiceProps) => {
   const [values, setValues] = useState<ServiceFormValues>({
-    description: initialValues.description || "",
-    duration: initialValues.duration || "",
-    price: initialValues.price || "",
-    zone: initialValues.zone || "",
-    category: initialValues.category || "",
-    modality: initialValues.modality || "",
-    language: initialValues.language || "",
+    description: "",
+    duration: "",
+    price: "",
+    zone: "",
+    category: "",
+    modality: "",
+    language: "",
   });
   const [errors, setErrors] = useState<
     Partial<Record<keyof ServiceFormValues, string>>
   >({});
+
+  // Fetch service data if in edit mode
+  useEffect(() => {
+    if (id && mode === "edit") {
+      getServiceById(id);
+    }
+  }, [id, mode, getServiceById]);
+
+  // Update form values when service data is loaded
+  useEffect(() => {
+    if (currentService && mode === "edit") {
+      setValues({
+        description: currentService.description,
+        duration: `${Math.floor(currentService.duration / 60)} hora${Math.floor(currentService.duration / 60) > 1 ? 's' : ''}`,
+        price: currentService.price.toString(),
+        zone: currentService.zone,
+        category: currentService.category,
+        modality: currentService.mode === "online" ? "Virtual" : "Presencial",
+        language: currentService.language,
+      });
+    }
+  }, [currentService, mode]);
 
   const handleChange = (field: keyof ServiceFormValues, value: string) => {
     setValues((prev) => ({ ...prev, [field]: value }));
@@ -57,16 +87,60 @@ const CreateService = ({
     if (!values.zone) newErrors.zone = "La zona es obligatoria.";
     if (!values.category) newErrors.category = "La categoría es obligatoria.";
     if (!values.modality) newErrors.modality = "La modalidad es obligatoria.";
+    if (!values.language) newErrors.language = "El idioma es obligatorio.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleCancel = () => {
+    navigate("/my-services");
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (validate()) {
-      if (onSubmit) onSubmit(values);
+      // Convert form values to API format
+      const serviceData: CreateServiceRequest = {
+        description: values.description,
+        duration: parseInt(values.duration.split(" ")[0]) * 60, // Convert hours to minutes
+        price: parseFloat(values.price),
+        zone: values.zone,
+        category: values.category,
+        mode: values.modality === "Virtual" ? "online" : "in-person",
+        language: values.language,
+      };
+
+      if (mode === "create") {
+        createService(
+          serviceData,
+          () => {
+            // Success callback - navigate to my services
+            navigate("/my-services");
+          },
+          (errorMessage) => {
+            // Error callback - you can handle this if needed
+            console.error("Failed to create service:", errorMessage);
+          }
+        );
+      } else if (mode === "edit" && id) {
+        updateService(
+          id,
+          serviceData,
+          () => {
+            // Success callback - navigate to my services
+            navigate("/my-services");
+          },
+          (errorMessage) => {
+            // Error callback - you can handle this if needed
+            console.error("Failed to update service:", errorMessage);
+          }
+        );
+      }
     }
   };
+
+  const displayError = error || updateError;
+  const displayLoading = isLoading || updateLoading;
 
   return (
     <form
@@ -76,6 +150,13 @@ const CreateService = ({
       <h1 className="text-2xl font-bold">
         {mode === "edit" ? "Editar Servicio" : "Crear Servicio"}
       </h1>
+      
+      {displayError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          {displayError}
+        </div>
+      )}
+      
       <RequiredInput
         label="Descripción"
         type="text"
@@ -128,7 +209,7 @@ const CreateService = ({
           onChange={(e) => handleChange("language", e.target.value)}
           error={errors.language}
           required
-          options={CATEGORY_OPTIONS}
+          options={LANGUAGE_OPTIONS}
         />
         <RequiredInput
           label="Modalidad"
@@ -141,11 +222,14 @@ const CreateService = ({
         />
       </div>
       <div className="flex gap-2 justify-end">
-        <Button type="button" variant="ghost" onClick={onCancel}>
+        <Button type="button" variant="destructive" onClick={handleCancel} disabled={displayLoading}>
           Cancelar
         </Button>
-        <Button type="submit">
-          {mode === "edit" ? "Editar Servicio" : "Crear Servicio"}
+        <Button type="submit" disabled={displayLoading}>
+          {displayLoading 
+            ? (mode === "edit" ? "Editando..." : "Creando...") 
+            : (mode === "edit" ? "Editar Servicio" : "Crear Servicio")
+          }
         </Button>
       </div>
     </form>

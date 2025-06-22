@@ -1,6 +1,9 @@
 import { Router } from "express";
 import { ArchivesController } from "./archives.controller";
-import { validateBody, validateParams } from "../../middleware/validation.middleware";
+import {
+  validateBody,
+  validateParams,
+} from "../../middleware/validation.middleware";
 import {
   uploadFileSchema,
   getFilesByHiringSchema,

@@ -18,6 +18,18 @@ export const createServiceSchema = z.object({
     language: z.string().min(1, "Language is required"),
 });
 
+export const updateServiceSchema = z.object({
+    category: z.string().min(1, "Category is required").optional(),
+    description: z.string().min(10, "Description must be at least 10 characters").optional(),
+    duration: z.number().min(15, "Duration must be at least 15 minutes").optional(),
+    price: z.number().min(0, "Price must be positive").optional(),
+    mode: z.enum(["online", "in-person"], {
+        errorMap: () => ({ message: 'Mode must be "online" or "in-person"' }),
+    }).optional(),
+    zone: z.string().min(1, "Zone is required").optional(),
+    language: z.string().min(1, "Language is required").optional(),
+});
+
 export const getServicesParamsSchema = z.object({
     category: z.string().optional(),
     zone: z.string().optional(),
@@ -30,4 +42,8 @@ export const getServicesParamsSchema = z.object({
 
 export const serviceIdSchema = z.object({
     id: objectId,
+});
+
+export const trainerIdSchema = z.object({
+    trainerId: objectId,
 });

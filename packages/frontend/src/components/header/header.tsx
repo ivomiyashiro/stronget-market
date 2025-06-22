@@ -86,7 +86,7 @@ const Header = () => {
                   <Link to={`/profile/${user?.id}`}>Mi Perfil</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer">
-                  Mis Servicios
+                  <Link to="/my-services">Mis Servicios</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {user?.role === "entrenador" && (

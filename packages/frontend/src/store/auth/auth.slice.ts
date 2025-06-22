@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { AuthState, User } from "./auth.types";
 import { register, login, logout } from "./auth.thunks";
+import { updateProfile, uploadAvatar } from "../profile/profile.thunks";
 
 // Initialize state from localStorage if available
 const getInitialState = (): AuthState => {
@@ -101,6 +102,38 @@ export const authSlice = createSlice({
         // Clear localStorage
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+      });
+
+    // Update Profile - Sync with auth state
+    builder
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        if (state.user) {
+          // Update the user in auth state with the new profile data
+          state.user = {
+            ...state.user,
+            name: action.payload.name,
+            surname: action.payload.surname,
+            email: action.payload.email,
+            birthDay: action.payload.birthDay,
+            role: action.payload.role as "cliente" | "entrenador",
+            avatar: action.payload.avatar,
+          };
+          
+          // Update localStorage
+          localStorage.setItem('user', JSON.stringify(state.user));
+        }
+      });
+
+    // Upload Avatar - Sync with auth state
+    builder
+      .addCase(uploadAvatar.fulfilled, (state, action) => {
+        if (state.user) {
+          // Update the avatar URL in auth state
+          state.user.avatar = action.payload.avatarUrl;
+          
+          // Update localStorage
+          localStorage.setItem('user', JSON.stringify(state.user));
+        }
       });
   },
 });
