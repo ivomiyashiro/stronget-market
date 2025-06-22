@@ -76,7 +76,7 @@ export class UserService {
         surname: user.surname,
         email: user.email,
         birthDay: user.birthDay,
-        avatar: user.avatarPath || "",
+        avatar: user.avatar || "",
         role: user.role,
         createdAt: user.createdAt,
       },
