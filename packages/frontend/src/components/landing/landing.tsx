@@ -33,7 +33,8 @@ const Landing = () => {
           {services.map((service: Service) => (
             <article key={service.id} className="w-full">
               <ServiceCard
-                name={service.title}
+                name={service.category}
+                imageUrl={service.trainerImage}
                 description={service.description}
                 price={service.price}
                 rating={service.rating}

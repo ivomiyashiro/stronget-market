@@ -8,24 +8,31 @@ export interface CreateServiceRequest {
   mode: "online" | "in-person";
   zone: string;
   language: string;
+  availability: {
+    day: string;
+    startTime: string;
+  }[];
 }
 
 export interface Service {
   id: string;
-  trainerId: string;
   category: string;
-  title: string;
   description: string;
   duration: number;
-  price: number;
-  mode: "online" | "in-person";
-  zone: string;
   language: string;
+  mode: "online" | "in-person";
+  pendings: number;
+  price: number;
   rating: number;
   totalReviews: number;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  trainerImage: string;
+  visualizations: number;
+  zone: string;
+  clients: number;
+  availability: {
+    day: string;
+    startTime: string;
+  }[];
 }
 
 export interface GetServicesParams {

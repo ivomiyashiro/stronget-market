@@ -9,13 +9,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Archive, Ban, Copy, Eye, Pencil, Plus, Star, Trash2 } from "lucide-react";
+import { Archive, Ban, Eye, Pencil, Plus, Star, Trash2 } from "lucide-react";
 import Filtering from "../filtering/filtering";
 import { Button } from "../ui/button";
 import { useAuth } from "@/store/auth/auth.hooks";
-import { useServices, useServicesLoading } from "@/store/services/services.hooks";
+import {
+  useServices,
+  useServicesLoading,
+} from "@/store/services/services.hooks";
 import { useDispatch } from "react-redux";
-import { getServicesByTrainerId, deleteService } from "@/store/services/services.thunks";
+import {
+  getServicesByTrainerId,
+  deleteService,
+} from "@/store/services/services.thunks";
 import type { AppDispatch } from "@/store/store";
 import type { Service } from "@/services/services.service";
 
@@ -34,6 +40,8 @@ const ServicesTable = () => {
       dispatch(getServicesByTrainerId(user.id));
     }
   }, [isTrainer, user, dispatch]);
+
+  console.log(services);
 
   useEffect(() => {
     if (!hasFetched.current && isTrainer && user?.id && user.id.trim() !== "") {
@@ -56,12 +64,19 @@ const ServicesTable = () => {
     }
   };
 
+  const handleViewService = (serviceId: string) => {
+    navigate(`/service/${serviceId}`);
+  };
+
   return (
     <section>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Mis Servicios</h1>
         {isTrainer && (
-          <Button onClick={handleCreateService} className="flex items-center gap-2">
+          <Button
+            onClick={handleCreateService}
+            className="flex items-center gap-2"
+          >
             <Plus className="size-4" />
             Crear Servicio
           </Button>
@@ -88,12 +103,18 @@ const ServicesTable = () => {
               : "Busca un servicio para anotarte"}
           </p>
           {isTrainer ? (
-            <Button onClick={handleCreateService} className="flex items-center gap-2">
+            <Button
+              onClick={handleCreateService}
+              className="flex items-center gap-2"
+            >
               <Plus className="size-4" />
               Crear Servicio
             </Button>
           ) : (
-            <Button onClick={() => navigate("/")} className="flex items-center gap-2">
+            <Button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-2"
+            >
               Buscar Servicios
             </Button>
           )}
@@ -128,41 +149,44 @@ const ServicesTable = () => {
               ? services.map((service: Service, index) => (
                   <TableRow key={index}>
                     <TableCell className="max-w-[250px] overflow-hidden text-ellipsis px-4">
-                      {service.description}
+                      {service.category}
                     </TableCell>
                     <TableCell className="px-4">
-                      {/* Placeholder for visualizations - not in current Service model */}
-                      0
+                      {service.visualizations}
                     </TableCell>
+                    <TableCell className="px-4">{service.clients}</TableCell>
                     <TableCell className="px-4">
-                      {/* Placeholder for clients - not in current Service model */}0
-                    </TableCell>
-                    <TableCell className="px-4">
-                      {/* Placeholder for conversion rate - not in current Service model */}
-                      0%
+                      {service.visualizations > 0
+                        ? `${(
+                            (service.clients / service.visualizations) *
+                            100
+                          ).toFixed(1)}%`
+                        : "0%"}
                     </TableCell>
                     <TableCell className="px-4">
                       <div className="flex items-center gap-1">
                         <Star className="size-4 text-yellow-400 fill-yellow-400" />
                         <span>
-                          {/* {service.rating.toFixed(1)} ({service.totalReviews}) */}
+                          {service.rating.toFixed(1)} ({service.totalReviews})
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="px-4">
-                      {/* Placeholder for pending - not in current Service model */}0
-                    </TableCell>
+                    <TableCell className="px-4">{service.pendings}</TableCell>
                     <TableCell className="px-4">
                       <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleViewService(service.id)}
+                        >
+                          <Eye className="size-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleEditService(service.id)}
                         >
                           <Pencil className="size-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
-                          <Copy className="size-4" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -182,13 +206,15 @@ const ServicesTable = () => {
                       "Trainer Name"
                     </TableCell>
                     <TableCell className="max-w-[300px] overflow-hidden text-ellipsis px-4">
-                      {service.description}
+                      {service.category}
                     </TableCell>
                     <TableCell className="px-4">${service.price}</TableCell>
                     <TableCell className="px-4">
                       {service.mode === "online" ? "Virtual" : "Presencial"}
                     </TableCell>
-                    <TableCell className="px-4">{service.duration} min</TableCell>
+                    <TableCell className="px-4">
+                      {service.duration} min
+                    </TableCell>
                     <TableCell className="px-4">
                       <div className="flex items-center gap-1">
                         <Archive className="size-4" />
