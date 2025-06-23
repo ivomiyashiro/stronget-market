@@ -5,6 +5,7 @@ import {
   GetServicesParams,
   GetServicesResponseDTO,
   UpdateServiceRequestDTO,
+  GetFiltersResponseDTO,
 } from "./dtos";
 import Hiring from "../hiring/hiring.model";
 import Review from "../reviews/reviews.model";
@@ -23,15 +24,19 @@ export class ServicesService {
   async getServices(params: GetServicesParams): Promise<GetServicesResponseDTO[]> {
     const query: any = { isActive: true };
 
-    if (params.category) query.category = params.category;
-    if (params.zone) query.zone = params.zone;
-    if (params.mode) query.mode = params.mode;
-    if (params.language) query.language = params.language;
+    if (params.category) query.category = { $in: params.category.split(",") };
+    if (params.zone) query.zone = { $in: params.zone.split(",") };
+    if (params.mode) query.mode = { $in: params.mode.split(",") };
+    if (params.language) query.language = { $in: params.language.split(",") };
+
     if (params.minPrice) query.price = { $gte: params.minPrice };
     if (params.maxPrice) {
       query.price = { ...query.price, $lte: params.maxPrice };
     }
-    if (params.duration) query.duration = params.duration;
+    if (params.minDuration) query.duration = { $gte: params.minDuration };
+    if (params.maxDuration) {
+      query.duration = { ...query.duration, $lte: params.maxDuration };
+    }
 
     const services = await Service.find(query)
       .populate("trainerId", "name surname profileImage averageCalification avatar")
@@ -138,11 +143,32 @@ export class ServicesService {
     };
   }
 
-  async getServicesByTrainerId(trainerId: string) {
-    const services = await Service.find({
+  async getServicesByTrainerId(
+    trainerId: string,
+    params: GetServicesParams = {}
+  ): Promise<GetServicesResponseDTO[]> {
+    // Build query with trainer filter and additional filters
+    const query: any = {
       trainerId: new Types.ObjectId(trainerId),
       isActive: true,
-    })
+    };
+
+    // Apply the same filtering logic as getServices
+    if (params.category) query.category = { $in: params.category.split(",") };
+    if (params.zone) query.zone = { $in: params.zone.split(",") };
+    if (params.mode) query.mode = { $in: params.mode.split(",") };
+    if (params.language) query.language = { $in: params.language.split(",") };
+
+    if (params.minPrice) query.price = { $gte: params.minPrice };
+    if (params.maxPrice) {
+      query.price = { ...query.price, $lte: params.maxPrice };
+    }
+    if (params.minDuration) query.duration = { $gte: params.minDuration };
+    if (params.maxDuration) {
+      query.duration = { ...query.duration, $lte: params.maxDuration };
+    }
+
+    const services = await Service.find(query)
       .populate("trainerId", "name surname profileImage averageCalification avatar")
       .sort({ createdAt: -1 });
 
@@ -228,5 +254,50 @@ export class ServicesService {
     Object.assign(service, serviceData);
     await service.save();
     return service;
+  }
+
+  async getFilters(): Promise<GetFiltersResponseDTO> {
+    // Get min and max prices
+    const priceStats = await Service.aggregate([
+      { $match: { isActive: true } },
+      {
+        $group: {
+          _id: null,
+          minPrice: { $min: "$price" },
+          maxPrice: { $max: "$price" },
+        },
+      },
+    ]);
+
+    // Get unique zones
+    const zones = await Service.distinct("zone", { isActive: true });
+
+    // Get unique languages
+    const languages = await Service.distinct("language", { isActive: true });
+
+    // Get unique categories
+    const categories = await Service.distinct("category", { isActive: true });
+
+    // Get min and max duration
+    const durationStats = await Service.aggregate([
+      { $match: { isActive: true } },
+      {
+        $group: {
+          _id: null,
+          minDuration: { $min: "$duration" },
+          maxDuration: { $max: "$duration" },
+        },
+      },
+    ]);
+
+    return {
+      minPrice: priceStats[0]?.minPrice || 0,
+      maxPrice: priceStats[0]?.maxPrice || 0,
+      zones: zones.sort(),
+      languages: languages.sort(),
+      categories: categories.sort(),
+      minDuration: durationStats[0]?.minDuration || 0,
+      maxDuration: durationStats[0]?.maxDuration || 0,
+    };
   }
 }

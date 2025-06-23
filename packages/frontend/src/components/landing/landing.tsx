@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import {
   useServices,
@@ -8,7 +8,7 @@ import {
 } from "@/store/services/services.hooks";
 import Filtering from "../filtering/filtering";
 import ServiceCard from "../service-card/service-card";
-import type { Service } from "@/services/services.service";
+import type { Service, GetServicesParams } from "@/services/services.service";
 
 const Landing = () => {
   const services = useServices();
@@ -16,23 +16,43 @@ const Landing = () => {
   const isLoading = useServicesLoading();
   const error = useServicesError();
 
+  // Track current applied filters
+  const [currentFilters, setCurrentFilters] = useState<GetServicesParams>({});
+
   useEffect(() => {
     getServices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleApplyFilters = (filters: GetServicesParams) => {
+    console.log("Landing: Applying filters", filters);
+    setCurrentFilters(filters);
+    getServices(filters);
+  };
+
+  const handleSearch = (searchTerm: string) => {
+    // For now, we'll just reload all services
+    // In the future, you might want to implement text search
+    console.log("Search term:", searchTerm);
+    // Clear filters when searching
+    setCurrentFilters({});
+    getServices();
+  };
+
   return (
     <main className="flex h-full w-full flex-col gap-6">
-      <Filtering />
+      <Filtering
+        onApplyFilters={handleApplyFilters}
+        onSearch={handleSearch}
+        currentFilters={currentFilters}
+      />
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <Loader2 className="size-10 animate-spin" />
           <h2 className="mb-2 text-2xl font-semibold text-gray-900">
             Cargando servicios...
           </h2>
-          <p className="text-gray-600">
-            Estamos obteniendo los servicios disponibles.
-          </p>
+          <p className="text-gray-600">Estamos obteniendo los servicios disponibles.</p>
         </div>
       ) : error ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -58,8 +78,7 @@ const Landing = () => {
         <section
           className="grid grid-cols-1 auto-rows-fr gap-8"
           style={{
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(min(100%, 360px), 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 360px), 1fr))",
           }}
           aria-label="Lista de servicios disponibles"
         >

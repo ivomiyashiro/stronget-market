@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Table,
@@ -9,30 +9,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import {
-  Archive,
-  Ban,
-  Eye,
-  Loader2,
-  Pencil,
-  Plus,
-  Star,
-  Trash2,
-} from "lucide-react";
+import { Archive, Ban, Eye, Loader2, Pencil, Plus, Star, Trash2 } from "lucide-react";
 import Filtering from "../filtering/filtering";
 import { Button } from "../ui/button";
 import { useAuth } from "@/store/auth/auth.hooks";
-import {
-  useServices,
-  useServicesLoading,
-} from "@/store/services/services.hooks";
+import { useServices, useServicesLoading } from "@/store/services/services.hooks";
 import { useDispatch } from "react-redux";
-import {
-  getServicesByTrainerId,
-  deleteService,
-} from "@/store/services/services.thunks";
+import { getServicesByTrainerId, deleteService } from "@/store/services/services.thunks";
 import type { AppDispatch } from "@/store/store";
-import type { Service } from "@/services/services.service";
+import type { Service, GetServicesParams } from "@/services/services.service";
 
 const ServicesTable = () => {
   const { user } = useAuth();
@@ -44,18 +29,26 @@ const ServicesTable = () => {
   const services = useServices();
   const isLoading = useServicesLoading();
 
-  const fetchTrainerServices = useCallback(() => {
-    if (isTrainer && user?.id && user.id.trim() !== "") {
-      dispatch(getServicesByTrainerId(user.id));
-    }
-  }, [isTrainer, user, dispatch]);
+  // Track current applied filters for trainer services
+  const [currentFilters, setCurrentFilters] = useState<GetServicesParams>({});
 
-  console.log(services);
+  const fetchTrainerServices = useCallback(
+    (filters?: GetServicesParams) => {
+      if (isTrainer && user?.id && user.id.trim() !== "") {
+        // Use current filters if no specific filters are provided
+        const filtersToApply = filters !== undefined ? filters : currentFilters;
+
+        dispatch(getServicesByTrainerId({ id: user.id, params: filtersToApply }));
+      }
+    },
+    [isTrainer, user, dispatch, currentFilters]
+  );
 
   useEffect(() => {
     if (!hasFetched.current && isTrainer && user?.id && user.id.trim() !== "") {
       hasFetched.current = true;
-      fetchTrainerServices();
+      // Initial load without filters
+      fetchTrainerServices({});
     }
   }, [isTrainer, user?.id, fetchTrainerServices]);
 
@@ -69,7 +62,15 @@ const ServicesTable = () => {
 
   const handleDeleteService = (serviceId: string) => {
     if (confirm("¿Estás seguro de que quieres eliminar este servicio?")) {
-      dispatch(deleteService({ id: serviceId }));
+      dispatch(
+        deleteService({
+          id: serviceId,
+          onSuccess: () => {
+            // Refresh the services list after successful deletion
+            fetchTrainerServices();
+          },
+        })
+      );
     }
   };
 
@@ -77,21 +78,39 @@ const ServicesTable = () => {
     navigate(`/service/${serviceId}`);
   };
 
+  const handleApplyFilters = (filters: GetServicesParams) => {
+    setCurrentFilters(filters);
+    console.log("Current filters:", filters);
+    // Apply filters to trainer services
+    fetchTrainerServices(filters);
+  };
+
+  const handleSearch = (searchTerm: string) => {
+    // Clear filters when searching and fetch all services
+    const emptyFilters = {};
+    setCurrentFilters(emptyFilters);
+    fetchTrainerServices(emptyFilters);
+    console.log("Current filters:", searchTerm);
+    // TODO: In the future, you could implement text search by adding a search parameter
+    // to the API and passing searchTerm to the backend
+  };
+
   return (
     <section>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Mis Servicios</h1>
         {isTrainer && (
-          <Button
-            onClick={handleCreateService}
-            className="flex items-center gap-2"
-          >
+          <Button onClick={handleCreateService} className="flex items-center gap-2">
             <Plus className="size-4" />
             Crear Servicio
           </Button>
         )}
       </div>
-      <Filtering />
+      <Filtering
+        onApplyFilters={handleApplyFilters}
+        onSearch={handleSearch}
+        currentFilters={currentFilters}
+      />
       {isLoading ? (
         <div className="flex justify-center items-center py-8 w-full">
           <Loader2 className="size-10 animate-spin" />
@@ -112,18 +131,12 @@ const ServicesTable = () => {
               : "Busca un servicio para anotarte"}
           </p>
           {isTrainer ? (
-            <Button
-              onClick={handleCreateService}
-              className="flex items-center gap-2"
-            >
+            <Button onClick={handleCreateService} className="flex items-center gap-2">
               <Plus className="size-4" />
               Crear Servicio
             </Button>
           ) : (
-            <Button
-              onClick={() => navigate("/")}
-              className="flex items-center gap-2"
-            >
+            <Button onClick={() => navigate("/")} className="flex items-center gap-2">
               Buscar Servicios
             </Button>
           )}
@@ -160,16 +173,13 @@ const ServicesTable = () => {
                     <TableCell className="max-w-[250px] overflow-hidden text-ellipsis px-4">
                       {service.category}
                     </TableCell>
-                    <TableCell className="px-4">
-                      {service.visualizations}
-                    </TableCell>
+                    <TableCell className="px-4">{service.visualizations}</TableCell>
                     <TableCell className="px-4">{service.clients}</TableCell>
                     <TableCell className="px-4">
                       {service.visualizations > 0
-                        ? `${(
-                            (service.clients / service.visualizations) *
-                            100
-                          ).toFixed(1)}%`
+                        ? `${((service.clients / service.visualizations) * 100).toFixed(
+                            1
+                          )}%`
                         : "0%"}
                     </TableCell>
                     <TableCell className="px-4">
@@ -221,9 +231,7 @@ const ServicesTable = () => {
                     <TableCell className="px-4">
                       {service.mode === "online" ? "Virtual" : "Presencial"}
                     </TableCell>
-                    <TableCell className="px-4">
-                      {service.duration} min
-                    </TableCell>
+                    <TableCell className="px-4">{service.duration} min</TableCell>
                     <TableCell className="px-4">
                       <div className="flex items-center gap-1">
                         <Archive className="size-4" />

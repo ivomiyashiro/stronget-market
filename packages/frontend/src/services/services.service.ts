@@ -37,14 +37,16 @@ export interface Service {
 }
 
 export interface GetServicesParams {
-  category?: string;
-  zone?: string;
+  category?: string[];
+  zone?: string[];
   minPrice?: number;
   maxPrice?: number;
-  duration?: number;
-  language?: string;
-  mode?: "online" | "in-person";
+  minDuration?: number;
+  maxDuration?: number;
+  language?: string[];
+  mode?: "online" | "in-person" | "both";
   trainerId?: string;
+  rating?: number[];
 }
 
 export interface GetServicesResponse {
@@ -75,14 +77,24 @@ export class ServicesService {
     return await baseService.get<Service>(`/services/${id}`);
   }
 
-  async getServicesByTrainerId(id: string): Promise<Service[]> {
-    return await baseService.get<Service[]>(`/services/trainer/${id}`);
+  async getServicesByTrainerId(
+    id: string,
+    params?: GetServicesParams
+  ): Promise<Service[]> {
+    const queryParams: Record<string, string> = {};
+
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams[key] = value.toString();
+        }
+      });
+    }
+
+    return await baseService.get<Service[]>(`/services/trainer/${id}`, queryParams);
   }
 
-  async updateService(
-    id: string,
-    data: Partial<CreateServiceRequest>
-  ): Promise<Service> {
+  async updateService(id: string, data: Partial<CreateServiceRequest>): Promise<Service> {
     return await baseService.put<Service>(`/services/${id}`, data);
   }
 

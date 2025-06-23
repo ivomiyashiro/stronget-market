@@ -3,7 +3,8 @@ export type GetServicesParams = {
   zone?: string;
   minPrice?: number;
   maxPrice?: number;
-  duration?: number;
+  minDuration?: number;
+  maxDuration?: number;
   language?: string;
   mode?: "online" | "in-person";
 };

@@ -63,15 +63,16 @@ export const getServiceById = createAsyncThunk(
 
 export const getServicesByTrainerId = createAsyncThunk(
   "services/getServicesByTrainerId",
-  async (id: string, { rejectWithValue }) => {
+  async (payload: { id: string; params?: GetServicesParams }, { rejectWithValue }) => {
     try {
-      const services = await servicesService.getServicesByTrainerId(id);
+      const services = await servicesService.getServicesByTrainerId(
+        payload.id,
+        payload.params
+      );
       return services;
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch trainer services";
+        error instanceof Error ? error.message : "Failed to fetch trainer services";
       return rejectWithValue(errorMessage);
     }
   }
@@ -81,10 +82,7 @@ export const updateService = createAsyncThunk(
   "services/updateService",
   async (payload: UpdateServicePayload, { rejectWithValue }) => {
     try {
-      const service = await servicesService.updateService(
-        payload.id,
-        payload.data
-      );
+      const service = await servicesService.updateService(payload.id, payload.data);
 
       // Call success callback if provided
       if (payload.onSuccess) {

@@ -43,11 +43,12 @@ export class ServicesController {
         zone: req.query.zone as string | undefined,
         minPrice: req.query.minPrice ? Number(req.query.minPrice) : undefined,
         maxPrice: req.query.maxPrice ? Number(req.query.maxPrice) : undefined,
-        duration: req.query.duration ? Number(req.query.duration) : undefined,
+        minDuration: req.query.minDuration ? Number(req.query.minDuration) : undefined,
+        maxDuration: req.query.maxDuration ? Number(req.query.maxDuration) : undefined,
         language: req.query.language as string | undefined,
         mode: req.query.mode as "online" | "in-person" | undefined,
       };
-
+      console.log(req.query.language);
       const services = await this.servicesService.getServices(params);
       res.status(200).json(services);
     } catch (error) {
@@ -76,7 +77,23 @@ export class ServicesController {
   getServicesByTrainerId = async (req: Request, res: Response): Promise<void> => {
     try {
       const { trainerId } = req.params;
-      const services = await this.servicesService.getServicesByTrainerId(trainerId);
+
+      // Convert query params to the correct types (same as getServices)
+      const params: GetServicesParams = {
+        category: req.query.category as string | undefined,
+        zone: req.query.zone as string | undefined,
+        minPrice: req.query.minPrice ? Number(req.query.minPrice) : undefined,
+        maxPrice: req.query.maxPrice ? Number(req.query.maxPrice) : undefined,
+        minDuration: req.query.minDuration ? Number(req.query.minDuration) : undefined,
+        maxDuration: req.query.maxDuration ? Number(req.query.maxDuration) : undefined,
+        language: req.query.language as string | undefined,
+        mode: req.query.mode as "online" | "in-person" | undefined,
+      };
+
+      const services = await this.servicesService.getServicesByTrainerId(
+        trainerId,
+        params
+      );
       res.status(200).json(services);
     } catch (error) {
       res.status(400).json({
@@ -119,6 +136,17 @@ export class ServicesController {
     } catch (error) {
       res.status(400).json({
         message: error instanceof Error ? error.message : "Update service failed",
+      });
+    }
+  };
+
+  getFilters = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const filters = await this.servicesService.getFilters();
+      res.status(200).json(filters);
+    } catch (error) {
+      res.status(400).json({
+        message: error instanceof Error ? error.message : "Get filters failed",
       });
     }
   };

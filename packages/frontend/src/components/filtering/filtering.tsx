@@ -3,18 +3,39 @@ import { Input } from "../ui/input";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { ExpandedFilters } from "./expanded-filters";
+import type { GetServicesParams } from "@/services/services.service";
 
-const Filtering = () => {
+interface FilteringProps {
+  onApplyFilters?: (filters: GetServicesParams) => void;
+  onSearch?: (searchTerm: string) => void;
+  currentFilters: GetServicesParams;
+}
+
+const Filtering = ({ onApplyFilters, onSearch, currentFilters }: FilteringProps) => {
   const [search, setSearch] = useState("");
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onSearch) {
+      onSearch(search);
+    }
+  };
+
+  const handleApplyFilters = (filters: GetServicesParams) => {
+    if (onApplyFilters) {
+      onApplyFilters(filters);
+    }
+    setIsFiltersOpen(false);
+  };
+
+  // Check if there are active filters
+  const hasActiveFilters = currentFilters && Object.keys(currentFilters).length > 0;
+
   return (
     <>
-      <nav
-        className="flex items-center gap-2 py-8"
-        aria-label="Filtros de búsqueda"
-      >
-        <div className="relative w-full">
+      <nav className="flex items-center gap-2 py-8" aria-label="Filtros de búsqueda">
+        <form onSubmit={handleSearch} className="relative w-full">
           <label htmlFor="trainer-search" className="sr-only">
             Buscar entrenadores
           </label>
@@ -36,20 +57,22 @@ const Filtering = () => {
           >
             <Search className="size-5 text-white" aria-hidden="true" />
           </Button>
-        </div>
+        </form>
         <Button
-          variant="secondary"
+          variant={hasActiveFilters ? "default" : "secondary"}
           className="gap-2"
           aria-label="Abrir filtros avanzados"
           onClick={() => setIsFiltersOpen(true)}
         >
           <SlidersHorizontal className="size-4" aria-hidden="true" />
-          Filtros
+          {hasActiveFilters ? "Filtros activos" : "Filtros"}
         </Button>
       </nav>
       <ExpandedFilters
         isOpen={isFiltersOpen}
         onClose={() => setIsFiltersOpen(false)}
+        onApplyFilters={handleApplyFilters}
+        currentFilters={currentFilters}
       />
     </>
   );

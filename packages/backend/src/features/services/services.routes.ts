@@ -13,6 +13,9 @@ import {
 const router = Router();
 const servicesController = new ServicesController();
 
+// Get filters for services
+router.get("/filters", servicesController.getFilters);
+
 // Create a new service
 router.post(
   "/",
