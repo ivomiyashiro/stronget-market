@@ -9,10 +9,15 @@ export type GetServicesResponseDTO = {
   mode: "online" | "in-person";
   zone: string;
   language: string;
+  availability: {
+    day: string;
+    startTime: string;
+  }[];
   trainerImage: string;
   rating: number;
   pendings: number;
   totalReviews: number;
   visualizations: number;
   clients: number;
+  trainerId: Types.ObjectId;
 };
