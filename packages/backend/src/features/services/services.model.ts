@@ -9,6 +9,12 @@ const serviceSchema = new mongoose.Schema({
   mode: { type: String, enum: ["online", "in-person"], required: true },
   zone: { type: String, required: true },
   language: { type: String, required: true },
+  availability: [
+    {
+      day: { type: String, required: true },
+      startTime: { type: String, required: true },
+    },
+  ],
   visualizations: { type: Number, default: 0 },
   isActive: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
@@ -16,7 +22,7 @@ const serviceSchema = new mongoose.Schema({
 });
 
 // Index for efficient querying
-serviceSchema.index({ category: 1, zone: 1, price: 1 });
+serviceSchema.index({ categoryId: 1, zone: 1, price: 1 });
 
 const Service = mongoose.model("Service", serviceSchema);
 

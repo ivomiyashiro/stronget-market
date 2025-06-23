@@ -6,9 +6,9 @@ import {
   GetServicesResponseDTO,
   UpdateServiceRequestDTO,
 } from "./dtos";
-import User from "../user/user.model";
 import Hiring from "../hiring/hiring.model";
 import Review from "../reviews/reviews.model";
+import User from "../user/user.model";
 
 export class ServicesService {
   async createService(trainerId: string, serviceData: CreateServiceRequestDTO) {
@@ -34,30 +34,91 @@ export class ServicesService {
     if (params.duration) query.duration = params.duration;
 
     const services = await Service.find(query)
-      .populate("trainerId", "name surname profileImage averageCalification")
-      .sort({ rating: -1 });
+      .populate("trainerId", "name surname profileImage averageCalification avatar")
+      .sort({ createdAt: -1 });
 
-    const image = await User.findById(services[0].trainerId);
+    if (services.length === 0) {
+      return [];
+    }
+
+    // Get statistics for each service
+    const servicesWithStats = await Promise.all(
+      services.map(async (service: any) => {
+        const pendings = await Hiring.countDocuments({
+          serviceId: service._id,
+          status: "pending",
+        });
+
+        const totalReviews = await Review.countDocuments({
+          serviceId: service._id,
+        });
+
+        const ratingResult = await Review.aggregate([
+          { $match: { serviceId: service._id } },
+          { $group: { _id: null, average: { $avg: "$calification" } } },
+        ]);
+
+        const clients = await Hiring.countDocuments({
+          serviceId: service._id,
+        });
+
+        const trainer = (await User.findById(service.trainerId)) as any;
+
+        return {
+          id: service._id,
+          category: service.category,
+          description: service.description,
+          duration: service.duration,
+          price: service.price,
+          mode: service.mode,
+          zone: service.zone,
+          language: service.language,
+          availability: service.availability,
+          trainerImage: trainer?.avatar || "",
+          rating: ratingResult[0]?.average || 0,
+          pendings: pendings,
+          totalReviews: totalReviews,
+          visualizations: service.visualizations,
+          clients: clients,
+          trainerId: trainer?._id || new Types.ObjectId(),
+        };
+      })
+    );
+
+    return servicesWithStats;
+  }
+
+  async getServiceById(id: string): Promise<GetServicesResponseDTO> {
+    const service = await Service.findById(id).populate(
+      "trainerId",
+      "name surname profileImage averageCalification avatar"
+    );
+
+    if (!service) {
+      throw new Error("Service not found");
+    }
 
     const pendings = await Hiring.countDocuments({
-      serviceId: services[0]._id,
+      serviceId: service._id,
       status: "pending",
     });
 
     const totalReviews = await Review.countDocuments({
-      serviceId: services[0]._id,
+      serviceId: service._id,
     });
 
-    const rating = await Review.aggregate([
-      { $match: { serviceId: services[0]._id } },
+    const ratingResult = await Review.aggregate([
+      { $match: { serviceId: service._id } },
       { $group: { _id: null, average: { $avg: "$calification" } } },
     ]);
 
     const clients = await Hiring.countDocuments({
-      serviceId: services[0]._id,
+      serviceId: service._id,
     });
 
-    return services.map((service) => ({
+    const trainer = (await User.findById(service.trainerId)) as any;
+
+    return {
       id: service._id,
       category: service.category,
       description: service.description,
@@ -66,68 +127,74 @@ export class ServicesService {
       mode: service.mode,
       zone: service.zone,
       language: service.language,
-      trainerImage: image?.avatar || "",
-      rating: rating[0]?.average || 0,
+      availability: service.availability,
+      trainerImage: trainer?.avatar || "",
+      rating: ratingResult[0]?.average || 0,
       pendings: pendings,
       totalReviews: totalReviews,
       visualizations: service.visualizations,
       clients: clients,
-    }));
-  }
-
-  async getServiceById(id: string) {
-    return Service.findById(id).populate(
-      "trainerId",
-      "name surname profileImage averageCalification"
-    );
+      trainerId: trainer?._id || new Types.ObjectId(),
+    };
   }
 
   async getServicesByTrainerId(trainerId: string) {
     const services = await Service.find({
       trainerId: new Types.ObjectId(trainerId),
       isActive: true,
-    }).sort({ createdAt: -1 });
+    })
+      .populate("trainerId", "name surname profileImage averageCalification avatar")
+      .sort({ createdAt: -1 });
 
     if (services.length === 0) {
       return [];
     }
 
-    const image = await User.findById(services[0].trainerId);
+    // Get statistics for each service
+    const servicesWithStats = await Promise.all(
+      services.map(async (service: any) => {
+        const pendings = await Hiring.countDocuments({
+          serviceId: service._id,
+          status: "pending",
+        });
 
-    const rating = await Review.aggregate([
-      { $match: { serviceId: services[0]._id } },
-      { $group: { _id: null, average: { $avg: "$calification" } } },
-    ]);
+        const totalReviews = await Review.countDocuments({
+          serviceId: service._id,
+        });
 
-    const pendings = await Hiring.countDocuments({
-      serviceId: services[0]._id,
-      status: "pending",
-    });
+        const ratingResult = await Review.aggregate([
+          { $match: { serviceId: service._id } },
+          { $group: { _id: null, average: { $avg: "$calification" } } },
+        ]);
 
-    const totalReviews = await Review.countDocuments({
-      serviceId: services[0]._id,
-    });
+        const clients = await Hiring.countDocuments({
+          serviceId: service._id,
+        });
 
-    const clients = await Hiring.countDocuments({
-      serviceId: services[0]._id,
-    });
+        const trainer = (await User.findById(service.trainerId)) as any;
 
-    return services.map((service) => ({
-      id: service._id,
-      category: service.category,
-      description: service.description,
-      duration: service.duration,
-      price: service.price,
-      mode: service.mode,
-      zone: service.zone,
-      language: service.language,
-      trainerImage: image?.avatar || "",
-      rating: rating[0]?.average || 0,
-      pendings: pendings,
-      totalReviews: totalReviews,
-      visualizations: service.visualizations,
-      clients: clients,
-    }));
+        return {
+          id: service._id,
+          category: service.category,
+          description: service.description,
+          duration: service.duration,
+          price: service.price,
+          mode: service.mode,
+          zone: service.zone,
+          language: service.language,
+          availability: service.availability,
+          trainerImage: trainer?.avatar || "",
+          rating: ratingResult[0]?.average || 0,
+          pendings: pendings,
+          totalReviews: totalReviews,
+          visualizations: service.visualizations,
+          clients: clients,
+          trainerId: trainer?._id || new Types.ObjectId(),
+        };
+      })
+    );
+
+    return servicesWithStats;
   }
 
   async deleteService(id: string, trainerId: string) {
