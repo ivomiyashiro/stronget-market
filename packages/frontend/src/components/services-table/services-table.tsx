@@ -9,7 +9,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Archive, Ban, Eye, Pencil, Plus, Star, Trash2 } from "lucide-react";
+import {
+  Archive,
+  Ban,
+  Eye,
+  Loader2,
+  Pencil,
+  Plus,
+  Star,
+  Trash2,
+} from "lucide-react";
 import Filtering from "../filtering/filtering";
 import { Button } from "../ui/button";
 import { useAuth } from "@/store/auth/auth.hooks";
@@ -84,8 +93,8 @@ const ServicesTable = () => {
       </div>
       <Filtering />
       {isLoading ? (
-        <div className="flex justify-center items-center py-8">
-          <div className="text-lg">Cargando servicios...</div>
+        <div className="flex justify-center items-center py-8 w-full">
+          <Loader2 className="size-10 animate-spin" />
         </div>
       ) : services.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">

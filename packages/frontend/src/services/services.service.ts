@@ -33,6 +33,7 @@ export interface Service {
     day: string;
     startTime: string;
   }[];
+  trainerId: string;
 }
 
 export interface GetServicesParams {
@@ -43,6 +44,7 @@ export interface GetServicesParams {
   duration?: number;
   language?: string;
   mode?: "online" | "in-person";
+  trainerId?: string;
 }
 
 export interface GetServicesResponse {
@@ -55,7 +57,7 @@ export class ServicesService {
     return await baseService.post<Service>("/services", data);
   }
 
-  async getServices(params?: GetServicesParams): Promise<GetServicesResponse> {
+  async getServices(params?: GetServicesParams): Promise<Service[]> {
     const queryParams: Record<string, string> = {};
 
     if (params) {
@@ -66,7 +68,7 @@ export class ServicesService {
       });
     }
 
-    return await baseService.get<GetServicesResponse>("/services", queryParams);
+    return await baseService.get<Service[]>("/services", queryParams);
   }
 
   async getServiceById(id: string): Promise<Service> {

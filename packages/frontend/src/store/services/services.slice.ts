@@ -70,8 +70,8 @@ export const servicesSlice = createSlice({
       .addCase(getServices.fulfilled, (state, action) => {
         state.isLoading = false;
         state.error = null;
-        state.services = action.payload.services;
-        state.total = action.payload.total;
+        state.services = action.payload;
+        state.total = action.payload.length;
       })
       .addCase(getServices.rejected, (state, action) => {
         state.isLoading = false;

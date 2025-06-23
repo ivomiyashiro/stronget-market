@@ -1,4 +1,4 @@
-import { User, Star, MapPin, Clock, Globe, Users } from "lucide-react";
+import { User, Star, MapPin, Clock, Globe, Users, Loader2, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import TrainerEvaluations from "../trainer-evaluations/trainer-evaluations";
@@ -8,6 +8,7 @@ import {
 } from "@/store/services/services.hooks";
 import { useDispatch } from "react-redux";
 import { getServiceById } from "@/store/services/services.thunks";
+import { getTrainerById } from "@/store/trainer/trainer.thunks";
 import type { AppDispatch } from "@/store/store";
 import { useParams } from "react-router-dom";
 
@@ -28,18 +29,24 @@ const ServiceExpanded = () => {
     }
   }, [id, dispatch]);
 
+  useEffect(() => {
+    if (service?.trainerId) {
+      dispatch(getTrainerById({ id: service.trainerId }));
+    }
+  }, [service?.trainerId, dispatch]);
+
   return (
     <section className="flex flex-col md:flex-row gap-50 mx-auto w-full py-8">
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-16 text-center w-full">
-          <div className="mb-4 text-6xl">⏳</div>
+          <Loader2 className="size-10 animate-spin" />
           <h2 className="mb-2 text-2xl font-semibold text-gray-900">
             Cargando servicio...
           </h2>
         </div>
       ) : !service ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="mb-4 text-6xl">🔍</div>
+        <div className="flex flex-col items-center justify-center py-16 text-center w-full">
+          <Search className="size-10" />
           <h2 className="mb-2 text-2xl font-semibold text-gray-900">
             No se encontró el servicio
           </h2>

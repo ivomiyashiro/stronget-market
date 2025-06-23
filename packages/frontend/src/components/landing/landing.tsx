@@ -1,16 +1,49 @@
-import { useServices } from "@/store/services/services.hooks";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import {
+  useServices,
+  useServicesActions,
+  useServicesLoading,
+  useServicesError,
+} from "@/store/services/services.hooks";
 import Filtering from "../filtering/filtering";
 import ServiceCard from "../service-card/service-card";
 import type { Service } from "@/services/services.service";
 
 const Landing = () => {
   const services = useServices();
+  const { getServices } = useServicesActions();
+  const isLoading = useServicesLoading();
+  const error = useServicesError();
+
+  useEffect(() => {
+    getServices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <main className="flex h-full w-full flex-col gap-6">
       <Filtering />
-      {services.length === 0 ? (
-        <section className="flex flex-col items-center justify-center py-16 text-center">
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <Loader2 className="size-10 animate-spin" />
+          <h2 className="mb-2 text-2xl font-semibold text-gray-900">
+            Cargando servicios...
+          </h2>
+          <p className="text-gray-600">
+            Estamos obteniendo los servicios disponibles.
+          </p>
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="mb-4 text-6xl">❌</div>
+          <h2 className="mb-2 text-2xl font-semibold text-gray-900">
+            Error al cargar servicios
+          </h2>
+          <p className="text-gray-600">{error}</p>
+        </div>
+      ) : !services || services.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="mb-4 text-6xl">🏋️‍♂️</div>
           <h2 className="mb-2 text-2xl font-semibold text-gray-900">
             No se encontraron servicios
@@ -20,7 +53,7 @@ const Landing = () => {
             <br />
             Intenta ajustar tus criterios de búsqueda.
           </p>
-        </section>
+        </div>
       ) : (
         <section
           className="grid grid-cols-1 auto-rows-fr gap-8"
@@ -39,6 +72,7 @@ const Landing = () => {
                 price={service.price}
                 rating={service.rating}
                 amountOfReviews={service.totalReviews}
+                id={service.id}
               />
             </article>
           ))}
