@@ -41,11 +41,13 @@ export interface DailyAvailability {
 interface AvailabilitySelectorProps {
   availability: DailyAvailability[];
   onChange: (availability: DailyAvailability[]) => void;
+  duration: number;
 }
 
 export const AvailabilitySelector = ({
   availability,
   onChange,
+  duration,
 }: AvailabilitySelectorProps) => {
   const toggleDay = (day: string) => {
     const isSelected = availability.some((item) => item.day === day);
@@ -111,6 +113,45 @@ export const AvailabilitySelector = ({
     );
   };
 
+  const getAvailableTimes = (day: string, currentSlotId: string) => {
+    const dayAvailability = availability.find((item) => item.day === day);
+    if (!dayAvailability) return TIME_OPTIONS;
+
+    const timeToMinutes = (time: string) => {
+      const [hours, minutes] = time.split(":").map(Number);
+      return hours * 60 + minutes;
+    };
+
+    const otherSlots = dayAvailability.timeSlots.filter(
+      (slot) => slot.id !== currentSlotId && slot.startTime
+    );
+
+    if (duration === 0) {
+      const selectedTimes = new Set(otherSlots.map((s) => s.startTime));
+      return TIME_OPTIONS.filter((t) => !selectedTimes.has(t));
+    }
+
+    const unavailableIntervals = otherSlots.map((slot) => {
+      const start = timeToMinutes(slot.startTime);
+      return { start, end: start + duration };
+    });
+
+    return TIME_OPTIONS.filter((timeOption) => {
+      const timeOptionMinutes = timeToMinutes(timeOption);
+      const timeOptionEnd = timeOptionMinutes + duration;
+
+      for (const interval of unavailableIntervals) {
+        if (
+          timeOptionMinutes < interval.end &&
+          timeOptionEnd > interval.start
+        ) {
+          return false;
+        }
+      }
+      return true;
+    });
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div>
@@ -139,7 +180,10 @@ export const AvailabilitySelector = ({
         {availability
           .sort((a, b) => DAYS.indexOf(a.day) - DAYS.indexOf(b.day))
           .map(({ day, timeSlots }) => (
-            <div key={day} className="border rounded-lg p-4 flex flex-col gap-4">
+            <div
+              key={day}
+              className="border rounded-lg p-4 flex flex-col gap-4"
+            >
               <div className="flex justify-between items-center">
                 <h2 className="font-semibold">{day}</h2>
                 <Button
@@ -161,7 +205,7 @@ export const AvailabilitySelector = ({
                     onChange={(e) =>
                       handleTimeChange(day, slot.id, e.target.value)
                     }
-                    options={TIME_OPTIONS}
+                    options={getAvailableTimes(day, slot.id)}
                     required
                     fullSize
                   />
@@ -180,4 +224,4 @@ export const AvailabilitySelector = ({
       </div>
     </div>
   );
-}; 
+};

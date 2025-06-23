@@ -22,11 +22,8 @@ import {
   type DailyAvailability,
 } from "./availability-selector";
 
-const DURATION_OPTIONS = ["1 hora", "2 horas"];
-const ZONE_OPTIONS = ["Nuñez", "Palermo"];
-const CATEGORY_OPTIONS = ["Running", "Gimnasio", "Nutrición", "Yoga"];
+const DURATION_OPTIONS = ["1 hora", "2 horas", "3 horas", "4 horas", "5 horas"];
 const MODALITY_OPTIONS = ["Virtual", "Presencial"];
-const LANGUAGE_OPTIONS = ["Español", "Inglés", "Portugués"];
 
 interface ServiceFormValues {
   description: string;
@@ -65,14 +62,12 @@ const CreateService = () => {
     Partial<Record<keyof ServiceFormValues, string>>
   >({});
 
-  // Fetch service data if in edit mode
   useEffect(() => {
     if (id && mode === "edit") {
       dispatch(getServiceById(id));
     }
   }, [id, mode, dispatch]);
 
-  // Update form values when service data is loaded
   useEffect(() => {
     if (currentService && mode === "edit") {
       setValues({
@@ -140,10 +135,9 @@ const CreateService = () => {
         }))
       );
 
-      // Convert form values to API format
       const serviceData: CreateServiceRequest = {
         description: values.description,
-        duration: parseInt(values.duration.split(" ")[0]) * 60, // Convert hours to minutes
+        duration: parseInt(values.duration.split(" ")[0]) * 60,
         price: parseFloat(values.price),
         zone: values.zone,
         category: values.category,
@@ -209,30 +203,27 @@ const CreateService = () => {
         />
         <RequiredInput
           label="Zona"
-          inputType="select"
+          inputType="input"
           value={values.zone}
           onChange={(e) => handleChange("zone", e.target.value)}
           error={errors.zone}
           required
-          options={ZONE_OPTIONS}
         />
         <RequiredInput
           label="Categoría"
-          inputType="select"
+          inputType="input"
           value={values.category}
           onChange={(e) => handleChange("category", e.target.value)}
           error={errors.category}
           required
-          options={CATEGORY_OPTIONS}
         />
         <RequiredInput
           label="Idioma"
-          inputType="select"
+          inputType="input"
           value={values.language}
           onChange={(e) => handleChange("language", e.target.value)}
           error={errors.language}
           required
-          options={LANGUAGE_OPTIONS}
         />
         <RequiredInput
           label="Modalidad"
@@ -247,6 +238,9 @@ const CreateService = () => {
       <AvailabilitySelector
         availability={availability}
         onChange={setAvailability}
+        duration={
+          values.duration ? parseInt(values.duration.split(" ")[0]) * 60 : 0
+        }
       />
       <div className="flex gap-2 justify-end">
         <Button
