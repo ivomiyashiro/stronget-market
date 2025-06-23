@@ -1,9 +1,7 @@
 import { Router } from "express";
 import { ServicesController } from "./services.controller";
-import {
-  validateBody,
-  validateParams,
-} from "../../middleware/validation.middleware";
+import { validateBody, validateParams } from "../../middleware/validation.middleware";
+import { authenticateToken, requireRole } from "../../middleware/auth.middleware";
 import {
   createServiceSchema,
   updateServiceSchema,
@@ -18,23 +16,17 @@ const servicesController = new ServicesController();
 // Create a new service
 router.post(
   "/",
+  authenticateToken,
+  requireRole(["entrenador"]),
   validateBody(createServiceSchema),
   servicesController.createService
 );
 
 // Get all services with filters
-router.get(
-  "/",
-  validateParams(getServicesParamsSchema),
-  servicesController.getServices
-);
+router.get("/", validateParams(getServicesParamsSchema), servicesController.getServices);
 
 // Get service by ID
-router.get(
-  "/:id",
-  validateParams(serviceIdSchema),
-  servicesController.getServiceById
-);
+router.get("/:id", validateParams(serviceIdSchema), servicesController.getServiceById);
 
 // Get services by trainer ID
 router.get(
@@ -46,6 +38,8 @@ router.get(
 // Update service
 router.put(
   "/:id",
+  authenticateToken,
+  requireRole(["entrenador"]),
   validateBody(updateServiceSchema),
   validateParams(serviceIdSchema),
   servicesController.updateService
@@ -54,6 +48,8 @@ router.put(
 // Delete service
 router.delete(
   "/:id",
+  authenticateToken,
+  requireRole(["entrenador"]),
   validateParams(serviceIdSchema),
   servicesController.deleteService
 );

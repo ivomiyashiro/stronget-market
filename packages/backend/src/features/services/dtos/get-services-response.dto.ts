@@ -10,4 +10,9 @@ export type GetServicesResponseDTO = {
   zone: string;
   language: string;
   trainerImage: string;
+  rating: number;
+  pendings: number;
+  totalReviews: number;
+  visualizations: number;
+  clients: number;
 };

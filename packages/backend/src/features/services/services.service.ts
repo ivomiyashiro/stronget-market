@@ -7,6 +7,8 @@ import {
   UpdateServiceRequestDTO,
 } from "./dtos";
 import User from "../user/user.model";
+import Hiring from "../hiring/hiring.model";
+import Review from "../reviews/reviews.model";
 
 export class ServicesService {
   async createService(trainerId: string, serviceData: CreateServiceRequestDTO) {
@@ -37,6 +39,24 @@ export class ServicesService {
 
     const image = await User.findById(services[0].trainerId);
 
+    const pendings = await Hiring.countDocuments({
+      serviceId: services[0]._id,
+      status: "pending",
+    });
+
+    const totalReviews = await Review.countDocuments({
+      serviceId: services[0]._id,
+    });
+
+    const rating = await Review.aggregate([
+      { $match: { serviceId: services[0]._id } },
+      { $group: { _id: null, average: { $avg: "$calification" } } },
+    ]);
+
+    const clients = await Hiring.countDocuments({
+      serviceId: services[0]._id,
+    });
+
     return services.map((service) => ({
       id: service._id,
       category: service.category,
@@ -46,7 +66,12 @@ export class ServicesService {
       mode: service.mode,
       zone: service.zone,
       language: service.language,
-      trainerImage: image?.avatarPath || "",
+      trainerImage: image?.avatar || "",
+      rating: rating[0]?.average || 0,
+      pendings: pendings,
+      totalReviews: totalReviews,
+      visualizations: service.visualizations,
+      clients: clients,
     }));
   }
 
@@ -69,6 +94,24 @@ export class ServicesService {
 
     const image = await User.findById(services[0].trainerId);
 
+    const rating = await Review.aggregate([
+      { $match: { serviceId: services[0]._id } },
+      { $group: { _id: null, average: { $avg: "$calification" } } },
+    ]);
+
+    const pendings = await Hiring.countDocuments({
+      serviceId: services[0]._id,
+      status: "pending",
+    });
+
+    const totalReviews = await Review.countDocuments({
+      serviceId: services[0]._id,
+    });
+
+    const clients = await Hiring.countDocuments({
+      serviceId: services[0]._id,
+    });
+
     return services.map((service) => ({
       id: service._id,
       category: service.category,
@@ -78,7 +121,12 @@ export class ServicesService {
       mode: service.mode,
       zone: service.zone,
       language: service.language,
-      trainerImage: image?.avatarPath || "",
+      trainerImage: image?.avatar || "",
+      rating: rating[0]?.average || 0,
+      pendings: pendings,
+      totalReviews: totalReviews,
+      visualizations: service.visualizations,
+      clients: clients,
     }));
   }
 

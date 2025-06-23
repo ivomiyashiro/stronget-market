@@ -9,28 +9,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import {
-  Archive,
-  Ban,
-  Copy,
-  Eye,
-  Pencil,
-  Plus,
-  Star,
-  Trash2,
-} from "lucide-react";
+import { Archive, Ban, Copy, Eye, Pencil, Plus, Star, Trash2 } from "lucide-react";
 import Filtering from "../filtering/filtering";
 import { Button } from "../ui/button";
 import { useAuth } from "@/store/auth/auth.hooks";
-import {
-  useServices,
-  useServicesLoading,
-} from "@/store/services/services.hooks";
+import { useServices, useServicesLoading } from "@/store/services/services.hooks";
 import { useDispatch } from "react-redux";
-import {
-  getServicesByTrainerId,
-  deleteService,
-} from "@/store/services/services.thunks";
+import { getServicesByTrainerId, deleteService } from "@/store/services/services.thunks";
 import type { AppDispatch } from "@/store/store";
 import type { Service } from "@/services/services.service";
 
@@ -76,10 +61,7 @@ const ServicesTable = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Mis Servicios</h1>
         {isTrainer && (
-          <Button
-            onClick={handleCreateService}
-            className="flex items-center gap-2"
-          >
+          <Button onClick={handleCreateService} className="flex items-center gap-2">
             <Plus className="size-4" />
             Crear Servicio
           </Button>
@@ -106,18 +88,12 @@ const ServicesTable = () => {
               : "Busca un servicio para anotarte"}
           </p>
           {isTrainer ? (
-            <Button
-              onClick={handleCreateService}
-              className="flex items-center gap-2"
-            >
+            <Button onClick={handleCreateService} className="flex items-center gap-2">
               <Plus className="size-4" />
               Crear Servicio
             </Button>
           ) : (
-            <Button
-              onClick={() => navigate("/")}
-              className="flex items-center gap-2"
-            >
+            <Button onClick={() => navigate("/")} className="flex items-center gap-2">
               Buscar Servicios
             </Button>
           )}
@@ -159,8 +135,7 @@ const ServicesTable = () => {
                       0
                     </TableCell>
                     <TableCell className="px-4">
-                      {/* Placeholder for clients - not in current Service model */}
-                      0
+                      {/* Placeholder for clients - not in current Service model */}0
                     </TableCell>
                     <TableCell className="px-4">
                       {/* Placeholder for conversion rate - not in current Service model */}
@@ -170,13 +145,12 @@ const ServicesTable = () => {
                       <div className="flex items-center gap-1">
                         <Star className="size-4 text-yellow-400 fill-yellow-400" />
                         <span>
-                          {service.rating.toFixed(1)} ({service.totalReviews})
+                          {/* {service.rating.toFixed(1)} ({service.totalReviews}) */}
                         </span>
                       </div>
                     </TableCell>
                     <TableCell className="px-4">
-                      {/* Placeholder for pending - not in current Service model */}
-                      0
+                      {/* Placeholder for pending - not in current Service model */}0
                     </TableCell>
                     <TableCell className="px-4">
                       <div className="flex items-center gap-2">
@@ -214,9 +188,7 @@ const ServicesTable = () => {
                     <TableCell className="px-4">
                       {service.mode === "online" ? "Virtual" : "Presencial"}
                     </TableCell>
-                    <TableCell className="px-4">
-                      {service.duration} min
-                    </TableCell>
+                    <TableCell className="px-4">{service.duration} min</TableCell>
                     <TableCell className="px-4">
                       <div className="flex items-center gap-1">
                         <Archive className="size-4" />
