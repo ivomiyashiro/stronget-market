@@ -37,6 +37,35 @@ export class ServicesController {
 
     getServices = async (req: Request, res: Response): Promise<void> => {
         try {
+            // Convert query params to the correct types
+            const params: GetServicesParams = {
+                category: req.query.category as string | undefined,
+                zone: req.query.zone as string | undefined,
+                minPrice: req.query.minPrice ? Number(req.query.minPrice) : undefined,
+                maxPrice: req.query.maxPrice ? Number(req.query.maxPrice) : undefined,
+                minDuration: req.query.minDuration
+                    ? Number(req.query.minDuration)
+                    : undefined,
+                maxDuration: req.query.maxDuration
+                    ? Number(req.query.maxDuration)
+                    : undefined,
+                language: req.query.language as string | undefined,
+                mode: req.query.mode as "online" | "in-person" | undefined,
+                search: req.query.search as string | undefined,
+            };
+
+            const services = await this.servicesService.getServices(params);
+
+            res.status(200).json(services);
+        } catch (error) {
+            res.status(400).json({
+                message: error instanceof Error ? error.message : "Get services failed",
+            });
+        }
+    };
+
+    getUserServices = async (req: Request, res: Response): Promise<void> => {
+        try {
             const authenticatedReq = req as AuthenticatedRequest;
             const user = authenticatedReq.user;
 
@@ -182,3 +211,5 @@ export class ServicesController {
         }
     };
 }
+
+export const servicesController = new ServicesController();

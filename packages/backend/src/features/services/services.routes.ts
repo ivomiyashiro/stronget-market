@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { ServicesController } from "./services.controller";
 import { validateBody, validateParams } from "../../middleware/validation.middleware";
 import {
     authenticateToken,
@@ -13,9 +12,9 @@ import {
     trainerIdSchema,
     getServicesParamsSchema,
 } from "./services.validation";
+import { servicesController } from "./services.controller";
 
 const router = Router();
-const servicesController = new ServicesController();
 
 // Get filters for services
 router.get("/filters", servicesController.getFilters);

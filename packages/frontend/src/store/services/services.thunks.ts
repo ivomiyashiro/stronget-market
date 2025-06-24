@@ -47,6 +47,20 @@ export const getServices = createAsyncThunk(
   }
 );
 
+export const getUserServices = createAsyncThunk(  
+  "services/getUserServices",
+  async (params: GetServicesParams | undefined, { rejectWithValue }) => {
+    try {
+      const response = await servicesService.getUserServices(params);
+      return response;
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch user services";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 export const getServiceById = createAsyncThunk(
   "services/getServiceById",
   async (id: string, { rejectWithValue }) => {

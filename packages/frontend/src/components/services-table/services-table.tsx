@@ -27,9 +27,9 @@ import { useAuth } from "@/store/auth/auth.hooks";
 import { useServices, useServicesLoading } from "@/store/services/services.hooks";
 import { useDispatch } from "react-redux";
 import {
-    getServices,
     getServicesByTrainerId,
     deleteService,
+    getUserServices,
 } from "@/store/services/services.thunks";
 import type { AppDispatch } from "@/store/store";
 import type { Service, GetServicesParams } from "@/services/services.service";
@@ -59,17 +59,16 @@ const ServicesTable = () => {
             if (isTrainer && user?.id && user.id.trim() !== "") {
                 // For trainers, fetch their specific services
                 dispatch(getServicesByTrainerId({ id: user.id, params: filtersToApply }));
-            } else if (isClient || !user) {
-                // For clients, fetch their hired services (or all services if not authenticated)
-                // The backend now handles this automatically based on authentication
-                dispatch(getServices(filtersToApply));
+            } else if (isClient) {
+                // For clients, fetch their hired services from /users/services
+                dispatch(getUserServices(filtersToApply));
             }
         },
         [isTrainer, isClient, user, dispatch, currentFilters]
     );
 
     useEffect(() => {
-        if (!hasFetched.current && (isTrainer || isClient || !user)) {
+        if (!hasFetched.current && (isTrainer || isClient)) {
             hasFetched.current = true;
             // Initial load without filters
             fetchServices({});
@@ -153,6 +152,11 @@ const ServicesTable = () => {
             buttonAction: () => navigate("/"),
         };
     };
+
+    // Only render for authenticated users (trainers or clients)
+    if (!user || (!isTrainer && !isClient)) {
+        return null;
+    }
 
     return (
         <section>
