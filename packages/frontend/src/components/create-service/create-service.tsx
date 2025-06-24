@@ -4,10 +4,8 @@ import { RequiredInput } from "@/components/common/required-input";
 import { Button } from "@/components/ui/button";
 import {
   useCreateServiceLoading,
-  useCreateServiceError,
   useCurrentService,
   useUpdateServiceLoading,
-  useUpdateServiceError,
 } from "@/store/services/services.hooks";
 import { useDispatch } from "react-redux";
 import {
@@ -44,8 +42,7 @@ const CreateService = () => {
 
   const isLoading = useCreateServiceLoading();
   const updateLoading = useUpdateServiceLoading();
-  const error = useCreateServiceError();
-  const updateError = useUpdateServiceError();
+
   const currentService = useCurrentService();
 
   const [values, setValues] = useState<ServiceFormValues>({
@@ -156,7 +153,6 @@ const CreateService = () => {
     }
   };
 
-  const displayError = error || updateError;
   const displayLoading = isLoading || updateLoading;
 
   return (
@@ -167,12 +163,6 @@ const CreateService = () => {
       <h1 className="text-2xl font-bold">
         {mode === "edit" ? "Editar Servicio" : "Crear Servicio"}
       </h1>
-
-      {displayError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {displayError}
-        </div>
-      )}
 
       <RequiredInput
         label="Descripción"

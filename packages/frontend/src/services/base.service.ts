@@ -56,6 +56,18 @@ export class BaseService {
     }
 
     /**
+     * Handle token expiration by clearing localStorage and redirecting to login
+     */
+    private handleTokenExpiration(): void {
+        // Clear localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        
+        // Redirect to login page
+        window.location.href = '/login';
+    }
+
+    /**
      * Core request method
      */
     private async request<T>(method: string, url: string, data?: unknown): Promise<T> {
@@ -88,7 +100,23 @@ export class BaseService {
             const result = await response.json();
 
             if (!response.ok) {
-                throw new ApiError(response.status, result.error || "Unknown error");
+                // Handle token expiration (401 Unauthorized or 403 Forbidden)
+                if (response.status === 401 || response.status === 403) {
+                    // Check if the error message indicates token issues
+                    const errorMessage = result.message || result.error || "";
+                    if (
+                        errorMessage.includes("token") || 
+                        errorMessage.includes("expired") || 
+                        errorMessage.includes("invalid") ||
+                        errorMessage.includes("Unauthorized") ||
+                        errorMessage.includes("Forbidden")
+                    ) {
+                        this.handleTokenExpiration();
+                        throw new ApiError(response.status, "Session expired. Please log in again.");
+                    }
+                }
+                
+                throw new ApiError(response.status, result.error || result.message || "Unknown error");
             }
 
             return result as T;
