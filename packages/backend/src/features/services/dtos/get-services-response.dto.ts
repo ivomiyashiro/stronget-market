@@ -21,4 +21,5 @@ export type GetServicesResponseDTO = {
     visualizations: number;
     clients: number;
     trainerId: Types.ObjectId;
+    files: string[];
 };

@@ -75,9 +75,9 @@ router.get(
         z.object({
             trainerId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid ObjectId format"),
             day: z.enum([
+                "Domingo",
                 "Lunes",
                 "Martes",
-                "Miercoles",
                 "Miercoles",
                 "Jueves",
                 "Viernes",

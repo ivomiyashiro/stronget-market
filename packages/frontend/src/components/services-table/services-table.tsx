@@ -20,13 +20,17 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-import { Archive, Ban, Eye, Loader2, Pencil, Plus, Star, Trash2 } from "lucide-react";
+import { Archive, Eye, Loader2, Pencil, Plus, Star, Trash2 } from "lucide-react";
 import Filtering from "../filtering/filtering";
 import { Button } from "../ui/button";
 import { useAuth } from "@/store/auth/auth.hooks";
 import { useServices, useServicesLoading } from "@/store/services/services.hooks";
 import { useDispatch } from "react-redux";
-import { getServicesByTrainerId, deleteService } from "@/store/services/services.thunks";
+import {
+    getServices,
+    getServicesByTrainerId,
+    deleteService,
+} from "@/store/services/services.thunks";
 import type { AppDispatch } from "@/store/store";
 import type { Service, GetServicesParams } from "@/services/services.service";
 
@@ -35,37 +39,42 @@ const ServicesTable = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
     const isTrainer = user?.role === "entrenador";
+    const isClient = user?.role === "cliente";
     const hasFetched = useRef(false);
 
     const services = useServices();
     const isLoading = useServicesLoading();
 
-    // Track current applied filters for trainer services
+    // Track current applied filters
     const [currentFilters, setCurrentFilters] = useState<GetServicesParams>({});
 
     // State for delete confirmation dialog
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
 
-    const fetchTrainerServices = useCallback(
+    const fetchServices = useCallback(
         (filters?: GetServicesParams) => {
-            if (isTrainer && user?.id && user.id.trim() !== "") {
-                // Use current filters if no specific filters are provided
-                const filtersToApply = filters !== undefined ? filters : currentFilters;
+            const filtersToApply = filters !== undefined ? filters : currentFilters;
 
+            if (isTrainer && user?.id && user.id.trim() !== "") {
+                // For trainers, fetch their specific services
                 dispatch(getServicesByTrainerId({ id: user.id, params: filtersToApply }));
+            } else if (isClient || !user) {
+                // For clients, fetch their hired services (or all services if not authenticated)
+                // The backend now handles this automatically based on authentication
+                dispatch(getServices(filtersToApply));
             }
         },
-        [isTrainer, user, dispatch, currentFilters]
+        [isTrainer, isClient, user, dispatch, currentFilters]
     );
 
     useEffect(() => {
-        if (!hasFetched.current && isTrainer && user?.id && user.id.trim() !== "") {
+        if (!hasFetched.current && (isTrainer || isClient || !user)) {
             hasFetched.current = true;
             // Initial load without filters
-            fetchTrainerServices({});
+            fetchServices({});
         }
-    }, [isTrainer, user?.id, fetchTrainerServices]);
+    }, [isTrainer, isClient, fetchServices, user]);
 
     const handleEditService = (serviceId: string) => {
         navigate(`/create-service/${serviceId}`);
@@ -87,7 +96,7 @@ const ServicesTable = () => {
                     id: serviceToDelete,
                     onSuccess: () => {
                         // Refresh the services list after successful deletion
-                        fetchTrainerServices();
+                        fetchServices();
                         setDeleteDialogOpen(false);
                         setServiceToDelete(null);
                     },
@@ -111,14 +120,44 @@ const ServicesTable = () => {
 
     const handleApplyFilters = (filters: GetServicesParams) => {
         setCurrentFilters(filters);
-        // Apply filters to trainer services
-        fetchTrainerServices(filters);
+        fetchServices(filters);
+    };
+
+    const getPageTitle = () => {
+        if (isTrainer) return "Mis Servicios";
+        if (isClient) return "Mis Servicios Contratados";
+        return "Servicios";
+    };
+
+    const getEmptyStateMessage = () => {
+        if (isTrainer) {
+            return {
+                title: "No tienes servicios creados",
+                description: "Crea tu primer servicio para empezar a recibir clientes",
+                buttonText: "Crear Servicio",
+                buttonAction: handleCreateService,
+            };
+        }
+        if (isClient) {
+            return {
+                title: "Todavía no estás anotado en ningún servicio",
+                description: "Busca un servicio para anotarte",
+                buttonText: "Buscar Servicios",
+                buttonAction: () => navigate("/"),
+            };
+        }
+        return {
+            title: "No hay servicios disponibles",
+            description: "No se encontraron servicios",
+            buttonText: "Buscar Servicios",
+            buttonAction: () => navigate("/"),
+        };
     };
 
     return (
         <section>
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">Mis Servicios</h1>
+                <h1 className="text-2xl font-bold">{getPageTitle()}</h1>
                 {isTrainer && (
                     <Button
                         onClick={handleCreateService}
@@ -143,31 +182,18 @@ const ServicesTable = () => {
                         <Archive className="size-16 mx-auto" />
                     </div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">
-                        {isTrainer
-                            ? "No tienes servicios creados"
-                            : "Todavía no estas anotado en ningún servicio"}
+                        {getEmptyStateMessage().title}
                     </h3>
                     <p className="text-gray-500 mb-6">
-                        {isTrainer
-                            ? "Crea tu primer servicio para empezar a recibir clientes"
-                            : "Busca un servicio para anotarte"}
+                        {getEmptyStateMessage().description}
                     </p>
-                    {isTrainer ? (
-                        <Button
-                            onClick={handleCreateService}
-                            className="flex items-center gap-2"
-                        >
-                            <Plus className="size-4" />
-                            Crear Servicio
-                        </Button>
-                    ) : (
-                        <Button
-                            onClick={() => navigate("/")}
-                            className="flex items-center gap-2"
-                        >
-                            Buscar Servicios
-                        </Button>
-                    )}
+                    <Button
+                        onClick={getEmptyStateMessage().buttonAction}
+                        className="flex items-center gap-2"
+                    >
+                        {isTrainer && <Plus className="size-4" />}
+                        {getEmptyStateMessage().buttonText}
+                    </Button>
                 </div>
             ) : (
                 <Table>
@@ -184,12 +210,12 @@ const ServicesTable = () => {
                             </TableRow>
                         ) : (
                             <TableRow>
-                                <TableHead>Nombre</TableHead>
+                                <TableHead>Entrenador</TableHead>
                                 <TableHead className="w-[300px]">Servicio</TableHead>
                                 <TableHead>Precio</TableHead>
                                 <TableHead>Modalidad</TableHead>
                                 <TableHead>Duración</TableHead>
-                                <TableHead>Archivos</TableHead>
+                                <TableHead>Evaluación</TableHead>
                                 <TableHead>Acciones</TableHead>
                             </TableRow>
                         )}
@@ -302,8 +328,7 @@ const ServicesTable = () => {
                             : services.map((service: Service, index) => (
                                   <TableRow key={index}>
                                       <TableCell className="overflow-hidden text-ellipsis px-4">
-                                          {/* Placeholder for trainer name - would need to be fetched separately */}
-                                          "Trainer Name"
+                                          {service.trainerName}
                                       </TableCell>
                                       <TableCell className="max-w-[300px] overflow-hidden text-ellipsis px-4">
                                           {service.category}
@@ -321,21 +346,34 @@ const ServicesTable = () => {
                                       </TableCell>
                                       <TableCell className="px-4">
                                           <div className="flex items-center gap-1">
-                                              <Archive className="size-4" />
-                                              {/* Placeholder for files count - not in current Service model */}
-                                              (0)
+                                              <Star className="size-4 text-yellow-400 fill-yellow-400" />
+                                              <span>
+                                                  {service.rating.toFixed(1)} (
+                                                  {service.totalReviews})
+                                              </span>
                                           </div>
                                       </TableCell>
                                       <TableCell className="px-4">
                                           <div className="flex items-center gap-2">
-                                              <Button variant="ghost" size="icon">
+                                              <Button
+                                                  variant="ghost"
+                                                  size="icon"
+                                                  onClick={() =>
+                                                      handleViewService(service.id)
+                                                  }
+                                              >
                                                   <Eye className="size-4" />
                                               </Button>
-                                              <Button variant="ghost" size="icon">
+                                              <Button
+                                                  variant="ghost"
+                                                  size="icon"
+                                                  onClick={() =>
+                                                      navigate(
+                                                          `/trainer-evaluations/${service.trainerId}`
+                                                      )
+                                                  }
+                                              >
                                                   <Star className="size-4" />
-                                              </Button>
-                                              <Button variant="ghost" size="icon">
-                                                  <Ban className="size-4" />
                                               </Button>
                                           </div>
                                       </TableCell>

@@ -111,11 +111,95 @@ export class ServicesService {
                     visualizations: service.visualizations,
                     clients: clients,
                     trainerId: trainer?._id || new Types.ObjectId(),
+                    files: [],
                 };
             })
         );
 
         return servicesWithStats;
+    }
+
+    async getClientServices(clientId: string): Promise<GetServicesResponseDTO[]> {
+        // Get all hirings for this client with populated service data
+        const hirings = await Hiring.find({
+            clientId: new Types.ObjectId(clientId),
+        }).populate({
+            path: "serviceId",
+            select: "category description duration price mode zone language availability trainerId visualizations isActive",
+            populate: {
+                path: "trainerId",
+                select: "name surname avatar",
+            },
+        });
+
+        if (hirings.length === 0) {
+            return [];
+        }
+
+        // Get unique services (in case user hired the same service multiple times)
+        const uniqueServiceIds = [
+            ...new Set(hirings.map((hiring: any) => hiring.serviceId._id.toString())),
+        ];
+
+        // Get statistics for each unique service
+        const servicesWithStats = await Promise.all(
+            uniqueServiceIds.map(async (serviceId: string) => {
+                const hiring = hirings.find(
+                    (h: any) => h.serviceId._id.toString() === serviceId
+                );
+
+                if (!hiring) return null;
+
+                const service = hiring.serviceId as any;
+                const trainer = service.trainerId as any;
+
+                const pendings = await Hiring.countDocuments({
+                    serviceId: new Types.ObjectId(serviceId),
+                    status: "pending",
+                });
+
+                const totalReviews = await Review.countDocuments({
+                    serviceId: new Types.ObjectId(serviceId),
+                });
+
+                const ratingResult = await Review.aggregate([
+                    { $match: { serviceId: new Types.ObjectId(serviceId) } },
+                    { $group: { _id: null, average: { $avg: "$calification" } } },
+                ]);
+
+                const clients = await Hiring.countDocuments({
+                    serviceId: new Types.ObjectId(serviceId),
+                });
+
+                return {
+                    id: service._id,
+                    trainerName: `${trainer?.name || ""} ${
+                        trainer?.surname || ""
+                    }`.trim(),
+                    category: service.category,
+                    description: service.description,
+                    duration: service.duration,
+                    price: service.price,
+                    mode: service.mode,
+                    zone: service.zone,
+                    language: service.language,
+                    availability: service.availability || [],
+                    trainerImage: trainer?.avatar || "",
+                    rating: ratingResult[0]?.average || 0,
+                    pendings: pendings,
+                    totalReviews: totalReviews,
+                    visualizations: service.visualizations || 0,
+                    clients: clients,
+                    trainerId: trainer?._id || new Types.ObjectId(),
+                    files: [],
+                };
+            })
+        );
+
+        // Filter out any null results and return
+        return servicesWithStats.filter(
+            (service) => service !== null
+        ) as GetServicesResponseDTO[];
     }
 
     async getServiceById(id: string): Promise<GetServicesResponseDTO> {
@@ -166,6 +250,7 @@ export class ServicesService {
             visualizations: service.visualizations,
             clients: clients,
             trainerId: trainer?._id || new Types.ObjectId(),
+            files: [],
         };
     }
 
@@ -267,6 +352,7 @@ export class ServicesService {
                     visualizations: service.visualizations,
                     clients: clients,
                     trainerId: trainer?._id || new Types.ObjectId(),
+                    files: [],
                 };
             })
         );

@@ -37,6 +37,9 @@ export class ServicesController {
 
     getServices = async (req: Request, res: Response): Promise<void> => {
         try {
+            const authenticatedReq = req as AuthenticatedRequest;
+            const user = authenticatedReq.user;
+
             // Convert query params to the correct types
             const params: GetServicesParams = {
                 category: req.query.category as string | undefined,
@@ -54,7 +57,16 @@ export class ServicesController {
                 search: req.query.search as string | undefined,
             };
 
-            const services = await this.servicesService.getServices(params);
+            let services;
+
+            // If user is authenticated and is a client, return their hired services
+            // Otherwise, return all services with filters
+            if (user && user.role === "cliente") {
+                services = await this.servicesService.getClientServices(user.id);
+            } else {
+                services = await this.servicesService.getServices(params);
+            }
+
             res.status(200).json(services);
         } catch (error) {
             res.status(400).json({
