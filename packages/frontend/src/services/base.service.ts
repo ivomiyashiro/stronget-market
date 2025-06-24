@@ -59,14 +59,17 @@ export class BaseService {
      * Core request method
      */
     private async request<T>(method: string, url: string, data?: unknown): Promise<T> {
-        const headers: Record<string, string> = { ...this.defaultHeaders } as Record<string, string>;
-        
+        const headers: Record<string, string> = { ...this.defaultHeaders } as Record<
+            string,
+            string
+        >;
+
         // Add authorization header if token exists
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (token) {
             headers.Authorization = `Bearer ${token}`;
         }
-        
+
         const options: RequestInit = {
             method,
             headers,
