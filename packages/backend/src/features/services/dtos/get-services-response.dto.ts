@@ -1,23 +1,24 @@
 import { Types } from "mongoose";
 
 export type GetServicesResponseDTO = {
-  id: Types.ObjectId;
-  category: string;
-  description: string;
-  duration: number;
-  price: number;
-  mode: "online" | "in-person";
-  zone: string;
-  language: string;
-  availability: {
-    day: string;
-    startTime: string;
-  }[];
-  trainerImage: string;
-  rating: number;
-  pendings: number;
-  totalReviews: number;
-  visualizations: number;
-  clients: number;
-  trainerId: Types.ObjectId;
+    id: Types.ObjectId;
+    trainerName: string;
+    category: string;
+    description: string;
+    duration: number;
+    price: number;
+    mode: "online" | "in-person";
+    zone: string;
+    language: string;
+    availability: {
+        day: string;
+        startTime: string;
+    }[];
+    trainerImage: string;
+    rating: number;
+    pendings: number;
+    totalReviews: number;
+    visualizations: number;
+    clients: number;
+    trainerId: Types.ObjectId;
 };

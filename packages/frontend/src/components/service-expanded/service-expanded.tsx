@@ -18,7 +18,6 @@ import {
 } from "@/store/services/services.hooks";
 import { useDispatch } from "react-redux";
 import { getServiceById } from "@/store/services/services.thunks";
-import { getTrainerById } from "@/store/trainer/trainer.thunks";
 import type { AppDispatch } from "@/store/store";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "@/store/auth/auth.hooks";
@@ -26,7 +25,7 @@ import { useCurrentTrainer } from "@/store/trainer/trainer.hooks";
 
 const ServiceExpanded = () => {
   const { id } = useParams();
-  const service = useCurrentService();
+  const service = useCurrentService(); 
   const isLoading = useServicesLoading();
   const dispatch = useDispatch<AppDispatch>();
   const [selectedDay, setSelectedDay] = useState("");
@@ -39,12 +38,6 @@ const ServiceExpanded = () => {
       dispatch(getServiceById(id));
     }
   }, [id, dispatch]);
-
-  useEffect(() => {
-    if (service?.trainerId) {
-      dispatch(getTrainerById({ id: service.trainerId }));
-    }
-  }, [service?.trainerId, dispatch]);
 
   const availableDays = service?.availability
     ? [...new Set(service.availability.map((av) => av.day))]
@@ -98,7 +91,7 @@ const ServiceExpanded = () => {
                 </div>
                 <div>
                   <h1 className="text-xl font-semibold">
-                    {trainer?.name || "Entrenador"}
+                    {service.trainerName || "Entrenador"}
                   </h1>
                   <div className="flex flex-wrap gap-2 mt-1">
                     <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">
@@ -246,7 +239,7 @@ const ServiceExpanded = () => {
                 </Button>
               </div>
             ) : (
-              <div className="flex flex-col gap-4 border rounded-lg p-6 flex-col gap-4 bg-card">
+              <div className="flex flex-col gap-4 border rounded-lg p-6 bg-card">
                 <div className="flex flex-row gap-2">
                   <Check className="size-10 text-green-500" />
                   <p className="text-lg">

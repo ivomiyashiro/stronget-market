@@ -71,6 +71,7 @@ export class ServicesService {
 
                 return {
                     id: service._id,
+                    trainerName: `${trainer?.name} ${trainer?.surname}`,
                     category: service.category,
                     description: service.description,
                     duration: service.duration,
@@ -125,6 +126,7 @@ export class ServicesService {
 
         return {
             id: service._id,
+            trainerName: `${trainer?.name} ${trainer?.surname}`,
             category: service.category,
             description: service.description,
             duration: service.duration,
@@ -201,6 +203,7 @@ export class ServicesService {
 
                 return {
                     id: service._id,
+                    trainerName: `${trainer?.name} ${trainer?.surname}`,
                     category: service.category,
                     description: service.description,
                     duration: service.duration,

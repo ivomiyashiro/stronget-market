@@ -52,7 +52,7 @@ export class ServicesController {
                 language: req.query.language as string | undefined,
                 mode: req.query.mode as "online" | "in-person" | undefined,
             };
-            console.log(req.query.language);
+
             const services = await this.servicesService.getServices(params);
             res.status(200).json(services);
         } catch (error) {

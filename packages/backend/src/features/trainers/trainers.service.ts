@@ -1,53 +1,43 @@
-import { Types } from "mongoose";
-import Trainer from "./trainers.model";
-import {
-    GetTrainerResponseDTO,
-    GetTrainerStatisticsResponseDTO,
-    GetTrainerNotificationResponse,
-} from "./dtos";
+import { GetTrainerStatisticsResponseDTO, GetTrainerNotificationResponse } from "./dtos";
+
+import User from "../user/user.model";
+import Service from "../services/services.model";
+import Hiring from "../hiring/hiring.model";
 
 export class TrainersService {
-    async getTrainerById(id: string): Promise<GetTrainerResponseDTO | null> {
-        const trainer = await Trainer.findById(id);
-        if (!trainer) return null;
-        return {
-            id: trainer._id,
-            name: trainer.name,
-            surname: trainer.surname,
-            specialty: trainer.specialty,
-            experience: trainer.experience,
-            averageCalification: trainer.averageCalification,
-            profileImage: trainer.profileImage || "",
-        };
-    }
-
     async getTrainerStatistics(
         id: string
     ): Promise<GetTrainerStatisticsResponseDTO | null> {
-        const trainer = await Trainer.findById(id);
+        const trainer = await User.findById(id);
+        const services = await Service.find({ trainerId: id });
+        const clients = await Hiring.find({ trainerId: id });
+
         if (!trainer) return null;
+
         return {
-            totalServices: trainer.totalServices,
-            totalClients: trainer.totalClients,
-            visits: trainer.visits,
-            averageRating: trainer.averageRating,
-            performance: trainer.performance,
+            totalServices: services.length,
+            totalClients: clients.length,
+            visits: services.reduce((acc, service) => acc + service.visualizations, 0),
+            averageRating: 0,
+            performance: clients.length / services.length,
         };
     }
 
     async getTrainerNotifications(id: string): Promise<GetTrainerNotificationResponse[]> {
-        const trainer = await Trainer.findById(id);
-        if (!trainer) return [];
-        return trainer.notifications.map((n: any) => ({
-            id: n._id,
-            message: n.message,
-            leido: n.leido,
-            date: n.date,
+        const user = await User.findById(id);
+
+        if (!user || !user.notifications) return [];
+
+        return user.notifications.map((notification) => ({
+            id: notification._id,
+            message: notification.message,
+            leido: notification.leido,
+            date: notification.date,
         }));
     }
 
     async updateSeenNotifications(id: string): Promise<void> {
-        await Trainer.updateMany(
+        await User.updateMany(
             { _id: id, "notifications.leido": false },
             { $set: { "notifications.$.leido": true } }
         );

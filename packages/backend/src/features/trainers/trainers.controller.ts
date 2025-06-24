@@ -1,6 +1,15 @@
 import { Request, Response } from "express";
 import { TrainersService } from "./trainers.service";
 
+// Type extension for authenticated requests
+interface AuthenticatedRequest extends Request {
+    user?: {
+        id: string;
+        email: string;
+        role: string;
+    };
+}
+
 export class TrainersController {
     private trainersService: TrainersService;
 
@@ -8,25 +17,22 @@ export class TrainersController {
         this.trainersService = new TrainersService();
     }
 
-    getTrainerById = async (req: Request, res: Response): Promise<void> => {
+    getTrainerStatistics = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ): Promise<void> => {
         try {
             const { id } = req.params;
-            const trainer = await this.trainersService.getTrainerById(id);
-            if (!trainer) {
-                res.status(404).json({ message: "Trainer not found" });
+            const userId = req.user?.id;
+
+            // Only allow trainers to access their own statistics
+            if (userId !== id) {
+                res.status(403).json({
+                    message: "Access denied. You can only view your own statistics.",
+                });
                 return;
             }
-            res.status(200).json(trainer);
-        } catch (error) {
-            res.status(400).json({
-                message: error instanceof Error ? error.message : "Get trainer failed",
-            });
-        }
-    };
 
-    getTrainerStatistics = async (req: Request, res: Response): Promise<void> => {
-        try {
-            const { id } = req.params;
             const stats = await this.trainersService.getTrainerStatistics(id);
             if (!stats) {
                 res.status(404).json({ message: "Trainer not found" });
@@ -40,9 +46,22 @@ export class TrainersController {
         }
     };
 
-    getTrainerNotifications = async (req: Request, res: Response): Promise<void> => {
+    getTrainerNotifications = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ): Promise<void> => {
         try {
             const { id } = req.params;
+            const userId = req.user?.id;
+
+            // Only allow trainers to access their own notifications
+            if (userId !== id) {
+                res.status(403).json({
+                    message: "Access denied. You can only view your own notifications.",
+                });
+                return;
+            }
+
             const notifications = await this.trainersService.getTrainerNotifications(id);
             res.status(200).json(notifications);
         } catch (error) {
@@ -53,9 +72,22 @@ export class TrainersController {
         }
     };
 
-    updateSeenNotifications = async (req: Request, res: Response): Promise<void> => {
+    updateSeenNotifications = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ): Promise<void> => {
         try {
             const { id } = req.params;
+            const userId = req.user?.id;
+
+            // Only allow trainers to update their own notifications
+            if (userId !== id) {
+                res.status(403).json({
+                    message: "Access denied. You can only update your own notifications.",
+                });
+                return;
+            }
+
             await this.trainersService.updateSeenNotifications(id);
             res.status(200).json({ message: "Notifications marked as seen" });
         } catch (error) {

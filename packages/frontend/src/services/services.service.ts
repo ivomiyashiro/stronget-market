@@ -16,6 +16,7 @@ export interface CreateServiceRequest {
 
 export interface Service {
   id: string;
+  trainerName: string;
   category: string;
   description: string;
   duration: number;
