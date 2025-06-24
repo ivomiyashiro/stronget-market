@@ -1,6 +1,6 @@
 import { Label } from "@radix-ui/react-label";
 import { BellRing, Dumbbell, Menu, ShoppingCart } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/store/auth/auth.hooks";
 import { Button } from "../ui/button";
 import {
@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Header = () => {
     const { isAuthenticated, logoutUser, user } = useAuth();
-
+    const navigate = useNavigate();
     const handleLogout = () => {
         logoutUser();
     };
@@ -63,7 +63,7 @@ const Header = () => {
                                 Notificaciones
                             </Button>
                         ) : (
-                            <Button variant="secondary">
+                            <Button variant="secondary" onClick={() => navigate("/cart")}>
                                 <ShoppingCart className="size-4" />
                                 Carrito
                             </Button>
@@ -93,11 +93,15 @@ const Header = () => {
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 {user?.role === "entrenador" && (
-                                    <DropdownMenuItem className="cursor-pointer">
-                                        <Link to="/create-service">Crear Servicio</Link>
-                                    </DropdownMenuItem>
+                                    <>
+                                        <DropdownMenuItem className="cursor-pointer">
+                                            <Link to="/create-service">
+                                                Crear Servicio
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                    </>
                                 )}
-                                <DropdownMenuSeparator />
                                 <DropdownMenuItem
                                     onClick={handleLogout}
                                     className="cursor-pointer"

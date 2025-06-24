@@ -9,12 +9,13 @@ export class HiringService {
         clientId: string,
         hiringData: CreateHiringRequestDTO
     ): Promise<CreateHiringResponseDTO> {
-        // Validate booking date is in the future
-        const bookingDate = new Date(hiringData.date);
+        // Validate booking time is in the future (at least 2 hours from now)
         const now = new Date();
-        const minBookingTime = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours minimum advance booking
+        const minBookingTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
 
-        if (bookingDate <= minBookingTime) {
+        // Parse the day and time to validate it's not in the immediate past
+        const requestedDateTime = this.parseDateTime(hiringData.day, hiringData.time);
+        if (requestedDateTime <= minBookingTime) {
             throw new Error("Booking must be at least 2 hours in advance");
         }
 
@@ -38,10 +39,11 @@ export class HiringService {
             throw new Error("Trainer not found");
         }
 
-        // Check trainer availability for the requested date/time
+        // Check trainer availability for the requested day/time slot
         await this.validateTrainerAvailability(
             (service.trainerId as any)._id.toString(),
-            bookingDate,
+            hiringData.day,
+            hiringData.time,
             service.duration
         );
 
@@ -61,9 +63,7 @@ export class HiringService {
 
         // Add notification to trainer about new booking request
         trainer.notifications?.push({
-            message: `New booking request for your ${
-                service.category
-            } service on ${bookingDate.toLocaleDateString()}`,
+            message: `New booking request for your ${service.category} service on ${hiringData.day} at ${hiringData.time}`,
             leido: false,
             date: new Date(),
         } as any);
@@ -77,7 +77,8 @@ export class HiringService {
         return {
             id: (populatedHiring as any)._id.toString(),
             serviceId: (populatedHiring as any).serviceId.toString(),
-            date: (populatedHiring as any).date,
+            day: (populatedHiring as any).day,
+            time: (populatedHiring as any).time,
             client: {
                 id: (populatedHiring as any).clientId._id.toString(),
                 name: (populatedHiring as any).clientId.name,
@@ -89,48 +90,85 @@ export class HiringService {
         };
     }
 
+    private parseDateTime(day: string, time: string): Date {
+        // Parse day (e.g., "Monday", "Tuesday", etc.) and time (e.g., "14:30")
+        const today = new Date();
+        const dayNames = [
+            "Domingo",
+            "Lunes",
+            "Martes",
+            "Miercoles",
+            "Jueves",
+            "Viernes",
+            "Sabado",
+        ];
+        const targetDayIndex = dayNames.indexOf(day);
+
+        if (targetDayIndex === -1) {
+            throw new Error("Día inválido");
+        }
+
+        // Find the next occurrence of this day
+        const todayIndex = today.getDay();
+        let daysToAdd = targetDayIndex - todayIndex;
+        if (daysToAdd <= 0) {
+            daysToAdd += 7; // Next week
+        }
+
+        const targetDate = new Date(today);
+        targetDate.setDate(today.getDate() + daysToAdd);
+
+        // Parse time
+        const [hours, minutes] = time.split(":").map(Number);
+        if (isNaN(hours) || isNaN(minutes)) {
+            throw new Error("Formato de hora inválido");
+        }
+
+        targetDate.setHours(hours, minutes, 0, 0);
+        return targetDate;
+    }
+
     private async validateTrainerAvailability(
         trainerId: string,
-        requestedDate: Date,
+        day: string,
+        time: string,
         serviceDuration: number
     ): Promise<void> {
-        const requestedStart = new Date(requestedDate);
-        const requestedEnd = new Date(
-            requestedStart.getTime() + serviceDuration * 60 * 1000
-        );
+        // Parse the requested time
+        const [requestedHours, requestedMinutes] = time.split(":").map(Number);
+        if (isNaN(requestedHours) || isNaN(requestedMinutes)) {
+            throw new Error("Formato de hora inválido");
+        }
 
-        // Find all confirmed or pending bookings for this trainer on the same day
-        const startOfDay = new Date(requestedStart);
-        startOfDay.setHours(0, 0, 0, 0);
+        const requestedStartMinutes = requestedHours * 60 + requestedMinutes;
+        const requestedEndMinutes = requestedStartMinutes + serviceDuration;
 
-        const endOfDay = new Date(requestedStart);
-        endOfDay.setHours(23, 59, 59, 999);
-
+        // Find all confirmed or pending bookings for this trainer on the same day of the week
         const existingBookings = await Hiring.find({
             trainerId: new Types.ObjectId(trainerId),
-            date: {
-                $gte: startOfDay,
-                $lte: endOfDay,
-            },
+            day: day,
             status: { $in: ["pending", "confirmed"] },
         }).populate("serviceId", "duration");
 
-        // Check for time conflicts
+        // Check for time conflicts with existing bookings
         for (const booking of existingBookings) {
-            const bookingStart = new Date(booking.date);
-            const bookingEnd = new Date(
-                bookingStart.getTime() + (booking.serviceId as any).duration * 60 * 1000
-            );
+            const [bookingHours, bookingMinutes] = booking.time.split(":").map(Number);
+            const bookingStartMinutes = bookingHours * 60 + bookingMinutes;
+            const bookingEndMinutes =
+                bookingStartMinutes + (booking.serviceId as any).duration;
 
             // Check if there's any overlap
             const hasOverlap =
-                (requestedStart >= bookingStart && requestedStart < bookingEnd) ||
-                (requestedEnd > bookingStart && requestedEnd <= bookingEnd) ||
-                (requestedStart <= bookingStart && requestedEnd >= bookingEnd);
+                (requestedStartMinutes >= bookingStartMinutes &&
+                    requestedStartMinutes < bookingEndMinutes) ||
+                (requestedEndMinutes > bookingStartMinutes &&
+                    requestedEndMinutes <= bookingEndMinutes) ||
+                (requestedStartMinutes <= bookingStartMinutes &&
+                    requestedEndMinutes >= bookingEndMinutes);
 
             if (hasOverlap) {
                 throw new Error(
-                    `Trainer is not available at ${requestedStart.toLocaleString()}. Please choose a different time.`
+                    `El entrenador no está disponible el ${day} a las ${time}. El horario ya está ocupado.`
                 );
             }
         }
@@ -140,14 +178,14 @@ export class HiringService {
         return Hiring.find({ clientId: new Types.ObjectId(clientId) })
             .populate("serviceId", "category description duration price")
             .populate("trainerId", "name surname profileImage")
-            .sort({ date: -1 });
+            .sort({ day: 1, time: 1 });
     }
 
     async getHiringsByTrainerId(trainerId: string) {
         return Hiring.find({ trainerId: new Types.ObjectId(trainerId) })
             .populate("serviceId", "category description duration price")
             .populate("clientId", "name surname profileImage")
-            .sort({ date: -1 });
+            .sort({ day: 1, time: 1 });
     }
 
     async getHiringById(id: string) {
@@ -217,7 +255,8 @@ export class HiringService {
             if (service) {
                 await this.validateTrainerAvailability(
                     hiring.trainerId.toString(),
-                    hiring.date,
+                    hiring.day,
+                    hiring.time,
                     service.duration
                 );
             }
@@ -252,61 +291,49 @@ export class HiringService {
         return this.updateHiringStatus(id, "confirmed", trainerId);
     }
 
-    async getTrainerAvailableSlots(trainerId: string, date: string) {
-        const targetDate = new Date(date);
-        const startOfDay = new Date(targetDate);
-        startOfDay.setHours(0, 0, 0, 0);
-
-        const endOfDay = new Date(targetDate);
-        endOfDay.setHours(23, 59, 59, 999);
-
-        // Get all bookings for this trainer on this date
+    async getTrainerAvailableSlots(trainerId: string, day: string) {
+        // Get all bookings for this trainer on this day of the week
         const bookings = await Hiring.find({
             trainerId: new Types.ObjectId(trainerId),
-            date: {
-                $gte: startOfDay,
-                $lte: endOfDay,
-            },
+            day: day,
             status: { $in: ["pending", "confirmed"] },
         })
             .populate("serviceId", "duration")
-            .sort({ date: 1 });
+            .sort({ time: 1 });
 
-        // Generate available slots (assuming 9 AM to 9 PM working hours)
-        const workStart = new Date(targetDate);
-        workStart.setHours(9, 0, 0, 0);
+        // Generate available time slots (assuming 9 AM to 9 PM working hours)
+        const workStartHour = 9;
+        const workEndHour = 21;
+        const slotDurationMinutes = 60; // 1 hour slots
 
-        const workEnd = new Date(targetDate);
-        workEnd.setHours(21, 0, 0, 0);
+        const availableSlots: string[] = [];
 
-        const availableSlots: Date[] = [];
-        const slotDuration = 60; // 1 hour slots
-
-        for (
-            let time = new Date(workStart);
-            time < workEnd;
-            time.setTime(time.getTime() + slotDuration * 60 * 1000)
-        ) {
-            const slotStart = new Date(time);
-            const slotEnd = new Date(time.getTime() + slotDuration * 60 * 1000);
+        for (let hour = workStartHour; hour < workEndHour; hour++) {
+            const timeSlot = `${hour.toString().padStart(2, "0")}:00`;
+            const slotStartMinutes = hour * 60;
+            const slotEndMinutes = slotStartMinutes + slotDurationMinutes;
 
             // Check if this slot conflicts with any booking
             const hasConflict = bookings.some((booking) => {
-                const bookingStart = new Date(booking.date);
-                const bookingEnd = new Date(
-                    bookingStart.getTime() +
-                        (booking.serviceId as any).duration * 60 * 1000
-                );
+                const [bookingHours, bookingMinutes] = booking.time
+                    .split(":")
+                    .map(Number);
+                const bookingStartMinutes = bookingHours * 60 + bookingMinutes;
+                const bookingEndMinutes =
+                    bookingStartMinutes + (booking.serviceId as any).duration;
 
                 return (
-                    (slotStart >= bookingStart && slotStart < bookingEnd) ||
-                    (slotEnd > bookingStart && slotEnd <= bookingEnd) ||
-                    (slotStart <= bookingStart && slotEnd >= bookingEnd)
+                    (slotStartMinutes >= bookingStartMinutes &&
+                        slotStartMinutes < bookingEndMinutes) ||
+                    (slotEndMinutes > bookingStartMinutes &&
+                        slotEndMinutes <= bookingEndMinutes) ||
+                    (slotStartMinutes <= bookingStartMinutes &&
+                        slotEndMinutes >= bookingEndMinutes)
                 );
             });
 
             if (!hasConflict) {
-                availableSlots.push(new Date(slotStart));
+                availableSlots.push(timeSlot);
             }
         }
 
@@ -316,7 +343,8 @@ export class HiringService {
     async canBookService(
         clientId: string,
         serviceId: string,
-        date: Date
+        day: string,
+        time: string
     ): Promise<{ canBook: boolean; reason?: string }> {
         try {
             // Check if service exists and is active
@@ -337,20 +365,49 @@ export class HiringService {
                 return { canBook: false, reason: "You cannot book your own service" };
             }
 
-            // Check date validity
+            // Validate day and time format
+            const dayNames = [
+                "Domingo",
+                "Lunes",
+                "Martes",
+                "Miercoles",
+                "Jueves",
+                "Viernes",
+                "Sabado",
+            ];
+            if (!dayNames.includes(day)) {
+                return { canBook: false, reason: "Día inválido" };
+            }
+
+            const [hours, minutes] = time.split(":").map(Number);
+            if (
+                isNaN(hours) ||
+                isNaN(minutes) ||
+                hours < 0 ||
+                hours > 23 ||
+                minutes < 0 ||
+                minutes > 59
+            ) {
+                return { canBook: false, reason: "Formato de hora inválido" };
+            }
+
+            // Check if the requested time is at least 2 hours from now
+            const requestedDateTime = this.parseDateTime(day, time);
             const now = new Date();
             const minBookingTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
-            if (date <= minBookingTime) {
+
+            if (requestedDateTime <= minBookingTime) {
                 return {
                     canBook: false,
-                    reason: "Booking must be at least 2 hours in advance",
+                    reason: "La reserva debe ser como mínimo 2 horas en adelante",
                 };
             }
 
-            // Check trainer availability
+            // Check trainer availability for this day/time slot
             await this.validateTrainerAvailability(
                 (service.trainerId as any)._id.toString(),
-                date,
+                day,
+                time,
                 service.duration
             );
 
@@ -359,7 +416,9 @@ export class HiringService {
             return {
                 canBook: false,
                 reason:
-                    error instanceof Error ? error.message : "Booking validation failed",
+                    error instanceof Error
+                        ? error.message
+                        : "Validación de reserva falló",
             };
         }
     }

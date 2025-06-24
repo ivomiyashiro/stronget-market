@@ -1,24 +1,26 @@
 export type CreateHiringRequestDTO = {
     serviceId: string;
-    date: Date;
+    day: string;
+    time: string;
     payment: {
         name: string;
         cardNumber: string;
         expiry: string;
         cvv: string;
-    }
+    };
 };
 
 export type CreateHiringResponseDTO = {
     id: string;
     serviceId: string;
-    date: Date;
+    day: string;
+    time: string;
     client: {
         id: string;
         name: string;
-    },
+    };
     trainer: {
         id: string;
         name: string;
-    }
-}
+    };
+};

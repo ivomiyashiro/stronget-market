@@ -2,21 +2,24 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/store/auth/auth.hooks";
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
-  redirectTo?: string;
+    children: React.ReactNode;
+    redirectTo?: string;
+    allowedRoles?: "entrenador" | "both" | "cliente";
 }
 
 const ProtectedRoute = ({
-  children,
-  redirectTo = "/login",
+    children,
+    redirectTo = "/login",
+    allowedRoles = "cliente",
 }: ProtectedRouteProps) => {
-  const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated } = useAuth();
+    const isAllowed = allowedRoles === "both" ? true : user?.role === allowedRoles;
 
-  if (!isAuthenticated || user?.role === "cliente") {
-    return <Navigate to={redirectTo} replace />;
-  }
+    if (!isAuthenticated || !isAllowed) {
+        return <Navigate to={redirectTo} replace />;
+    }
 
-  return <>{children}</>;
+    return <>{children}</>;
 };
 
 export default ProtectedRoute;

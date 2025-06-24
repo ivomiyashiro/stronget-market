@@ -3,68 +3,57 @@ import { z } from "zod";
 // Custom validator for MongoDB ObjectId
 const objectIdRegex = /^[0-9a-fA-F]{24}$/;
 const objectId = z.string().refine((val) => objectIdRegex.test(val), {
-  message: "Invalid ObjectId format",
+    message: "Fecha inválida",
 });
 
 // Custom validator for credit card number (basic)
 const cardNumberRegex = /^\d{16}$/;
 const cardNumber = z
-  .string()
-  .refine((val) => cardNumberRegex.test(val.replace(/\s/g, "")), {
-    message: "Invalid card number format",
-  });
-
-// Custom validator for expiry date (MM/YY)
-const expiryRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
-const expiry = z.string().refine((val) => expiryRegex.test(val), {
-  message: "Invalid expiry format (MM/YY)",
-});
+    .string()
+    .refine((val) => cardNumberRegex.test(val.replace(/\s/g, "")), {
+        message: "Número de tarjeta inválido",
+    });
 
 // Custom validator for CVV
 const cvvRegex = /^\d{3,4}$/;
 const cvv = z.string().refine((val) => cvvRegex.test(val), {
-  message: "Invalid CVV format",
+    message: "CVV inválido",
 });
 
 export const createHiringSchema = z.object({
-  serviceId: objectId,
-  date: z
-    .string()
-    .refine((val) => !isNaN(Date.parse(val)), {
-      message: "Invalid date format",
-    })
-    .refine(
-      (val) => {
-        const date = new Date(val);
-        const now = new Date();
-        const minBookingTime = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours minimum
-        return date > minBookingTime;
-      },
-      {
-        message: "Booking must be at least 2 hours in advance",
-      }
-    )
-    .transform((val) => new Date(val)),
-  payment: z.object({
-    name: z.string().min(2, "Cardholder name must be at least 2 characters"),
-    cardNumber: cardNumber,
-    expiry: expiry,
-    cvv: cvv,
-  }),
+    serviceId: objectId,
+    day: z.enum(
+        ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+        {
+            errorMap: () => ({ message: "Día inválido" }),
+        }
+    ),
+    time: z.string().refine((val) => /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(val), {
+        message: "Formato de hora inválido (HH:MM)",
+    }),
+    payment: z.object({
+        name: z.string().min(2, "El nombre del titular debe tener al menos 2 caracteres"),
+        cardNumber: cardNumber,
+        expiry: z
+            .string()
+            .min(5, "La fecha de expiración debe tener al menos 5 caracteres"),
+        cvv: cvv,
+    }),
 });
 
 export const updateHiringStatusSchema = z.object({
-  status: z.enum(["pending", "confirmed", "cancelled", "completed"], {
-    errorMap: () => ({
-      message: "Status must be one of: pending, confirmed, cancelled, completed",
+    status: z.enum(["pending", "confirmed", "cancelled", "completed"], {
+        errorMap: () => ({
+            message:
+                "El estado debe ser uno de: pending, confirmed, cancelled, completed",
+        }),
     }),
-  }),
 });
 
 export const hiringIdSchema = z.object({
-  id: objectId,
+    id: objectId,
 });
 
 export const trainerIdSchema = z.object({
-  trainerId: objectId,
+    trainerId: objectId,
 });

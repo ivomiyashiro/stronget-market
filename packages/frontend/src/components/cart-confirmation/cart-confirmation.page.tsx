@@ -16,17 +16,21 @@ import { useDispatch } from "react-redux";
 import { removeServiceFromCart } from "@/store/cart/cart.slice";
 import { Link, useNavigate } from "react-router-dom";
 import type { AppDispatch } from "@/store/store";
+import { hiringService, type CreateHiringRequest } from "@/services/hiring.service";
+import { toast } from "sonner";
 
 const CartConfirmationPage = () => {
     const cartService = useCartService();
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
+    const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [paymentData, setPaymentData] = useState({
         cardNumber: "",
         expiryDate: "",
         cvv: "",
         postalCode: "",
         country: "",
+        cardholderName: "",
     });
 
     const handleInputChange = (field: string, value: string) => {
@@ -53,9 +57,93 @@ const CartConfirmationPage = () => {
         navigate(-1);
     };
 
-    const handlePayment = () => {
-        // Handle payment logic here
-        console.log("Processing payment...", paymentData);
+    const handlePayment = async () => {
+        if (!cartService) {
+            toast.error("No hay servicio en el carrito");
+            return;
+        }
+
+        // Validate payment data
+        if (!paymentData.cardholderName.trim()) {
+            toast.error("Por favor ingresa el nombre del titular de la tarjeta");
+            return;
+        }
+
+        if (!paymentData.cardNumber.replace(/\s/g, "")) {
+            toast.error("Por favor ingresa el número de tarjeta");
+            return;
+        }
+
+        if (!paymentData.expiryDate) {
+            toast.error("Por favor ingresa la fecha de vencimiento");
+            return;
+        }
+
+        if (!paymentData.cvv) {
+            toast.error("Por favor ingresa el CVV");
+            return;
+        }
+
+        if (!paymentData.country) {
+            toast.error("Por favor selecciona un país");
+            return;
+        }
+
+        setIsProcessingPayment(true);
+
+        try {
+            // Create hiring request with day and time instead of date
+            const hiringRequest: CreateHiringRequest = {
+                serviceId: cartService.id,
+                day: cartService.selectedDay, // e.g., "Monday", "Tuesday", etc.
+                time: cartService.selectedTime, // e.g., "14:30"
+                payment: {
+                    name: paymentData.cardholderName,
+                    cardNumber: paymentData.cardNumber.replace(/\s/g, ""),
+                    expiry: paymentData.expiryDate,
+                    cvv: paymentData.cvv,
+                },
+            };
+
+            console.log("Creating hiring with data:", hiringRequest);
+
+            // Create the hiring
+            const hiring = await hiringService.createHiring(hiringRequest);
+            console.log("Hiring created successfully:", hiring);
+
+            // Clear cart
+            dispatch(removeServiceFromCart());
+
+            // Show success message
+            toast.success(
+                "¡Reserva creada exitosamente! El entrenador recibirá una notificación."
+            );
+
+            // Navigate to profile or hiring details
+            navigate("/my-services", { replace: true });
+        } catch (error: unknown) {
+            console.error("Error creating hiring:", error);
+
+            // Handle different types of errors
+            let errorMessage = "Error al procesar el pago. Intenta nuevamente.";
+
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            } else if (error && typeof error === "object" && "response" in error) {
+                const responseError = error as {
+                    response?: { data?: { message?: string } };
+                };
+                if (responseError.response?.data?.message) {
+                    errorMessage = responseError.response.data.message;
+                }
+            } else if (typeof error === "string") {
+                errorMessage = error;
+            }
+
+            toast.error(errorMessage);
+        } finally {
+            setIsProcessingPayment(false);
+        }
     };
 
     if (!cartService) {
@@ -106,6 +194,21 @@ const CartConfirmationPage = () => {
                             </div>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor="cardholderName">Nombre del titular</Label>
+                                <Input
+                                    id="cardholderName"
+                                    placeholder="Nombre del titular de la tarjeta"
+                                    value={paymentData.cardholderName}
+                                    onChange={(e) =>
+                                        handleInputChange(
+                                            "cardholderName",
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                            </div>
+
                             <div className="flex flex-col gap-2">
                                 <Label htmlFor="cardNumber">Número de tarjeta</Label>
                                 <Input
@@ -188,8 +291,11 @@ const CartConfirmationPage = () => {
                                 className="w-full bg-blue-600 hover:bg-blue-700"
                                 size="lg"
                                 onClick={handlePayment}
+                                disabled={isProcessingPayment}
                             >
-                                Contratar Servicio
+                                {isProcessingPayment
+                                    ? "Procesando..."
+                                    : "Contratar Servicio"}
                             </Button>
                         </CardContent>
                     </Card>
@@ -229,10 +335,7 @@ const CartConfirmationPage = () => {
 
                                 <div className="space-y-2">
                                     <div className="flex justify-between text-sm">
-                                        <span>
-                                            Asesoría personalizada en nutrición para
-                                            mejorar tu salud
-                                        </span>
+                                        <span>{cartService.description}</span>
                                         <span>${serviceTotal}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
@@ -292,6 +395,7 @@ const CartConfirmationPage = () => {
                                 variant="outline"
                                 className="w-full mt-4"
                                 onClick={handleRemoveFromCart}
+                                disabled={isProcessingPayment}
                             >
                                 Remover del Carrito
                             </Button>

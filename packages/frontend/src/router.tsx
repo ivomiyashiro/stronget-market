@@ -70,15 +70,17 @@ const router = createBrowserRouter([
             {
                 path: "service/:id",
                 element: (
-                    <Layout showHeader showFooter>
-                        <ServiceExpanded />
-                    </Layout>
+                    <ProtectedRoute allowedRoles="both">
+                        <Layout showHeader showFooter>
+                            <ServiceExpanded />
+                        </Layout>
+                    </ProtectedRoute>
                 ),
             },
             {
                 path: "create-service/:id?",
                 element: (
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles="entrenador">
                         <Layout showHeader showFooter>
                             <CreateService />
                         </Layout>
@@ -88,7 +90,7 @@ const router = createBrowserRouter([
             {
                 path: "profile/:id",
                 element: (
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles="both">
                         <Layout showHeader showFooter>
                             <Profile />
                         </Layout>
@@ -98,7 +100,7 @@ const router = createBrowserRouter([
             {
                 path: "my-services",
                 element: (
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles="both">
                         <Layout showHeader showFooter>
                             <ServicesTable />
                         </Layout>
@@ -108,7 +110,7 @@ const router = createBrowserRouter([
             {
                 path: "cart",
                 element: (
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles="both">
                         <Layout showHeader showFooter>
                             <CartConfirmationPage />
                         </Layout>

@@ -4,3 +4,4 @@ export * from "./services.service";
 export * from "./trainer.service";
 export * from "./trainer-evaluations.service";
 export * from "./filters.service";
+export * from "./hiring.service";
