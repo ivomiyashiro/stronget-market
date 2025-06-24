@@ -86,7 +86,7 @@ const Landing = () => {
           aria-label="Lista de servicios disponibles"
         >
           {services.map((service: Service) => (
-            <article key={service.id} className="w-full">
+            <article key={service.id} className="max-w-[360px] w-full">
               <ServiceCard
                 name={service.trainerName}
                 imageUrl={service.trainerImage}
