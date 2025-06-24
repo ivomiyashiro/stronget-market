@@ -70,11 +70,9 @@ const router = createBrowserRouter([
             {
                 path: "service/:id",
                 element: (
-                    <ProtectedRoute>
-                        <Layout showHeader showFooter>
-                            <ServiceExpanded />
-                        </Layout>
-                    </ProtectedRoute>
+                    <Layout showHeader showFooter>
+                        <ServiceExpanded />
+                    </Layout>
                 ),
             },
             {

@@ -212,73 +212,80 @@ const ServiceExpanded = () => {
                     </article>
 
                     <aside className="w-full md:w-80 flex-shrink-0">
-                        {service.trainerId !== user?.id ? (
-                            <div className="border rounded-lg p-6 flex flex-col gap-4 bg-card">
-                                <div>
-                                    <span className="text-2xl font-bold">
-                                        ${service.price}
-                                    </span>
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <label
-                                        htmlFor="day-select"
-                                        className="text-sm font-medium"
-                                    >
-                                        Día
-                                    </label>
-                                    <select
-                                        id="day-select"
-                                        className="border rounded px-3 py-2 text-sm"
-                                        value={selectedDay}
-                                        onChange={(e) => {
-                                            setSelectedDay(e.target.value);
-                                            setSelectedTime("");
-                                        }}
-                                    >
-                                        <option value="" disabled>
-                                            Seleccionar un día
-                                        </option>
-                                        {availableDays.map((day) => (
-                                            <option key={day} value={day}>
-                                                {day}
+                        {service.trainerId !== user?.id &&
+                            user?.role !== "entrenador" && (
+                                <div className="border rounded-lg p-6 flex flex-col gap-4 bg-card">
+                                    <div>
+                                        <span className="text-2xl font-bold">
+                                            ${service.price}
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <label
+                                            htmlFor="day-select"
+                                            className="text-sm font-medium"
+                                        >
+                                            Día
+                                        </label>
+                                        <select
+                                            id="day-select"
+                                            className="border rounded px-3 py-2 text-sm"
+                                            value={selectedDay}
+                                            onChange={(e) => {
+                                                setSelectedDay(e.target.value);
+                                                setSelectedTime("");
+                                            }}
+                                        >
+                                            <option value="" disabled>
+                                                Seleccionar un día
                                             </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <label
-                                        htmlFor="time-select"
-                                        className="text-sm font-medium"
-                                    >
-                                        Horario
-                                    </label>
-                                    <select
-                                        id="time-select"
-                                        className="border rounded px-3 py-2 text-sm"
-                                        value={selectedTime}
-                                        onChange={(e) => setSelectedTime(e.target.value)}
-                                        disabled={!selectedDay}
-                                    >
-                                        <option value="" disabled>
-                                            {selectedDay
-                                                ? "Seleccionar un horario"
-                                                : "Primero selecciona un día"}
-                                        </option>
-                                        {availableTimes.map((time) => (
-                                            <option key={time} value={time}>
-                                                {time}
+                                            {availableDays.map((day) => (
+                                                <option key={day} value={day}>
+                                                    {day}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <label
+                                            htmlFor="time-select"
+                                            className="text-sm font-medium"
+                                        >
+                                            Horario
+                                        </label>
+                                        <select
+                                            id="time-select"
+                                            className="border rounded px-3 py-2 text-sm"
+                                            value={selectedTime}
+                                            onChange={(e) =>
+                                                setSelectedTime(e.target.value)
+                                            }
+                                            disabled={!selectedDay}
+                                        >
+                                            <option value="" disabled>
+                                                {selectedDay
+                                                    ? "Seleccionar un horario"
+                                                    : "Primero selecciona un día"}
                                             </option>
-                                        ))}
-                                    </select>
+                                            {availableTimes.map((time) => (
+                                                <option key={time} value={time}>
+                                                    {time}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <Button
+                                        disabled={
+                                            !selectedDay || !selectedTime || user === null
+                                        }
+                                        onClick={handleAddToCart}
+                                    >
+                                        Contratar
+                                    </Button>
                                 </div>
-                                <Button
-                                    disabled={!selectedDay || !selectedTime}
-                                    onClick={handleAddToCart}
-                                >
-                                    Contratar
-                                </Button>
-                            </div>
-                        ) : (
+                            )}
+
+                        {service.trainerId === user?.id && (
                             <div className="flex flex-col gap-4 border rounded-lg p-6 bg-card">
                                 <div className="flex flex-row gap-2">
                                     <Check className="size-10 text-green-500" />
