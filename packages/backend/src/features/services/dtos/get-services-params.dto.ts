@@ -7,4 +7,5 @@ export type GetServicesParams = {
   maxDuration?: number;
   language?: string;
   mode?: "online" | "in-person";
+  search?: string;
 };

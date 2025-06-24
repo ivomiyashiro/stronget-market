@@ -48,6 +48,7 @@ export interface GetServicesParams {
   mode?: "online" | "in-person" | "both";
   trainerId?: string;
   rating?: number[];
+  search?: string;
 }
 
 export interface GetServicesResponse {

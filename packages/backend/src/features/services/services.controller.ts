@@ -51,6 +51,7 @@ export class ServicesController {
                     : undefined,
                 language: req.query.language as string | undefined,
                 mode: req.query.mode as "online" | "in-person" | undefined,
+                search: req.query.search as string | undefined,
             };
 
             const services = await this.servicesService.getServices(params);
@@ -96,6 +97,7 @@ export class ServicesController {
                     : undefined,
                 language: req.query.language as string | undefined,
                 mode: req.query.mode as "online" | "in-person" | undefined,
+                search: req.query.search as string | undefined,
             };
 
             const services = await this.servicesService.getServicesByTrainerId(
@@ -118,15 +120,7 @@ export class ServicesController {
             const { id } = req.params;
             const trainerId = req.user?.id; // Assuming you have auth middleware setting user
 
-            console.log("Delete service request:", {
-                serviceId: id,
-                trainerId,
-                userRole: req.user?.role,
-                userEmail: req.user?.email,
-            });
-
             if (!trainerId) {
-                console.log("No trainer ID found in request");
                 res.status(401).json({ message: "Unauthorized" });
                 return;
             }

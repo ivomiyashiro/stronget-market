@@ -115,16 +115,6 @@ const ServicesTable = () => {
         fetchTrainerServices(filters);
     };
 
-    const handleSearch = (searchTerm: string) => {
-        // Clear filters when searching and fetch all services
-        const emptyFilters = {};
-        setCurrentFilters(emptyFilters);
-        fetchTrainerServices(emptyFilters);
-        console.log("Current filters:", searchTerm);
-        // TODO: In the future, you could implement text search by adding a search parameter
-        // to the API and passing searchTerm to the backend
-    };
-
     return (
         <section>
             <div className="flex justify-between items-center mb-6">
@@ -141,7 +131,6 @@ const ServicesTable = () => {
             </div>
             <Filtering
                 onApplyFilters={handleApplyFilters}
-                onSearch={handleSearch}
                 currentFilters={currentFilters}
             />
             {isLoading ? (

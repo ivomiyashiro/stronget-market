@@ -38,7 +38,31 @@ export class ServicesService {
             query.duration = { ...query.duration, $lte: params.maxDuration };
         }
 
-        const services = await Service.find(query)
+        let services;
+
+        if (params.search) {
+            // First, find trainers that match the search term
+            const matchingTrainers = await User.find({
+                $or: [
+                    { name: { $regex: params.search, $options: "i" } },
+                    { surname: { $regex: params.search, $options: "i" } },
+                ],
+            }).select("_id");
+
+            const trainerIds = matchingTrainers.map((trainer) => trainer._id);
+
+            // Add trainer search to the query
+            query.$or = [
+                { description: { $regex: params.search, $options: "i" } },
+                { category: { $regex: params.search, $options: "i" } },
+                { zone: { $regex: params.search, $options: "i" } },
+                { language: { $regex: params.search, $options: "i" } },
+                { mode: { $regex: params.search, $options: "i" } },
+                { trainerId: { $in: trainerIds } },
+            ];
+        }
+
+        services = await Service.find(query)
             .populate("trainerId", "name surname profileImage averageCalification avatar")
             .sort({ createdAt: -1 });
 
@@ -170,7 +194,31 @@ export class ServicesService {
             query.duration = { ...query.duration, $lte: params.maxDuration };
         }
 
-        const services = await Service.find(query)
+        let services;
+
+        if (params.search) {
+            // First, find trainers that match the search term
+            const matchingTrainers = await User.find({
+                $or: [
+                    { name: { $regex: params.search, $options: "i" } },
+                    { surname: { $regex: params.search, $options: "i" } },
+                ],
+            }).select("_id");
+
+            const trainerIds = matchingTrainers.map((trainer) => trainer._id);
+
+            // Add trainer search to the query
+            query.$or = [
+                { description: { $regex: params.search, $options: "i" } },
+                { category: { $regex: params.search, $options: "i" } },
+                { zone: { $regex: params.search, $options: "i" } },
+                { language: { $regex: params.search, $options: "i" } },
+                { mode: { $regex: params.search, $options: "i" } },
+                { trainerId: { $in: trainerIds } },
+            ];
+        }
+
+        services = await Service.find(query)
             .populate("trainerId", "name surname profileImage averageCalification avatar")
             .sort({ createdAt: -1 });
 

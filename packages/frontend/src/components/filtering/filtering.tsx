@@ -6,76 +6,77 @@ import { ExpandedFilters } from "./expanded-filters";
 import type { GetServicesParams } from "@/services/services.service";
 
 interface FilteringProps {
-  onApplyFilters?: (filters: GetServicesParams) => void;
-  onSearch?: (searchTerm: string) => void;
-  currentFilters: GetServicesParams;
+    onApplyFilters?: (filters: GetServicesParams) => void;
+    onSearch?: (searchTerm: string) => void;
+    currentFilters: GetServicesParams;
 }
 
-const Filtering = ({ onApplyFilters, onSearch, currentFilters }: FilteringProps) => {
-  const [search, setSearch] = useState("");
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+const Filtering = ({ onApplyFilters, currentFilters }: FilteringProps) => {
+    const [search, setSearch] = useState("");
+    const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (onSearch) {
-      onSearch(search);
-    }
-  };
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        onApplyFilters?.({ ...currentFilters, search });
+    };
 
-  const handleApplyFilters = (filters: GetServicesParams) => {
-    if (onApplyFilters) {
-      onApplyFilters(filters);
-    }
-    setIsFiltersOpen(false);
-  };
+    const handleApplyFilters = (filters: GetServicesParams) => {
+        if (onApplyFilters) {
+            onApplyFilters(filters);
+        }
+        setIsFiltersOpen(false);
+    };
 
-  // Check if there are active filters
-  const hasActiveFilters = currentFilters && Object.keys(currentFilters).length > 0;
+    // Check if there are active filters
+    const hasActiveFilters = currentFilters && Object.keys(currentFilters).length > 0;
 
-  return (
-    <>
-      <nav className="flex items-center gap-2 py-8" aria-label="Filtros de búsqueda">
-        <form onSubmit={handleSearch} className="relative w-full">
-          <label htmlFor="trainer-search" className="sr-only">
-            Buscar entrenadores
-          </label>
-          <Input
-            id="trainer-search"
-            type="search"
-            placeholder="Explora nuestros servicios"
-            className="w-full pr-10 rounded-full px-4"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label="Buscar servicios"
-          />
-          <Button
-            type="submit"
-            variant="default"
-            size="icon"
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary p-0 size-7"
-            aria-label="Buscar"
-          >
-            <Search className="size-5 text-white" aria-hidden="true" />
-          </Button>
-        </form>
-        <Button
-          variant={hasActiveFilters ? "default" : "secondary"}
-          className="gap-2"
-          aria-label="Abrir filtros avanzados"
-          onClick={() => setIsFiltersOpen(true)}
-        >
-          <SlidersHorizontal className="size-4" aria-hidden="true" />
-          {hasActiveFilters ? "Filtros activos" : "Filtros"}
-        </Button>
-      </nav>
-      <ExpandedFilters
-        isOpen={isFiltersOpen}
-        onClose={() => setIsFiltersOpen(false)}
-        onApplyFilters={handleApplyFilters}
-        currentFilters={currentFilters}
-      />
-    </>
-  );
+    return (
+        <>
+            <nav
+                className="flex items-center gap-2 py-8"
+                aria-label="Filtros de búsqueda"
+            >
+                <form onSubmit={handleSearch} className="relative w-full">
+                    <label htmlFor="trainer-search" className="sr-only">
+                        Buscar entrenadores
+                    </label>
+                    <Input
+                        id="trainer-search"
+                        type="search"
+                        placeholder="Explora nuestros servicios"
+                        className="w-full pr-10 rounded-full px-4"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        aria-label="Buscar servicios"
+                    />
+                    <Button
+                        type="submit"
+                        variant="default"
+                        size="icon"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary p-0 size-7"
+                        aria-label="Buscar"
+                    >
+                        <Search className="size-4 text-white" aria-hidden="true" />
+                    </Button>
+                </form>
+                <Button
+                    variant={hasActiveFilters ? "default" : "secondary"}
+                    className="gap-2"
+                    aria-label="Abrir filtros avanzados"
+                    onClick={() => setIsFiltersOpen(true)}
+                >
+                    <SlidersHorizontal className="size-4" aria-hidden="true" />
+                    {hasActiveFilters ? "Filtros activos" : "Filtros"}
+                </Button>
+            </nav>
+            <ExpandedFilters
+                isOpen={isFiltersOpen}
+                onClose={() => setIsFiltersOpen(false)}
+                onApplyFilters={handleApplyFilters}
+                currentFilters={currentFilters}
+            />
+        </>
+    );
 };
 
 export default Filtering;
