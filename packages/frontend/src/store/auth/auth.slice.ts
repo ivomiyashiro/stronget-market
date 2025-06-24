@@ -12,6 +12,41 @@ const getInitialState = (): AuthState => {
   if (token && userStr) {
     try {
       const user = JSON.parse(userStr);
+      
+      // Validate token structure and expiration
+      const tokenParts = token.split('.');
+      if (tokenParts.length === 3) {
+        try {
+          const payload = JSON.parse(atob(tokenParts[1]));
+          const currentTime = Math.floor(Date.now() / 1000);
+          
+          // Check if token is expired
+          if (payload.exp && payload.exp < currentTime) {
+            // Token is expired, clear localStorage
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            return {
+              user: null,
+              token: null,
+              isLoading: false,
+              error: null,
+              isAuthenticated: false,
+            };
+          }
+        } catch {
+          // If payload parsing fails, clear localStorage
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          return {
+            user: null,
+            token: null,
+            isLoading: false,
+            error: null,
+            isAuthenticated: false,
+          };
+        }
+      }
+      
       return {
         user,
         token,

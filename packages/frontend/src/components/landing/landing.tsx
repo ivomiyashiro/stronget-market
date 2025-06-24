@@ -52,7 +52,9 @@ const Landing = () => {
           <h2 className="mb-2 text-2xl font-semibold text-gray-900">
             Cargando servicios...
           </h2>
-          <p className="text-gray-600">Estamos obteniendo los servicios disponibles.</p>
+          <p className="text-gray-600">
+            Estamos obteniendo los servicios disponibles.
+          </p>
         </div>
       ) : error ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -78,7 +80,8 @@ const Landing = () => {
         <section
           className="grid grid-cols-1 auto-rows-fr gap-8"
           style={{
-            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 360px), 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(min(100%, 360px), 1fr))",
           }}
           aria-label="Lista de servicios disponibles"
         >
