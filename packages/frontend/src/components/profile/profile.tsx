@@ -348,10 +348,7 @@ const Profile = () => {
                                                     <div
                                                         className="bg-yellow-500 h-2 rounded-full transition-all duration-300 ease-in-out"
                                                         style={{
-                                                            width: `${
-                                                                (trainerStatistics.averageRating ||
-                                                                    0 / 5) * 100
-                                                            }%`,
+                                                            width: `${trainerStatistics.averageRating}%`,
                                                         }}
                                                     ></div>
                                                 </div>

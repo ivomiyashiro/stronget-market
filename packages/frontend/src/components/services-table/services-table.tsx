@@ -661,7 +661,7 @@ const ServicesTable = () => {
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
                   >
                     <div className="flex items-center gap-3">
-                      <FileText className="size-6 text-blue-600" />
+                      <FileText className="size-6 text-muted-foreground" />
                       <div>
                         <p className="font-medium">{file.originalName}</p>
                         <p className="text-sm text-gray-500">
