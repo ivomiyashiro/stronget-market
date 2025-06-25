@@ -609,7 +609,7 @@ const ServicesTable = () => {
                       </Button>
                     </TableCell>
                     <TableCell className="px-4">
-                      {service.hiringStatus === "confirmed" ? (
+                      {service.hiringStatus === "confirmed" || service.hiringStatus === "completed" ? (
                         <div className="flex items-center gap-2">
                           <Button
                             variant="ghost"

@@ -6,16 +6,16 @@ import { CreateReviewRequestDTO, UpdateReviewRequestDTO } from "./dtos";
 
 export class ReviewsService {
   async createReview(userId: string, reviewData: CreateReviewRequestDTO) {
-    // Check if user has hired this service and it's confirmed
+    // Check if user has hired this service and it's confirmed or completed
     const hiring = await Hiring.findOne({
       clientId: new Types.ObjectId(userId),
       serviceId: new Types.ObjectId(reviewData.serviceId),
-      status: "confirmed",
+      status: { $in: ["confirmed", "completed"] },
     });
 
     if (!hiring) {
       throw new Error(
-        "You can only review services you have hired and confirmed"
+        "You can only review services you have hired and confirmed or completed"
       );
     }
 
