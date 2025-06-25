@@ -376,7 +376,7 @@ const ServicesTable = () => {
                                                       )
                                                   }
                                               >
-                                                  <Star className="size-4" />
+                                                  <Star className="size-4 " />
                                               </Button>
                                               <Button
                                                   variant="ghost"
