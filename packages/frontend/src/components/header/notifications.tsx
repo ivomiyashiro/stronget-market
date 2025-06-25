@@ -120,12 +120,13 @@ const Notifications = () => {
                 </div>
                 <DropdownMenuSeparator />
 
-                <ScrollArea className="h-[240px]">
+                <ScrollArea className="h-[200px]">
                   {notifications.map((notif) => (
                     <div key={notif.id}>
                       <DropdownMenuItem
                         className={cn(
-                          notif.leido ? "text-gray-400" : "font-semibold"
+                          notif.leido ? "text-gray-400" : "font-semibold",
+                          "flex justify-between px-4"
                         )}
                       >
                         <Link
