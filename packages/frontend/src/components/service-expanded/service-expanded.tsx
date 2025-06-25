@@ -322,7 +322,12 @@ const ServiceExpanded = () => {
                   </select>
                 </div>
                 <Button
-                  disabled={!selectedDay || !selectedTime || user === null}
+                  disabled={
+                    !selectedDay ||
+                    !selectedTime ||
+                    user === null ||
+                    user.role === "entrenador"
+                  }
                   onClick={handleAddToCart}
                 >
                   Contratar
