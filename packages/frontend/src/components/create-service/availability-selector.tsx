@@ -5,10 +5,10 @@ import { PlusCircle, XCircle } from "lucide-react";
 const DAYS = [
   "Lunes",
   "Martes",
-  "Miércoles",
+  "Miercoles",
   "Jueves",
   "Viernes",
-  "Sábado",
+  "Sabado",
   "Domingo",
 ];
 

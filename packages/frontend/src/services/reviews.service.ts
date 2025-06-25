@@ -17,6 +17,8 @@ export interface ReviewResponse {
   user: {
     id: string;
     name: string;
+    surname: string;
+    avatar?: string;
   };
 }
 
