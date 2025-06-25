@@ -55,6 +55,11 @@ const CreateReviewPopup = ({
       return;
     }
 
+    if (comments.length < 10) {
+      toast.error("Por favor, escribe un comentario de al menos 10 caracteres");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
