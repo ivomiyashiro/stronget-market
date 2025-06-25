@@ -609,7 +609,7 @@ const ServicesTable = () => {
                       </Button>
                     </TableCell>
                     <TableCell className="px-4">
-                      {service.hiringStatus === "confirmed" || service.hiringStatus === "completed" ? (
+                      {service.hiringStatus === "confirmed" ? (
                         <div className="flex items-center gap-2">
                           <Button
                             variant="ghost"
@@ -659,21 +659,25 @@ const ServicesTable = () => {
                               ? "Completado"
                               : service.hiringStatus}
                           </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleViewService(service.id)}
-                          >
-                            <Eye className="size-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleCreateReview(service)}
-                            title="Crear reseña"
-                          >
-                            <Star className="size-4" />
-                          </Button>
+                          {service.hiringStatus === "completed" && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleViewService(service.id)}
+                              >
+                                <Eye className="size-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleCreateReview(service)}
+                                title="Crear reseña"
+                              >
+                                <Star className="size-4" />
+                              </Button>
+                            </>
+                          )}
                         </div>
                       )}
                     </TableCell>
