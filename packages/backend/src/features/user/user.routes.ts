@@ -20,6 +20,8 @@ router.post("/register", validateBody(registerSchema), userController.register);
 
 router.post("/login", validateBody(loginSchema), userController.login);
 
+router.get("/:id", validateParams(userIdSchema), userController.getUserById);
+
 router.put(
     "/:id",
     validateParams(userIdSchema),

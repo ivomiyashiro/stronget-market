@@ -94,4 +94,16 @@ export class UserController {
       });
     }
   };
+
+  getUserById = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const result = await this.userService.getUserById(id);
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(404).json({
+        message: error instanceof Error ? error.message : "User not found",
+      });
+    }
+  };
 }

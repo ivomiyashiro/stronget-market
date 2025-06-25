@@ -52,7 +52,7 @@ interface PendingClient {
   id: string;
   name: string;
   email: string;
-  avatarUrl?: string; // Optional since the backend doesn't provide it
+  avatarUrl: string;
 }
 
 const ServicesTable = () => {
@@ -71,15 +71,15 @@ const ServicesTable = () => {
 
   // State for delete confirmation dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
+  const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
 
   // State for review popup
   const [reviewPopupOpen, setReviewPopupOpen] = useState(false);
   const [serviceToReview, setServiceToReview] = useState<Service | null>(null);
 
   const [pendingModalOpen, setPendingModalOpen] = useState(false);
-
   const [pendingClients, setPendingClients] = useState<PendingClient[]>([]);
+  const [currentServiceId, setCurrentServiceId] = useState<string | null>(null);
 
   const getDeleteDialogContent = () => {
     if (isTrainer) {
@@ -133,19 +133,17 @@ const ServicesTable = () => {
   };
 
   const handleDeleteService = (service: Service) => {
-    setServiceToDelete(service.id);
+    setServiceToDelete(service);
     setDeleteDialogOpen(true);
   };
 
   const confirmDeleteService = () => {
     if (serviceToDelete) {
-      const service = services.find((s) => s.id === serviceToDelete);
-
       if (isTrainer) {
         // For trainers, delete the service
         dispatch(
           deleteService({
-            id: serviceToDelete,
+            id: serviceToDelete.id,
             onSuccess: () => {
               // Refresh the services list after successful deletion
               fetchServices();
@@ -158,10 +156,10 @@ const ServicesTable = () => {
             },
           })
         );
-      } else if (isClient && service?.hiringId) {
+      } else if (isClient && serviceToDelete.hiringId) {
         // For clients, remove the hiring
         hiringService
-          .removeHiring(service.hiringId)
+          .removeHiring(serviceToDelete.hiringId)
           .then(() => {
             // Refresh the services list after successful removal
             fetchServices();
@@ -232,11 +230,31 @@ const ServicesTable = () => {
   };
 
   const handleAccept = (clientId: string) => {
-    console.log("Accepted client", clientId);
+    if (!currentServiceId) {
+      console.error("No current service ID found");
+      return;
+    }
+
+    hiringService.acceptHiring(clientId, currentServiceId).then(() => {
+      // Refresh the services list to update pending counts
+      fetchServices();
+      // Close the modal
+      handleClosePendingModal();
+    });
   };
 
   const handleReject = (clientId: string) => {
-    console.log("Rejected client", clientId);
+    if (!currentServiceId) {
+      console.error("No current service ID found");
+      return;
+    }
+
+    hiringService.rejectHiring(clientId, currentServiceId).then(() => {
+      // Refresh the services list to update pending counts
+      fetchServices();
+      // Close the modal
+      handleClosePendingModal();
+    });
   };
 
   const handleOpenPendingModal = (service: Service) => {
@@ -246,17 +264,19 @@ const ServicesTable = () => {
         id: client.id,
         name: client.name,
         email: client.email,
-        // avatarUrl is not provided by the backend, so it will use the default
+        avatarUrl: client.avatarUrl,
       })
     );
 
     setPendingClients(pendingClientsData);
     setPendingModalOpen(true);
+    setCurrentServiceId(service.id);
   };
 
   const handleClosePendingModal = () => {
     setPendingModalOpen(false);
-    setPendingClients([]); // Clear the pending clients when modal closes
+    setPendingClients([]);
+    setCurrentServiceId(null);
   };
 
   return (
@@ -420,30 +440,52 @@ const ServicesTable = () => {
                       </div>
                     </TableCell>
                     <TableCell className="px-4">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleViewService(service.id)}
-                        >
-                          <Eye className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleCreateReview(service)}
-                          title="Crear reseña"
-                        >
-                          <Star className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteService(service)}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </div>
+                      {service.hiringStatus === "confirmed" ? (
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleViewService(service.id)}
+                          >
+                            <Eye className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleCreateReview(service)}
+                            title="Crear reseña"
+                          >
+                            <Star className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteService(service)}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              service.hiringStatus === "pending"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : service.hiringStatus === "cancelled"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {service.hiringStatus === "pending"
+                              ? "Pendiente"
+                              : service.hiringStatus === "cancelled"
+                              ? "Rechazado"
+                              : service.hiringStatus === "completed"
+                              ? "Completado"
+                              : service.hiringStatus}
+                          </span>
+                        </div>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -488,6 +530,7 @@ const ServicesTable = () => {
         handleAccept={handleAccept}
         handleReject={handleReject}
         pendingClients={pendingClients}
+        setCurrentServiceId={setCurrentServiceId}
       />
     </section>
   );

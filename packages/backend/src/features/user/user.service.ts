@@ -201,8 +201,24 @@ export class UserService {
       updatedAt: new Date(),
     });
 
+    return { message: "Avatar eliminado exitosamente." };
+  }
+
+  async getUserById(userId: string) {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error("Usuario no encontrado.");
+    }
+
     return {
-      message: "Avatar eliminado exitosamente.",
+      id: user._id.toString(),
+      name: user.name,
+      surname: user.surname,
+      email: user.email,
+      birthDay: user.birthDay,
+      avatar: user.avatar || "",
+      role: user.role,
+      createdAt: user.createdAt,
     };
   }
 }

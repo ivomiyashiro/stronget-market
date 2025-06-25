@@ -68,6 +68,20 @@ router.patch(
     hiringController.confirmHiring
 );
 
+// Accept hiring by client and service (trainers only)
+router.patch(
+    "/accept",
+    authenticateToken,
+    hiringController.acceptHiring
+);
+
+// Reject hiring by client and service (trainers only)
+router.patch(
+    "/reject",
+    authenticateToken,
+    hiringController.rejectHiring
+);
+
 // Remove hiring (clients only - completely removes the hiring)
 router.delete(
     "/:id",

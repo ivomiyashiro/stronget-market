@@ -14,6 +14,7 @@ interface PendingModalProps {
   handleAccept: (clientId: string) => void;
   handleReject: (clientId: string) => void;
   pendingClients: PendingClient[];
+  setCurrentServiceId: (id: string | null) => void;
 }
 
 const PendingModal = ({
@@ -22,11 +23,15 @@ const PendingModal = ({
   handleAccept,
   handleReject,
   pendingClients,
+  setCurrentServiceId,
 }: PendingModalProps) => {
   return (
     <CustomModal
       isOpen={pendingModalOpen}
-      onClose={() => setPendingModalOpen(false)}
+      onClose={() => {
+        setPendingModalOpen(false);
+        setCurrentServiceId(null);
+      }}
     >
       <div className="p-4">
         <div className="flex flex-col gap-2">
@@ -37,11 +42,24 @@ const PendingModal = ({
         </div>
         {pendingClients.map((client) => (
           <div key={client.id} className="flex items-center py-4 gap-4">
-            <img
-              src={client.avatarUrl}
-              alt={client.name}
-              className="w-10 h-10 rounded-full"
-            />
+            <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold text-sm">
+              {client.avatarUrl ? (
+                <img
+                  src={client.avatarUrl}
+                  alt={client.name}
+                  className="w-full h-full rounded-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                    (
+                      e.target as HTMLImageElement
+                    ).nextElementSibling?.classList.remove("hidden");
+                  }}
+                />
+              ) : null}
+              <span className={client.avatarUrl ? "hidden" : ""}>
+                {client.name.charAt(0).toUpperCase()}
+              </span>
+            </div>
             <div className="flex-1">
               <div className="font-semibold">{client.name}</div>
               <div className="text-gray-500 text-sm">{client.email}</div>

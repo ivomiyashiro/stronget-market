@@ -27,6 +27,7 @@ export interface Service {
     id: string;
     name: string;
     email: string;
+    avatarUrl: string;
   }[];
   price: number;
   rating: number;
@@ -42,6 +43,7 @@ export interface Service {
   }[];
   trainerId: string;
   hiringId?: string; // Optional hiring ID for client services
+  hiringStatus?: "pending" | "confirmed" | "cancelled" | "completed"; // Optional hiring status for client services
 }
 
 export interface GetServicesParams {
@@ -129,6 +131,10 @@ export class ServicesService {
     }
 
     return await baseService.get<Service[]>("/users/services", queryParams);
+  }
+
+  async trackVisualization(serviceId: string): Promise<{ message: string }> {
+    return await baseService.post<{ message: string }>(`/services/${serviceId}/track-visualization`);
   }
 }
 

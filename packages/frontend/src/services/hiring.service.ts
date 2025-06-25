@@ -30,6 +30,7 @@ export interface CreateHiringResponse {
 export interface HiringItem {
     id: string;
     serviceId: {
+        _id: string;
         category: string;
         description: string;
         duration: number;
@@ -122,6 +123,26 @@ export class HiringService extends BaseService {
         return this.get<{ availableSlots: string[] }>(
             `${this.endpoint}/trainer/${trainerId}/availability/${day}`
         );
+    }
+
+    /**
+     * Accept a hiring (trainers only)
+     */
+    async acceptHiring(clientId: string, serviceId: string): Promise<HiringItem> {
+        return this.patch<HiringItem>(`${this.endpoint}/accept`, {
+            clientId,
+            serviceId,
+        });
+    }
+
+    /**
+     * Reject a hiring (trainers only)
+     */
+    async rejectHiring(clientId: string, serviceId: string): Promise<HiringItem> {
+        return this.patch<HiringItem>(`${this.endpoint}/reject`, {
+            clientId,
+            serviceId,
+        });
     }
 }
 
