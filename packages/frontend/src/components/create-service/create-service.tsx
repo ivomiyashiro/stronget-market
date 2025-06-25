@@ -31,6 +31,7 @@ interface ServiceFormValues {
   category: string;
   modality: string;
   language: string;
+  maxPeople: string;
 }
 
 const CreateService = () => {
@@ -53,6 +54,7 @@ const CreateService = () => {
     category: "",
     modality: "",
     language: "",
+    maxPeople: "",
   });
   const [availability, setAvailability] = useState<DailyAvailability[]>([]);
   const [errors, setErrors] = useState<
@@ -77,6 +79,7 @@ const CreateService = () => {
         category: currentService.category,
         modality: currentService.mode === "online" ? "Virtual" : "Presencial",
         language: currentService.language,
+        maxPeople: currentService.maxPeople.toString(),
       });
       if (currentService.availability) {
         const groupedAvailability = currentService.availability.reduce(
@@ -114,6 +117,8 @@ const CreateService = () => {
     if (!values.category) newErrors.category = "La categoría es obligatoria.";
     if (!values.modality) newErrors.modality = "La modalidad es obligatoria.";
     if (!values.language) newErrors.language = "El idioma es obligatorio.";
+    if (!values.maxPeople)
+      newErrors.maxPeople = "El número de personas es obligatorio.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -137,9 +142,10 @@ const CreateService = () => {
         duration: parseInt(values.duration.split(" ")[0]) * 60,
         price: parseFloat(values.price),
         zone: values.zone,
-        category: values.category,
+        categoryId: values.category,
         mode: values.modality === "Virtual" ? "online" : "in-person",
         language: values.language,
+        maxPeople: parseInt(values.maxPeople),
         availability: flattenedAvailability,
       };
 
@@ -163,17 +169,16 @@ const CreateService = () => {
       <h1 className="text-2xl font-bold">
         {mode === "edit" ? "Editar Servicio" : "Crear Servicio"}
       </h1>
-
-      <RequiredInput
-        label="Descripción"
-        type="text"
-        value={values.description}
-        onChange={(e) => handleChange("description", e.target.value)}
-        error={errors.description}
-        required
-        fullSize
-      />
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
+        <RequiredInput
+          label="Descripción"
+          type="text"
+          value={values.description}
+          onChange={(e) => handleChange("description", e.target.value)}
+          error={errors.description}
+          required
+          fullSize
+        />
         <RequiredInput
           label="Duración"
           inputType="select"
@@ -182,6 +187,7 @@ const CreateService = () => {
           error={errors.duration}
           required
           options={DURATION_OPTIONS}
+          fullSize
         />
         <RequiredInput
           label="Precio"
@@ -190,6 +196,7 @@ const CreateService = () => {
           onChange={(e) => handleChange("price", e.target.value)}
           error={errors.price}
           required
+          fullSize
         />
         <RequiredInput
           label="Zona"
@@ -198,6 +205,7 @@ const CreateService = () => {
           onChange={(e) => handleChange("zone", e.target.value)}
           error={errors.zone}
           required
+          fullSize
         />
         <RequiredInput
           label="Categoría"
@@ -206,6 +214,7 @@ const CreateService = () => {
           onChange={(e) => handleChange("category", e.target.value)}
           error={errors.category}
           required
+          fullSize
         />
         <RequiredInput
           label="Idioma"
@@ -214,6 +223,7 @@ const CreateService = () => {
           onChange={(e) => handleChange("language", e.target.value)}
           error={errors.language}
           required
+          fullSize
         />
         <RequiredInput
           label="Modalidad"
@@ -223,6 +233,16 @@ const CreateService = () => {
           error={errors.modality}
           required
           options={MODALITY_OPTIONS}
+          fullSize
+        />
+        <RequiredInput
+          label="Número de Personas"
+          type="number"
+          value={values.maxPeople}
+          onChange={(e) => handleChange("maxPeople", e.target.value)}
+          error={errors.maxPeople}
+          required
+          fullSize
         />
       </div>
       <AvailabilitySelector

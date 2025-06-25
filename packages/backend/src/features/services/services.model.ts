@@ -9,6 +9,7 @@ const serviceSchema = new mongoose.Schema({
     mode: { type: String, enum: ["online", "in-person"], required: true },
     zone: { type: String, required: true },
     language: { type: String, required: true },
+    maxPeople: { type: Number, required: true },
     availability: [
         {
             day: { type: String, required: true },
