@@ -1,7 +1,7 @@
 import { baseService } from "./base.service";
 
 export interface CreateServiceRequest {
-  categoryId: string;
+  category: string;
   description: string;
   duration: number;
   price: number;

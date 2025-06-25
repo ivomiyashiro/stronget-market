@@ -142,7 +142,7 @@ const CreateService = () => {
         duration: parseInt(values.duration.split(" ")[0]) * 60,
         price: parseFloat(values.price),
         zone: values.zone,
-        categoryId: values.category,
+        category: values.category,
         mode: values.modality === "Virtual" ? "online" : "in-person",
         language: values.language,
         maxPeople: parseInt(values.maxPeople),

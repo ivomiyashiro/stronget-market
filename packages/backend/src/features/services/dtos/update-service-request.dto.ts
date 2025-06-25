@@ -1,5 +1,5 @@
 export type UpdateServiceRequestDTO = {
-  categoryId?: string;
+  category?: string;
   description?: string;
   duration?: number;
   price?: number;

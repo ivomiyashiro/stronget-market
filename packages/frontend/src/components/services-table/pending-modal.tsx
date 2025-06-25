@@ -1,44 +1,28 @@
 import { Separator } from "@radix-ui/react-separator";
 import { CustomModal } from "../common/custom-modal";
 
+interface PendingClient {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string;
+}
+
 interface PendingModalProps {
   pendingModalOpen: boolean;
   setPendingModalOpen: (open: boolean) => void;
   handleAccept: (clientId: string) => void;
   handleReject: (clientId: string) => void;
+  pendingClients: PendingClient[];
 }
+
 const PendingModal = ({
   pendingModalOpen,
   setPendingModalOpen,
   handleAccept,
   handleReject,
+  pendingClients,
 }: PendingModalProps) => {
-  const pendingClients = [
-    {
-      id: "1",
-      name: "Jorge Ramirez",
-      email: "jorge@gmail.com",
-      avatarUrl: "https://via.placeholder.com/150",
-    },
-    {
-      id: "2",
-      name: "Emilio Lopez",
-      email: "emilio@gmail.com",
-      avatarUrl: "https://via.placeholder.com/150",
-    },
-    {
-      id: "3",
-      name: "Pepe",
-      email: "pepe@gmail.com",
-      avatarUrl: "https://via.placeholder.com/150",
-    },
-    {
-      id: "4",
-      name: "Elias Meza",
-      email: "elias@gmail.com",
-      avatarUrl: "https://via.placeholder.com/150",
-    },
-  ];
   return (
     <CustomModal
       isOpen={pendingModalOpen}
