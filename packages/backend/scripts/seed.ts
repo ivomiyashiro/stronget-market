@@ -13,18 +13,8 @@ import Archive from "../src/features/archives/archives.model";
 const generateUsers = async (count: number = 20) => {
     const users: any[] = [];
     const roles = ["cliente", "entrenador"] as const;
-    const names = [
-        "Juan",
-        "María",
-        "Carlos",
-        "Ana",
-        "Luis",
-        "Carmen",
-        "Pedro",
-        "Laura",
-        "Miguel",
-        "Elena",
-    ];
+    const menNames = ["Juan", "Carlos", "Luis", "Pedro", "Miguel"];
+    const womenNames = ["Ana", "Laura", "Elena", "Carmen", "María"];
     const surnames = [
         "García",
         "Rodríguez",
@@ -38,23 +28,15 @@ const generateUsers = async (count: number = 20) => {
         "Torres",
     ];
 
-    const images = [
+    const menImages = [
         "https://randomuser.me/api/portraits/men/32.jpg",
         "https://randomuser.me/api/portraits/men/33.jpg",
         "https://randomuser.me/api/portraits/men/34.jpg",
         "https://randomuser.me/api/portraits/men/35.jpg",
         "https://randomuser.me/api/portraits/men/36.jpg",
-        "https://randomuser.me/api/portraits/men/37.jpg",
-        "https://randomuser.me/api/portraits/men/38.jpg",
-        "https://randomuser.me/api/portraits/men/39.jpg",
-        "https://randomuser.me/api/portraits/men/40.jpg",
-        "https://randomuser.me/api/portraits/men/41.jpg",
-        "https://randomuser.me/api/portraits/men/42.jpg",
-        "https://randomuser.me/api/portraits/men/43.jpg",
-        "https://randomuser.me/api/portraits/men/44.jpg",
-        "https://randomuser.me/api/portraits/men/45.jpg",
-        "https://randomuser.me/api/portraits/men/46.jpg",
-        "https://randomuser.me/api/portraits/men/47.jpg",
+    ];
+
+    const womenImages = [
         "https://randomuser.me/api/portraits/women/84.jpg",
         "https://randomuser.me/api/portraits/women/85.jpg",
         "https://randomuser.me/api/portraits/women/86.jpg",
@@ -65,7 +47,11 @@ const generateUsers = async (count: number = 20) => {
     ];
 
     for (let i = 0; i < count; i++) {
-        const name = names[Math.floor(Math.random() * names.length)];
+        const gender = Math.random() > 0.5 ? "male" : "female";
+        const name =
+            gender === "male"
+                ? menNames[Math.floor(Math.random() * menNames.length)]
+                : womenNames[Math.floor(Math.random() * womenNames.length)];
         const surname = surnames[Math.floor(Math.random() * surnames.length)];
         const role =
             i < 8 ? "entrenador" : roles[Math.floor(Math.random() * roles.length)]; // Ensure we have trainers
@@ -92,7 +78,10 @@ const generateUsers = async (count: number = 20) => {
                 Math.floor(Math.random() * 28) + 1
             ),
             role,
-            avatar: images[Math.floor(Math.random() * images.length)],
+            avatar:
+                gender === "male"
+                    ? menImages[Math.floor(Math.random() * menImages.length)]
+                    : womenImages[Math.floor(Math.random() * womenImages.length)],
             notifications,
             createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000),
             updatedAt: new Date(),

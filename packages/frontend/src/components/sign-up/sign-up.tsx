@@ -160,61 +160,67 @@ const SignUp = () => {
                     required
                     fullSize
                 />
-                <RequiredInput
-                    label="Contraseña"
-                    type="password"
-                    placeholder="Contraseña"
-                    value={formData.password}
-                    onChange={(e) => handleInputChange("password", e.target.value)}
-                    error={passwordError}
-                    required
-                    fullSize
-                />
-                <RequiredInput
-                    label="Confirmar contraseña"
-                    type="password"
-                    placeholder="Repite la contraseña"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    error={confirmPasswordError}
-                    required
-                    fullSize
-                />
-                <RequiredInput
-                    label="PIN de recuperación"
-                    type="text"
-                    placeholder="Ej: 1234"
-                    value={formData.recoverPasswordPin}
-                    onChange={(e) =>
-                        handleInputChange("recoverPasswordPin", e.target.value)
-                    }
-                    required
-                    fullSize
-                />
+                <div className="flex flex-row gap-4">
+                    <RequiredInput
+                        label="Contraseña"
+                        type="password"
+                        placeholder="Contraseña"
+                        value={formData.password}
+                        onChange={(e) => handleInputChange("password", e.target.value)}
+                        error={passwordError}
+                        required
+                        fullSize
+                    />
+                    <RequiredInput
+                        label="Confirmar contraseña"
+                        type="password"
+                        placeholder="Repite la contraseña"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        error={confirmPasswordError}
+                        required
+                        fullSize
+                    />
+                </div>
                 <Label className="text-sm justify-end">
                     * 8 caracteres, 1 minúscula, 1 número y un caracter especial
                 </Label>
-                <Label className="text-sm justify-end">
-                    * El PIN de recuperación te permitirá restablecer tu contraseña
-                </Label>
-                <Label htmlFor="role">Tipo de usuario:</Label>
-                <RadioGroup
-                    value={formData.role}
-                    onValueChange={(value) =>
-                        handleInputChange("role", value as "cliente" | "entrenador")
-                    }
-                    className="flex flex-col gap-2"
-                >
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="cliente" id="cliente" />
-                        <Label htmlFor="cliente">Cliente</Label>
+                <div className="flex flex-row gap-4">
+                    <RequiredInput
+                        label="PIN de recuperación"
+                        type="password"
+                        placeholder="Ej: 1234"
+                        value={formData.recoverPasswordPin}
+                        onChange={(e) =>
+                            handleInputChange("recoverPasswordPin", e.target.value)
+                        }
+                        required
+                        fullSize
+                    />
+                    <div className="w-full flex flex-col gap-2">
+                        <Label htmlFor="role">Tipo de usuario:</Label>
+                        <RadioGroup
+                            value={formData.role}
+                            onValueChange={(value) =>
+                                handleInputChange(
+                                    "role",
+                                    value as "cliente" | "entrenador"
+                                )
+                            }
+                            className="flex flex-col gap-2"
+                        >
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="cliente" id="cliente" />
+                                <Label htmlFor="cliente">Cliente</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="entrenador" id="entrenador" />
+                                <Label htmlFor="entrenador">Entrenador</Label>
+                            </div>
+                        </RadioGroup>
                     </div>
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="entrenador" id="entrenador" />
-                        <Label htmlFor="entrenador">Entrenador</Label>
-                    </div>
-                </RadioGroup>
-                <div className="flex flex-col gap-2 justify-end">
+                </div>
+                <div className="flex flex-col gap-2 justify-end mt-4">
                     <Button type="submit" disabled={isLoading}>
                         {isLoading ? "Registrando..." : "Registrate"}
                     </Button>
