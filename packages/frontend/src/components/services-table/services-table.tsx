@@ -659,6 +659,21 @@ const ServicesTable = () => {
                               ? "Completado"
                               : service.hiringStatus}
                           </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleViewService(service.id)}
+                          >
+                            <Eye className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleCreateReview(service)}
+                            title="Crear reseña"
+                          >
+                            <Star className="size-4" />
+                          </Button>
                         </div>
                       )}
                     </TableCell>
