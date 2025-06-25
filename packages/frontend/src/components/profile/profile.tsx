@@ -129,10 +129,6 @@ const Profile = () => {
     setIsEditing(false);
   };
 
-  const handleDelete = () => {
-    console.log("delete");
-  };
-
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
@@ -502,7 +498,7 @@ const Profile = () => {
           </div>
         </div>
         <div className="flex flex-row gap-4 justify-between">
-          <Button variant="destructive" onClick={handleDelete}>
+          <Button variant="destructive">
             Eliminar usuario
           </Button>
           <div className="flex flex-row gap-4">

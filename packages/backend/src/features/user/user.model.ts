@@ -11,6 +11,7 @@ export interface IUser {
     _id: string;
     name: string;
     surname: string;
+    recoverPasswordPin: string;
     email: string;
     password: string;
     birthDay: Date;
@@ -31,6 +32,7 @@ const notificationSchema = new mongoose.Schema({
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     surname: { type: String, required: true },
+    recoverPasswordPin: { type: String, required: false },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     birthDay: { type: Date, required: true },

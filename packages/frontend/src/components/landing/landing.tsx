@@ -25,18 +25,13 @@ const Landing = () => {
     }, []);
 
     const handleApplyFilters = (filters: GetServicesParams) => {
-        console.log("Landing: Applying filters", filters);
         setCurrentFilters(filters);
         getServices(filters);
     };
 
     const handleSearch = (searchTerm: string) => {
-        // For now, we'll just reload all services
-        // In the future, you might want to implement text search
-        console.log("Search term:", searchTerm);
-        // Clear filters when searching
         setCurrentFilters({});
-        getServices();
+        getServices({ ...currentFilters, search: searchTerm });
     };
 
     return (

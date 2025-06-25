@@ -104,12 +104,8 @@ const CartConfirmationPage = () => {
                     cvv: paymentData.cvv,
                 },
             };
-
-            console.log("Creating hiring with data:", hiringRequest);
-
             // Create the hiring
-            const hiring = await hiringService.createHiring(hiringRequest);
-            console.log("Hiring created successfully:", hiring);
+            await hiringService.createHiring(hiringRequest);
 
             // Clear cart
             dispatch(removeServiceFromCart());

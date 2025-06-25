@@ -143,7 +143,7 @@ export class HiringService {
             status: { $in: ["pending", "confirmed"] },
             serviceId: new Types.ObjectId(serviceId),
         }).populate("serviceId", "duration");
-        console.log(existingBookings);
+
         if (existingBookings.length > 0) {
             throw new Error(
                 `El entrenador no está disponible el ${day} a las ${time}. El horario ya está ocupado.`

@@ -58,6 +58,7 @@ const router = createBrowserRouter([
                     </PublicOnlyRoute>
                 ),
             },
+
             {
                 path: "restore-password",
                 element: (

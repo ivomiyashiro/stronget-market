@@ -209,8 +209,6 @@ const TrainerEvaluations = ({
     }
   }, [averageRating, totalReviews, onStatsUpdate, serviceId]);
 
-  console.log(reviews);
-
   return (
     <section>
       <h2 className="text-lg font-semibold mb-4">Evaluaciones</h2>
