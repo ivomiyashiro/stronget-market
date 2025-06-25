@@ -306,7 +306,6 @@ const ServicesTable = () => {
     setCurrentServiceId(null);
   };
 
-
   console.log(services);
 
   return (
@@ -332,7 +331,7 @@ const ServicesTable = () => {
         <div className="flex justify-center items-center py-8 w-full">
           <Loader2 className="size-10 animate-spin" />
         </div>
-      ) : services.length === 0 ? (
+      ) : services && services.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <div className="text-gray-400 mb-4">
             <Archive className="size-16 mx-auto" />

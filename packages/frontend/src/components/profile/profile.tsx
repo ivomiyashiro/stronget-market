@@ -3,21 +3,21 @@ import { useAppDispatch } from "@/store/hooks";
 import { useProfile } from "@/store/profile/profile.hooks";
 import { updateProfile, uploadAvatar } from "@/store/profile/profile.thunks";
 import {
-    useTrainerLoading,
-    useTrainerStatistics,
+  useTrainerLoading,
+  useTrainerStatistics,
 } from "@/store/trainer/trainer.hooks";
 import { getTrainerStatistics } from "@/store/trainer/trainer.thunks";
 import {
-    Briefcase,
-    Calendar,
-    Eye,
-    Image,
-    Mail,
-    Pencil,
-    Star,
-    TrendingUp,
-    Upload,
-    Users,
+  Briefcase,
+  Calendar,
+  Eye,
+  Image,
+  Mail,
+  Pencil,
+  Star,
+  TrendingUp,
+  Upload,
+  Users,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -27,6 +27,7 @@ import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Label } from "../ui/label";
 import { Separator } from "../ui/separator";
+import { useMediaQuery } from "react-responsive";
 
 interface EditingForm {
   name: string;
@@ -56,6 +57,8 @@ const Profile = () => {
   });
 
   const userId = useParams().id;
+
+  const isMobile = useMediaQuery({ query: "(max-width: 600px)" });
 
   // Trainer-specific state
   const trainerStatistics = useTrainerStatistics();
@@ -228,9 +231,13 @@ const Profile = () => {
             {isTrainer && averageRating !== null && totalReviews !== null && (
               <div className="flex items-center gap-2 mt-1">
                 <Star className="size-4 text-yellow-400 fill-yellow-400" />
-                <span className="font-semibold text-lg">{averageRating.toFixed(1)}</span>
+                <span className="font-semibold text-lg">
+                  {averageRating.toFixed(1)}
+                </span>
                 <span className="mx-1">·</span>
-                <span className="text-base text-muted-foreground">{totalReviews} evaluaciones</span>
+                <span className="text-base text-muted-foreground">
+                  {totalReviews} evaluaciones
+                </span>
               </div>
             )}
             <Label className="flex flex-row gap-2 items-center text-muted-foreground">
@@ -276,7 +283,11 @@ const Profile = () => {
           ) : (
             trainerStatistics && (
               <div className="flex flex-col gap-4">
-                <div className="flex flex-row gap-4 w-full">
+                <div
+                  className={`flex ${
+                    isMobile ? "flex-col" : "flex-row"
+                  } gap-4 w-full`}
+                >
                   <Card className="w-full">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">
@@ -320,7 +331,11 @@ const Profile = () => {
                   </Card>
                 </div>
 
-                <div className="flex flex-row gap-4 w-full">
+                <div
+                  className={`flex ${
+                    isMobile ? "flex-col" : "flex-row"
+                  } gap-4 w-full`}
+                >
                   <Card className="w-full">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">

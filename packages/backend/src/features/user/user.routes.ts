@@ -1,13 +1,20 @@
 import { Router } from "express";
 import { UserController } from "./user.controller";
-import { validateBody, validateParams } from "../../middleware/validation.middleware";
-import { uploadAvatar, handleUploadError } from "../../middleware/upload.middleware";
 import {
-    registerSchema,
-    loginSchema,
-    updateUserSchema,
-    passwordRecoverySchema,
-    userIdSchema,
+  validateBody,
+  validateParams,
+  validateQuery,
+} from "../../middleware/validation.middleware";
+import {
+  uploadAvatar,
+  handleUploadError,
+} from "../../middleware/upload.middleware";
+import {
+  registerSchema,
+  loginSchema,
+  updateUserSchema,
+  passwordRecoverySchema,
+  userIdSchema,
 } from "./user.validation";
 import { optionalAuthentication } from "../../middleware/auth.middleware";
 import { getServicesParamsSchema } from "../services/services.validation";
@@ -20,37 +27,39 @@ router.post("/register", validateBody(registerSchema), userController.register);
 
 router.post("/login", validateBody(loginSchema), userController.login);
 
+router.post(
+  "/password-recovery",
+  validateBody(passwordRecoverySchema),
+  userController.passwordRecovery
+);
+
+// User services - must come before /:id routes
+router.get(
+  "/services",
+  optionalAuthentication,
+  validateQuery(getServicesParamsSchema),
+  servicesController.getUserServices
+);
+
+// Avatar routes - must come before /:id routes
+router.post(
+  "/:id/avatar",
+  validateParams(userIdSchema),
+  uploadAvatar,
+  handleUploadError,
+  userController.uploadAvatar
+);
+
+// Parameterized routes - must come after specific routes
 router.get("/:id", validateParams(userIdSchema), userController.getUserById);
 
 router.put(
-    "/:id",
-    validateParams(userIdSchema),
-    validateBody(updateUserSchema),
-    userController.updateUser
+  "/:id",
+  validateParams(userIdSchema),
+  validateBody(updateUserSchema),
+  userController.updateUser
 );
 
 router.delete("/:id", userController.deleteUser);
 
-router.post(
-    "/password-recovery",
-    validateBody(passwordRecoverySchema),
-    userController.passwordRecovery
-);
-
-// Avatar routes
-router.post(
-    "/:id/avatar",
-    validateParams(userIdSchema),
-    uploadAvatar,
-    handleUploadError,
-    userController.uploadAvatar
-);
-
-// User services
-router.get(
-    "/services",
-    optionalAuthentication,
-    validateParams(getServicesParamsSchema),
-    servicesController.getUserServices
-);
 export default router;

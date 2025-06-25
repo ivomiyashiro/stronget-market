@@ -35,6 +35,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-redux": "^9.2.0",
+    "react-responsive": "^10.0.1",
     "react-router-dom": "^7.6.0",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.3.0"
@@ -45,6 +46,7 @@
     "@types/node": "^20.12.3",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
+    "@types/react-responsive": "^8.0.8",
     "@vitejs/plugin-react-swc": "^3.9.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.25.0",

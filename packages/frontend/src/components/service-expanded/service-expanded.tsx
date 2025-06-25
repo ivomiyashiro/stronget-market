@@ -177,9 +177,13 @@ const ServiceExpanded = () => {
                       aria-hidden="true"
                     />
                     <span className="text-sm font-medium text-muted-foreground">
-                      {service.rating} · {service.totalReviews} evaluaciones
+                      {service.rating} · {service.totalReviews} evaluación
+                      {service.totalReviews === 1 ? "" : "es"}
                     </span>
                   </div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    En este servicio
+                  </p>
                 </div>
               </div>
             </header>
