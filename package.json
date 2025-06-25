@@ -13,7 +13,8 @@
     "dev": "concurrently \"pnpm run dev:frontend\" \"pnpm run dev:backend\"",
     "dev:frontend": "pnpm run --filter=frontend dev",
     "dev:backend": "pnpm run --filter=backend dev",
-    "build": "pnpm run --filter=* build"
+    "build": "pnpm run --filter=* build",
+    "seed": "pnpm run --filter=backend seed"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

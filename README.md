@@ -1,54 +1,70 @@
 # Stronget Market
 
-A monorepo containing a React frontend and Node Express backend.
+Un monorepo que contiene un frontend de React y un backend de Node Express.
 
-## Project Structure
+## Estructura del Proyecto
 
 ```
 stronget-market/
 ├── packages/
-│   ├── frontend/     # React application
-│   └── backend/      # Express API server
+│   ├── frontend/     # Aplicación React
+│   └── backend/      # Servidor API Express
 ```
 
-## Getting Started
+## Comenzar
 
-### Prerequisites
+### Requisitos Previos
 
--   Node (v16 or higher)
--   pnpm (v7 or higher)
+-   Node.js (v22 o superior)
+-   npm (v8 o superior)
 
-### Installation
+### Instalación
 
 ```bash
-pnpm install
+npm install
 ```
 
-### Development
+### Desarrollo
 
-Run both frontend and backend in development mode:
+Ejecutar tanto el frontend como el backend en modo desarrollo:
 
 ```bash
-pnpm run dev
+npm run dev
 ```
 
-Or run them separately:
+O ejecutarlos por separado:
 
 ```bash
-pnpm run dev:frontend
-pnpm run dev:backend
+npm run dev:frontend
+npm run dev:backend
 ```
 
-### Production
+### Configuración de la Base de Datos
 
-Build both packages:
+Poblar la base de datos con datos de ejemplo:
 
 ```bash
-pnpm run build
+npm run seed
 ```
 
-Start in production mode:
+Esto poblará tu base de datos con:
+
+-   20 usuarios (entrenadores y clientes)
+-   30 servicios
+-   50 contrataciones
+-   40 reseñas
+-   25 archivos
+
+### Producción
+
+Construir ambos paquetes:
 
 ```bash
-pnpm start
+npm run build
+```
+
+Iniciar en modo producción:
+
+```bash
+npm start
 ```
