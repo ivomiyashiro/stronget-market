@@ -3,31 +3,30 @@ import { useAppDispatch } from "@/store/hooks";
 import { useProfile } from "@/store/profile/profile.hooks";
 import { updateProfile, uploadAvatar } from "@/store/profile/profile.thunks";
 import {
-  useTrainerLoading,
-  useTrainerStatistics,
+    useTrainerLoading,
+    useTrainerStatistics,
 } from "@/store/trainer/trainer.hooks";
 import { getTrainerStatistics } from "@/store/trainer/trainer.thunks";
 import {
-  Briefcase,
-  Calendar,
-  Eye,
-  Image,
-  Mail,
-  Pencil,
-  Star,
-  TrendingUp,
-  Upload,
-  Users,
+    Briefcase,
+    Calendar,
+    Eye,
+    Image,
+    Mail,
+    Pencil,
+    Star,
+    TrendingUp,
+    Upload,
+    Users,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useMediaQuery } from "react-responsive";
 import { useParams } from "react-router-dom";
 import { RequiredInput } from "../common/required-input";
 import TrainerEvaluations from "../trainer-evaluations/trainer-evaluations";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Label } from "../ui/label";
 import { Separator } from "../ui/separator";
-import { useMediaQuery } from "react-responsive";
 
 interface EditingForm {
   name: string;
@@ -228,7 +227,7 @@ const Profile = () => {
               <div className="flex items-center gap-2 mt-1">
                 <Star className="size-4 text-yellow-400 fill-yellow-400" />
                 <span className="font-semibold text-lg">
-                  {averageRating.toFixed(1)}
+                  {(averageRating || 0).toFixed(1)}
                 </span>
                 <span className="mx-1">·</span>
                 <span className="text-base text-muted-foreground">
@@ -236,13 +235,13 @@ const Profile = () => {
                 </span>
               </div>
             )}
-            <Label className="flex flex-row gap-2 items-center text-muted-foreground">
+            <div className="flex flex-row gap-2 items-center text-muted-foreground">
               <Mail className="size-4" /> {profileUser?.email}
-            </Label>
-            <Label className="flex flex-row gap-2 items-center text-muted-foreground">
+            </div>
+            <div className="flex flex-row gap-2 items-center text-muted-foreground">
               <Calendar className="size-4" />{" "}
               {profileUser?.birthDay && formatBirthDay(profileUser.birthDay)}
-            </Label>
+            </div>
           </div>
         </div>
         <div className="flex flex-col gap-6 items-center">
@@ -257,12 +256,12 @@ const Profile = () => {
             </Button>
           )}
           <div className="flex flex-col items-center">
-            <Label className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground">
               Miembro desde
-            </Label>
-            <Label className="text-xl">
+            </div>
+            <div className="text-xl">
               {profileUser?.birthDay && formatBirthDay(profileUser.birthDay)}
-            </Label>
+            </div>
           </div>
         </div>
       </div>
@@ -345,7 +344,7 @@ const Profile = () => {
                           Promedio de calificaciones y evaluaciones totales.
                         </p>
                         <p className="text-muted-foreground mt-1">
-                          {trainerStatistics.averageRating.toFixed(1)} / 5.0
+                          {(trainerStatistics.averageRating || 0).toFixed(1)} / 5.0
                         </p>
                       </div>
                       <div className="mt-2">
@@ -354,7 +353,7 @@ const Profile = () => {
                             className="bg-yellow-500 h-2 rounded-full transition-all duration-300 ease-in-out"
                             style={{
                               width: `${
-                                (trainerStatistics.averageRating / 5) * 100
+                                ((trainerStatistics.averageRating || 0) / 5) * 100
                               }%`,
                             }}
                           ></div>
@@ -376,7 +375,7 @@ const Profile = () => {
                           Promedio de calificaciones y evaluaciones totales.
                         </p>
                         <p className="text-muted-foreground mt-1">
-                          {trainerStatistics.performance.toFixed(1)}%
+                          {(trainerStatistics.performance || 0).toFixed(1)}%
                         </p>
                       </div>
                       <div className="mt-2">
@@ -385,7 +384,7 @@ const Profile = () => {
                             className="bg-green-500 h-2 rounded-full transition-all duration-300 ease-in-out"
                             style={{
                               width: `${Math.min(
-                                trainerStatistics.performance,
+                                trainerStatistics.performance || 0,
                                 100
                               )}%`,
                             }}
