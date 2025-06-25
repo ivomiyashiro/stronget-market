@@ -151,11 +151,24 @@ const CreateService = () => {
       };
 
       if (mode === "create") {
-        dispatch(createService({ data: serviceData }));
-        navigate("/my-services");
+        dispatch(
+          createService({
+            data: serviceData,
+            onSuccess: () => {
+              navigate("/my-services");
+            },
+          })
+        );
       } else if (mode === "edit" && id) {
-        dispatch(updateService({ id, data: serviceData }));
-        navigate("/my-services");
+        dispatch(
+          updateService({
+            id,
+            data: serviceData,
+            onSuccess: () => {
+              navigate("/my-services");
+            },
+          })
+        );
       }
     }
   };
