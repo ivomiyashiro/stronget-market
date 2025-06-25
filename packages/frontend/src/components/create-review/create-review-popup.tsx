@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
@@ -107,78 +106,67 @@ const CreateReviewPopup = ({
         <Dialog open={isOpen} onOpenChange={handleClose}>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>Crear Reseña</DialogTitle>
-                    <DialogDescription>
-                        Comparte tu experiencia con el servicio de {service?.trainerName}
-                    </DialogDescription>
+                    <DialogTitle className="text-xl font-semibold">
+                        Escribir Evaluación
+                    </DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-6 py-4">
-                    {/* Service Info */}
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                        <h4 className="font-medium text-gray-900">{service?.category}</h4>
-                        <p className="text-sm text-gray-600 mt-1">
-                            Entrenador: {service?.trainerName}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                            Duración: {service?.duration} min | Precio: ${service?.price}
+                    {/* Subtitle */}
+                    <div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-1">
+                            Contanos como fue tu experiencia con {service?.trainerName}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                            Podés escribir hasta un máximo de 200 caracteres.
                         </p>
                     </div>
 
                     {/* Rating */}
-                    <div className="space-y-2">
-                        <Label htmlFor="rating">Calificación *</Label>
-                        <div className="flex items-center space-x-1">
-                            {renderStars()}
-                            <span className="ml-2 text-sm text-gray-600">
-                                {rating > 0
-                                    ? `${rating} de 5 estrellas`
-                                    : "Selecciona una calificación"}
+                    <div className="space-y-3">
+                        <Label className="text-base font-medium">
+                            Puntuación
+                            <span className="text-xs text-gray-500">
+                                (1 pésimo - 5 excelente)
                             </span>
-                        </div>
+                        </Label>
+                        <div className="flex items-center space-x-1">{renderStars()}</div>
                     </div>
 
                     {/* Comments */}
-                    <div className="space-y-2">
-                        <Label htmlFor="comments">Comentarios *</Label>
+                    <div className="space-y-3">
+                        <Label htmlFor="comments" className="text-base font-medium">
+                            Descripción de la evaluación
+                        </Label>
                         <textarea
                             id="comments"
-                            placeholder="Describe tu experiencia con este servicio..."
+                            placeholder="Ej: Una experiencia increíble...."
                             value={comments}
                             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                                setComments(e.target.value)
+                                setComments(e.target.value.slice(0, 200))
                             }
                             rows={4}
                             disabled={isSubmitting}
-                            className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                            maxLength={200}
+                            className="flex min-h-[100px] w-full rounded-md border border-gray-300 bg-white px-3 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
                         />
-                        <p className="text-xs text-gray-500">
-                            {comments.length}/500 caracteres
-                        </p>
                     </div>
                 </div>
 
-                <DialogFooter>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleClose}
-                        disabled={isSubmitting}
-                    >
-                        Cancelar
-                    </Button>
+                <DialogFooter className="flex justify-end pt-4">
                     <Button
                         type="button"
                         onClick={handleSubmit}
                         disabled={isSubmitting || rating === 0 || !comments.trim()}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 rounded-md font-medium"
                     >
                         {isSubmitting ? (
                             <>
                                 <Loader2 className="size-4 animate-spin mr-2" />
-                                Creando...
+                                Evaluando...
                             </>
                         ) : (
-                            "Crear Reseña"
+                            "Evaluar"
                         )}
                     </Button>
                 </DialogFooter>
