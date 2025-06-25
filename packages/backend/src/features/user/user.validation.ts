@@ -39,7 +39,3 @@ export const passwordRecoverySchema = z.object({
   email: z.string().email("Email inválido"),
   newPassword: z.string().min(6, "La nueva contraseña debe tener al menos 6 caracteres"),
 });
-
-export const userIdSchema = z.object({
-  id: z.string().regex(/^[0-9a-fA-F]{24}$/, "ID de usuario inválido"),
-});

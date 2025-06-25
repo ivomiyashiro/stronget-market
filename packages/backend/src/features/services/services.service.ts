@@ -88,7 +88,12 @@ export class ServicesService {
           status: "pending",
         }).populate("clientId", "name email avatar");
 
-        const pendingUsers = pendingHirings.map((hiring: any) => ({
+        // Filter out hirings with null clientId (in case user was deleted)
+        const validPendingHirings = pendingHirings.filter(
+          (hiring: any) => hiring.clientId !== null
+        );
+
+        const pendingUsers = validPendingHirings.map((hiring: any) => ({
           id: hiring.clientId._id,
           name: `${hiring.clientId.name}`,
           email: hiring.clientId.email,
@@ -113,7 +118,9 @@ export class ServicesService {
 
         return {
           id: service._id,
-          trainerName: `${trainer?.name} ${trainer?.surname}`,
+          trainerName: `${trainer?.name || ""} ${
+            trainer?.surname || ""
+          }`.trim(),
           category: service.category,
           description: service.description,
           duration: service.duration,
@@ -138,11 +145,17 @@ export class ServicesService {
     return servicesWithStats;
   }
 
-  async getClientServices(clientId: string): Promise<GetServicesResponseDTO[]> {
-    // Get all hirings for this client (pending, confirmed, cancelled, completed)
-    const hirings = await Hiring.find({
+  async getClientServices(
+    clientId: string,
+    params: GetServicesParams = {}
+  ): Promise<GetServicesResponseDTO[]> {
+    // Build query for hirings
+    const hiringQuery: any = {
       clientId: new Types.ObjectId(clientId),
-    }).populate({
+    };
+
+    // Get all hirings for this client (pending, confirmed, cancelled, completed)
+    const hirings = await Hiring.find(hiringQuery).populate({
       path: "serviceId",
       select:
         "category description duration price mode zone language availability trainerId visualizations isActive",
@@ -156,15 +169,99 @@ export class ServicesService {
       return [];
     }
 
+    // Filter out hirings with null serviceId (in case service was deleted)
+    const validHirings = hirings.filter(
+      (hiring: any) => hiring.serviceId !== null
+    );
+
+    if (validHirings.length === 0) {
+      return [];
+    }
+
+    // Filter hirings based on service criteria
+    let filteredHirings = validHirings;
+
+    // Apply service-based filters
+    if (
+      params.category ||
+      params.zone ||
+      params.mode ||
+      params.language ||
+      params.minPrice ||
+      params.maxPrice ||
+      params.minDuration ||
+      params.maxDuration ||
+      params.search
+    ) {
+      filteredHirings = validHirings.filter((hiring: any) => {
+        const service = hiring.serviceId;
+        const trainer = service.trainerId;
+
+        // Category filter
+        if (params.category) {
+          const categories = params.category.split(",");
+          if (!categories.includes(service.category)) return false;
+        }
+
+        // Zone filter
+        if (params.zone) {
+          const zones = params.zone.split(",");
+          if (!zones.includes(service.zone)) return false;
+        }
+
+        // Mode filter
+        if (params.mode) {
+          const modes = params.mode.split(",");
+          if (!modes.includes(service.mode)) return false;
+        }
+
+        // Language filter
+        if (params.language) {
+          const languages = params.language.split(",");
+          if (!languages.includes(service.language)) return false;
+        }
+
+        // Price filters
+        if (params.minPrice && service.price < params.minPrice) return false;
+        if (params.maxPrice && service.price > params.maxPrice) return false;
+
+        // Duration filters
+        if (params.minDuration && service.duration < params.minDuration)
+          return false;
+        if (params.maxDuration && service.duration > params.maxDuration)
+          return false;
+
+        // Search filter
+        if (params.search) {
+          const searchTerm = params.search.toLowerCase();
+          const trainerName = `${trainer?.name || ""} ${
+            trainer?.surname || ""
+          }`.toLowerCase();
+
+          const matchesSearch =
+            service.description.toLowerCase().includes(searchTerm) ||
+            service.category.toLowerCase().includes(searchTerm) ||
+            service.zone.toLowerCase().includes(searchTerm) ||
+            service.language.toLowerCase().includes(searchTerm) ||
+            service.mode.toLowerCase().includes(searchTerm) ||
+            trainerName.includes(searchTerm);
+
+          if (!matchesSearch) return false;
+        }
+
+        return true;
+      });
+    }
+
     // Get unique services (in case user hired the same service multiple times)
-    const uniqueServiceIds = [
-      ...new Set(hirings.map((hiring: any) => hiring.serviceId._id.toString())),
-    ];
+    const servicesIds = filteredHirings.map((hiring: any) =>
+      hiring.serviceId._id.toString()
+    );
 
     // Get statistics for each unique service
     const servicesWithStats = await Promise.all(
-      uniqueServiceIds.map(async (serviceId: string) => {
-        const hiring = hirings.find(
+      servicesIds.map(async (serviceId: string) => {
+        const hiring = filteredHirings.find(
           (h: any) => h.serviceId._id.toString() === serviceId
         );
 
@@ -219,7 +316,10 @@ export class ServicesService {
       })
     );
 
-    return servicesWithStats as unknown as GetServicesResponseDTO[];
+    // Filter out null results and return
+    return servicesWithStats.filter(
+      (service) => service !== null
+    ) as unknown as GetServicesResponseDTO[];
   }
 
   async getServiceById(id: string): Promise<GetServicesResponseDTO> {
@@ -660,16 +760,19 @@ export class ServicesService {
     }
   }
 
-  async getServiceClients(serviceId: string): Promise<GetServiceClientsResponseDTO> {
+  async getServiceClients(
+    serviceId: string
+  ): Promise<GetServiceClientsResponseDTO> {
     // Get all hirings for this service with client information
     const hirings = await Hiring.find({
       serviceId: new Types.ObjectId(serviceId),
-    }).populate("clientId", "name email avatar");
+    }).populate("clientId", "name email birthDate avatar");
 
     const clients = hirings.map((hiring: any) => ({
       id: hiring.clientId._id,
       name: `${hiring.clientId.name}`,
       email: hiring.clientId.email,
+      birthDate: hiring.clientId.birthDate,
       avatarUrl: hiring.clientId.avatar || "",
       hiringId: hiring._id,
       status: hiring.status,

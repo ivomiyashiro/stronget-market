@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -22,6 +22,7 @@ import {
 import {
   Archive,
   Eye,
+  FileText,
   Loader2,
   Pencil,
   Plus,
@@ -52,6 +53,13 @@ import type {
 import CreateReviewPopup from "../create-review/create-review-popup";
 import PendingModal from "./pending-modal";
 import ClientsModal from "./clients-modal";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { archivesService, type ArchiveFile } from "@/services/archives.service";
 
 // Interface for pending clients
 interface PendingClient {
@@ -90,6 +98,11 @@ const ServicesTable = () => {
   // State for clients modal
   const [clientsModalOpen, setClientsModalOpen] = useState(false);
   const [clients, setClients] = useState<ServiceClient[]>([]);
+
+  // State for archives modal
+  const [archivesModalOpen, setArchivesModalOpen] = useState(false);
+  const [archiveFiles, setArchiveFiles] = useState<ArchiveFile[]>([]);
+  const [archivesLoading, setArchivesLoading] = useState(false);
 
   const getDeleteDialogContent = () => {
     if (isTrainer) {
@@ -306,7 +319,30 @@ const ServicesTable = () => {
     setCurrentServiceId(null);
   };
 
-  console.log(services);
+  const handleOpenArchivesModal = async (service: Service) => {
+    if (!service.hiringId) {
+      console.error("No hiring ID found for service");
+      return;
+    }
+
+    setArchivesLoading(true);
+    setArchivesModalOpen(true);
+
+    try {
+      const files = await archivesService.getFilesByHiring(service.hiringId);
+      setArchiveFiles(files);
+    } catch (error) {
+      console.error("Error fetching archive files:", error);
+      setArchiveFiles([]);
+    } finally {
+      setArchivesLoading(false);
+    }
+  };
+
+  const handleCloseArchivesModal = () => {
+    setArchivesModalOpen(false);
+    setArchiveFiles([]);
+  };
 
   return (
     <section>
@@ -331,7 +367,7 @@ const ServicesTable = () => {
         <div className="flex justify-center items-center py-8 w-full">
           <Loader2 className="size-10 animate-spin" />
         </div>
-      ) : services && services.length === 0 ? (
+      ) : services?.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <div className="text-gray-400 mb-4">
             <Archive className="size-16 mx-auto" />
@@ -371,6 +407,7 @@ const ServicesTable = () => {
                 <TableHead>Modalidad</TableHead>
                 <TableHead>Duración</TableHead>
                 <TableHead>Evaluación</TableHead>
+                <TableHead>Archivos</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
             )}
@@ -380,7 +417,12 @@ const ServicesTable = () => {
               ? services.map((service: Service, index) => (
                   <TableRow key={index}>
                     <TableCell className="max-w-[250px] overflow-hidden text-ellipsis px-4">
-                      {service.description}
+                      <Link
+                        to={`/my-services/${service.id}/clients`}
+                        className="hover:underline"
+                      >
+                        {service.description}
+                      </Link>
                     </TableCell>
                     <TableCell className="px-4">
                       {service.visualizations}
@@ -417,13 +459,13 @@ const ServicesTable = () => {
                         variant="ghost"
                         size="icon"
                         onClick={() => {
-                          if (service.pendings.length > 0) {
+                          if (service.pendings?.length > 0) {
                             handleOpenPendingModal(service);
                           }
                         }}
                         className="p-0"
                       >
-                        {service.pendings.length}
+                        {service.pendings?.length}
                       </Button>
                     </TableCell>
                     <TableCell className="px-4">
@@ -476,6 +518,16 @@ const ServicesTable = () => {
                           {service.totalReviews || 0})
                         </span>
                       </div>
+                    </TableCell>
+                    <TableCell className="px-4">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleOpenArchivesModal(service)}
+                        title="Ver archivos"
+                      >
+                        <FileText className="size-4" />
+                      </Button>
                     </TableCell>
                     <TableCell className="px-4">
                       {service.hiringStatus === "confirmed" ? (
@@ -582,6 +634,62 @@ const ServicesTable = () => {
         clients={clients}
         setCurrentServiceId={setCurrentServiceId}
       />
+
+      {/* Archives Modal */}
+      <Dialog open={archivesModalOpen} onOpenChange={handleCloseArchivesModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Archivos del Servicio</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {archivesLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <Loader2 className="size-8 animate-spin" />
+              </div>
+            ) : archiveFiles?.length === 0 ? (
+              <div className="text-center py-8">
+                <FileText className="size-12 mx-auto mb-4 text-gray-400" />
+                <p className="text-gray-500">
+                  No hay archivos disponibles para este servicio
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {archiveFiles.map((file) => (
+                  <div
+                    key={file._id}
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <FileText className="size-6 text-blue-600" />
+                      <div>
+                        <p className="font-medium">{file.originalName}</p>
+                        <p className="text-sm text-gray-500">
+                          Subido por: {file.uploadedBy.name}{" "}
+                          {file.uploadedBy.surname}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(file.uploadDate).toLocaleDateString()} •{" "}
+                          {(file.fileSize / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(file.downloadUrl, "_blank")}
+                      disabled={!file.downloadUrl}
+                    >
+                      <Eye className="size-4 mr-2" />
+                      Ver
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };

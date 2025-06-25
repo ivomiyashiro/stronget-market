@@ -96,6 +96,18 @@ export class HiringService extends BaseService {
     }
 
     /**
+     * Update hiring status (complete or cancel)
+     */
+    async updateHiringStatus(
+        hiringId: string,
+        status: "completed" | "cancelled"
+    ): Promise<HiringItem> {
+        return this.patch<HiringItem>(`${this.endpoint}/${hiringId}/status`, {
+            status,
+        });
+    }
+
+    /**
      * Validate if a service can be booked
      */
     async canBookService(

@@ -14,7 +14,6 @@ import {
   loginSchema,
   updateUserSchema,
   passwordRecoverySchema,
-  userIdSchema,
 } from "./user.validation";
 import { optionalAuthentication } from "../../middleware/auth.middleware";
 import { getServicesParamsSchema } from "../services/services.validation";
@@ -44,21 +43,23 @@ router.get(
 // Avatar routes - must come before /:id routes
 router.post(
   "/:id/avatar",
-  validateParams(userIdSchema),
   uploadAvatar,
   handleUploadError,
   userController.uploadAvatar
 );
 
 // Parameterized routes - must come after specific routes
-router.get("/:id", validateParams(userIdSchema), userController.getUserById);
+router.get("/:id", userController.getUserById);
 
 router.put(
   "/:id",
-  validateParams(userIdSchema),
   validateBody(updateUserSchema),
   userController.updateUser
 );
+
+router.get("/:id", userController.getUserById);
+
+router.put("/:id", validateBody(updateUserSchema), userController.updateUser);
 
 router.delete("/:id", userController.deleteUser);
 
