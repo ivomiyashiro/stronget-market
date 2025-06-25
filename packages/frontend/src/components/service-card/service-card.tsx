@@ -23,7 +23,7 @@ const ServiceCard = ({
   const navigate = useNavigate();
   return (
     <article
-      className="flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md cursor-pointer"
+      className="flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md cursor-pointer h-[350px]"
       onClick={() => navigate(`/service/${id}`)}
     >
       <figure className="relative aspect-video w-full overflow-hidden rounded-t-lg">
