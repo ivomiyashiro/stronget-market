@@ -2,16 +2,21 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
-import { ExpandedFilters } from "./expanded-filters";
+import { ExpandedFilters, type FilterContext } from "./expanded-filters";
 import type { GetServicesParams } from "@/services/services.service";
 
 interface FilteringProps {
     onApplyFilters?: (filters: GetServicesParams) => void;
     onSearch?: (searchTerm: string) => void;
     currentFilters: GetServicesParams;
+    context?: FilterContext;
 }
 
-const Filtering = ({ onApplyFilters, currentFilters }: FilteringProps) => {
+const Filtering = ({
+    onApplyFilters,
+    currentFilters,
+    context = "landing",
+}: FilteringProps) => {
     const [search, setSearch] = useState("");
     const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
@@ -74,6 +79,7 @@ const Filtering = ({ onApplyFilters, currentFilters }: FilteringProps) => {
                 onClose={() => setIsFiltersOpen(false)}
                 onApplyFilters={handleApplyFilters}
                 currentFilters={currentFilters}
+                context={context}
             />
         </>
     );

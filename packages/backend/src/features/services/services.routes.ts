@@ -16,8 +16,24 @@ import { servicesController } from "./services.controller";
 
 const router = Router();
 
-// Get filters for services
+// Get filters for services (landing page - all filters)
 router.get("/filters", servicesController.getFilters);
+
+// Get filters for client services (only filters that client has confirmed)
+router.get(
+    "/filters/client",
+    authenticateToken,
+    requireRole(["cliente"]),
+    servicesController.getClientFilters
+);
+
+// Get filters for trainer services (only filters for services created by the trainer)
+router.get(
+    "/filters/trainer",
+    authenticateToken,
+    requireRole(["entrenador"]),
+    servicesController.getTrainerFilters
+);
 
 // Create a new service
 router.post(

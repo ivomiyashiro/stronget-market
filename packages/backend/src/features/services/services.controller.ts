@@ -210,6 +210,48 @@ export class ServicesController {
             });
         }
     };
+
+    getClientFilters = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ): Promise<void> => {
+        try {
+            const clientId = req.user?.id;
+            if (!clientId) {
+                res.status(401).json({ message: "Unauthorized" });
+                return;
+            }
+
+            const filters = await this.servicesService.getClientFilters(clientId);
+            res.status(200).json(filters);
+        } catch (error) {
+            res.status(400).json({
+                message:
+                    error instanceof Error ? error.message : "Get client filters failed",
+            });
+        }
+    };
+
+    getTrainerFilters = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ): Promise<void> => {
+        try {
+            const trainerId = req.user?.id;
+            if (!trainerId) {
+                res.status(401).json({ message: "Unauthorized" });
+                return;
+            }
+
+            const filters = await this.servicesService.getTrainerFilters(trainerId);
+            res.status(200).json(filters);
+        } catch (error) {
+            res.status(400).json({
+                message:
+                    error instanceof Error ? error.message : "Get trainer filters failed",
+            });
+        }
+    };
 }
 
 export const servicesController = new ServicesController();

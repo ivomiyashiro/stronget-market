@@ -483,4 +483,135 @@ export class ServicesService {
             maxDuration: durationStats[0]?.maxDuration || 0,
         };
     }
+
+    async getClientFilters(clientId: string): Promise<GetFiltersResponseDTO> {
+        // Get confirmed hirings for this client
+        const hirings = await Hiring.find({
+            clientId: new Types.ObjectId(clientId),
+            status: "confirmed",
+        }).populate("serviceId");
+
+        if (hirings.length === 0) {
+            return {
+                minPrice: 0,
+                maxPrice: 0,
+                zones: [],
+                languages: [],
+                categories: [],
+                minDuration: 0,
+                maxDuration: 0,
+            };
+        }
+
+        // Extract service IDs from confirmed hirings
+        const serviceIds = hirings.map((hiring: any) => hiring.serviceId._id);
+
+        // Get filters based on client's confirmed services
+        const priceStats = await Service.aggregate([
+            { $match: { _id: { $in: serviceIds }, isActive: true } },
+            {
+                $group: {
+                    _id: null,
+                    minPrice: { $min: "$price" },
+                    maxPrice: { $max: "$price" },
+                },
+            },
+        ]);
+
+        const zones = await Service.distinct("zone", {
+            _id: { $in: serviceIds },
+            isActive: true,
+        });
+
+        const languages = await Service.distinct("language", {
+            _id: { $in: serviceIds },
+            isActive: true,
+        });
+
+        const categories = await Service.distinct("category", {
+            _id: { $in: serviceIds },
+            isActive: true,
+        });
+
+        const durationStats = await Service.aggregate([
+            { $match: { _id: { $in: serviceIds }, isActive: true } },
+            {
+                $group: {
+                    _id: null,
+                    minDuration: { $min: "$duration" },
+                    maxDuration: { $max: "$duration" },
+                },
+            },
+        ]);
+
+        return {
+            minPrice: priceStats[0]?.minPrice || 0,
+            maxPrice: priceStats[0]?.maxPrice || 0,
+            zones: zones.sort(),
+            languages: languages.sort(),
+            categories: categories.sort(),
+            minDuration: durationStats[0]?.minDuration || 0,
+            maxDuration: durationStats[0]?.maxDuration || 0,
+        };
+    }
+
+    async getTrainerFilters(trainerId: string): Promise<GetFiltersResponseDTO> {
+        // Get filters based on trainer's services
+        const priceStats = await Service.aggregate([
+            {
+                $match: {
+                    trainerId: new Types.ObjectId(trainerId),
+                    isActive: true,
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    minPrice: { $min: "$price" },
+                    maxPrice: { $max: "$price" },
+                },
+            },
+        ]);
+
+        const zones = await Service.distinct("zone", {
+            trainerId: new Types.ObjectId(trainerId),
+            isActive: true,
+        });
+
+        const languages = await Service.distinct("language", {
+            trainerId: new Types.ObjectId(trainerId),
+            isActive: true,
+        });
+
+        const categories = await Service.distinct("category", {
+            trainerId: new Types.ObjectId(trainerId),
+            isActive: true,
+        });
+
+        const durationStats = await Service.aggregate([
+            {
+                $match: {
+                    trainerId: new Types.ObjectId(trainerId),
+                    isActive: true,
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    minDuration: { $min: "$duration" },
+                    maxDuration: { $max: "$duration" },
+                },
+            },
+        ]);
+
+        return {
+            minPrice: priceStats[0]?.minPrice || 0,
+            maxPrice: priceStats[0]?.maxPrice || 0,
+            zones: zones.sort(),
+            languages: languages.sort(),
+            categories: categories.sort(),
+            minDuration: durationStats[0]?.minDuration || 0,
+            maxDuration: durationStats[0]?.maxDuration || 0,
+        };
+    }
 }
