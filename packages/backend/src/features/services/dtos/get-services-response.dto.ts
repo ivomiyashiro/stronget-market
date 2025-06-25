@@ -11,6 +11,7 @@ export type GetServicesResponseDTO = {
     zone: string;
     language: string;
     maxPeople: number;
+    status: "active" | "inactive";
     availability: {
         day: string;
         startTime: string;

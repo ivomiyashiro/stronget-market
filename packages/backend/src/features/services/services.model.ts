@@ -10,6 +10,7 @@ const serviceSchema = new mongoose.Schema({
     zone: { type: String, required: true },
     language: { type: String, required: true },
     maxPeople: { type: Number, required: true },
+    status: { type: String, enum: ["active", "inactive"], default: "active" },
     availability: [
         {
             day: { type: String, required: true },
