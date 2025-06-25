@@ -44,7 +44,7 @@ import {
 import { hiringService } from "@/services/hiring.service";
 import type { AppDispatch } from "@/store/store";
 import type { Service, GetServicesParams } from "@/services/services.service";
-import { Label } from "@radix-ui/react-label";
+import CreateReviewPopup from "../create-review/create-review-popup";
 import PendingModal from "./pending-modal";
 
 const ServicesTable = () => {
@@ -64,9 +64,12 @@ const ServicesTable = () => {
   // State for delete confirmation dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
-  const [pendingModalOpen, setPendingModalOpen] = useState(false);
 
-  console.log(services);
+  // State for review popup
+  const [reviewPopupOpen, setReviewPopupOpen] = useState(false);
+  const [serviceToReview, setServiceToReview] = useState<Service | null>(null);
+
+  const [pendingModalOpen, setPendingModalOpen] = useState(false);
 
   const getDeleteDialogContent = () => {
     if (isTrainer) {
@@ -175,6 +178,16 @@ const ServicesTable = () => {
   const handleApplyFilters = (filters: GetServicesParams) => {
     setCurrentFilters(filters);
     fetchServices(filters);
+  };
+
+  const handleCreateReview = (service: Service) => {
+    setServiceToReview(service);
+    setReviewPopupOpen(true);
+  };
+
+  const handleReviewCreated = () => {
+    // Optionally refresh the services list to update ratings
+    fetchServices();
   };
 
   const getPageTitle = () => {
@@ -310,12 +323,7 @@ const ServicesTable = () => {
                       </div>
                     </TableCell>
                     <TableCell className="px-4">
-                      <Label
-                        className="cursor-pointer w-fit"
-                        onClick={() => setPendingModalOpen(true)}
-                      >
-                        {service.pendings}
-                      </Label>
+                      {service.pendings.length}
                     </TableCell>
                     <TableCell className="px-4">
                       <div className="flex items-center gap-2">
@@ -379,13 +387,10 @@ const ServicesTable = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() =>
-                            navigate(
-                              `/trainer-evaluations/${service.trainerId}`
-                            )
-                          }
+                          onClick={() => handleCreateReview(service)}
+                          title="Crear reseña"
                         >
-                          <Star className="size-4 " />
+                          <Star className="size-4" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -425,6 +430,14 @@ const ServicesTable = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Review Popup */}
+      <CreateReviewPopup
+        isOpen={reviewPopupOpen}
+        onClose={() => setReviewPopupOpen(false)}
+        service={serviceToReview}
+        onReviewCreated={handleReviewCreated}
+      />
       <PendingModal
         pendingModalOpen={pendingModalOpen}
         setPendingModalOpen={setPendingModalOpen}

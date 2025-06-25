@@ -41,7 +41,6 @@ export class ServicesService {
         let services;
 
         if (params.search) {
-            // First, find trainers that match the search term
             const matchingTrainers = await User.find({
                 $or: [
                     { name: { $regex: params.search, $options: "i" } },
@@ -51,7 +50,6 @@ export class ServicesService {
 
             const trainerIds = matchingTrainers.map((trainer) => trainer._id);
 
-            // Add trainer search to the query
             query.$or = [
                 { description: { $regex: params.search, $options: "i" } },
                 { category: { $regex: params.search, $options: "i" } },
@@ -77,6 +75,17 @@ export class ServicesService {
                     serviceId: service._id,
                     status: "pending",
                 });
+
+                // Get pending users information
+                const pendingHirings = await Hiring.find({
+                    serviceId: service._id,
+                    status: "pending",
+                }).populate("clientId", "name email");
+
+                const pendingUsers = pendingHirings.map((hiring: any) => ({
+                    name: `${hiring.clientId.name}`,
+                    email: hiring.clientId.email,
+                }));
 
                 const totalReviews = await Review.countDocuments({
                     serviceId: service._id,
@@ -107,7 +116,7 @@ export class ServicesService {
                     availability: service.availability,
                     trainerImage: trainer?.avatar || "",
                     rating: ratingResult[0]?.average || 0,
-                    pendings: pendings,
+                    pendings: pendingUsers,
                     totalReviews: totalReviews,
                     visualizations: service.visualizations,
                     clients: clients,
@@ -121,9 +130,10 @@ export class ServicesService {
     }
 
     async getClientServices(clientId: string): Promise<GetServicesResponseDTO[]> {
-        // Get all hirings for this client with populated service data
+        // Get only confirmed/accepted hirings for this client with populated service data
         const hirings = await Hiring.find({
             clientId: new Types.ObjectId(clientId),
+            status: "confirmed", // Only return services accepted by the trainer
         }).populate({
             path: "serviceId",
             select: "category description duration price mode zone language availability trainerId visualizations isActive",
@@ -199,10 +209,7 @@ export class ServicesService {
             })
         );
 
-        // Filter out any null results and return
-        return servicesWithStats.filter(
-            (service) => service !== null
-        ) as GetServicesResponseDTO[];
+        return servicesWithStats as unknown as GetServicesResponseDTO[];
     }
 
     async getServiceById(id: string): Promise<GetServicesResponseDTO> {
@@ -219,6 +226,17 @@ export class ServicesService {
             serviceId: service._id,
             status: "pending",
         });
+
+        // Get pending users information
+        const pendingHirings = await Hiring.find({
+            serviceId: service._id,
+            status: "pending",
+        }).populate("clientId", "name email");
+
+        const pendingUsers = pendingHirings.map((hiring: any) => ({
+            name: `${hiring.clientId.name}`,
+            email: hiring.clientId.email,
+        }));
 
         const totalReviews = await Review.countDocuments({
             serviceId: service._id,
@@ -249,7 +267,7 @@ export class ServicesService {
             availability: service.availability,
             trainerImage: trainer?.avatar || "",
             rating: ratingResult[0]?.average || 0,
-            pendings: pendings,
+            pendings: pendingUsers,
             totalReviews: totalReviews,
             visualizations: service.visualizations,
             clients: clients,
@@ -323,6 +341,17 @@ export class ServicesService {
                     status: "pending",
                 });
 
+                // Get pending users information
+                const pendingHirings = await Hiring.find({
+                    serviceId: service._id,
+                    status: "pending",
+                }).populate("clientId", "name email");
+
+                const pendingUsers = pendingHirings.map((hiring: any) => ({
+                    name: `${hiring.clientId.name}`,
+                    email: hiring.clientId.email,
+                }));
+
                 const totalReviews = await Review.countDocuments({
                     serviceId: service._id,
                 });
@@ -352,7 +381,7 @@ export class ServicesService {
                     availability: service.availability,
                     trainerImage: trainer?.avatar || "",
                     rating: ratingResult[0]?.average || 0,
-                    pendings: pendings,
+                    pendings: pendingUsers,
                     totalReviews: totalReviews,
                     visualizations: service.visualizations,
                     clients: clients,
@@ -362,7 +391,7 @@ export class ServicesService {
             })
         );
 
-        return servicesWithStats;
+        return servicesWithStats as unknown as GetServicesResponseDTO[];
     }
 
     async deleteService(id: string, trainerId: string) {
