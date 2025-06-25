@@ -1,31 +1,31 @@
-import {
-  User,
-  Star,
-  MapPin,
-  Clock,
-  Globe,
-  Users,
-  Loader2,
-  Search,
-  Check,
-} from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
-import { Button } from "../ui/button";
-import TrainerEvaluations from "../trainer-evaluations/trainer-evaluations";
+import { hiringService, type HiringItem } from "@/services/hiring.service";
+import { servicesService } from "@/services/services.service";
+import { useAuth } from "@/store/auth/auth.hooks";
+import { addServiceToCart } from "@/store/cart/cart.slice";
 import {
   useCurrentService,
   useServicesLoading,
 } from "@/store/services/services.hooks";
-import { useDispatch } from "react-redux";
 import { getServiceById } from "@/store/services/services.thunks";
 import type { AppDispatch } from "@/store/store";
-import { Link, useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "@/store/auth/auth.hooks";
 import { useCurrentTrainer } from "@/store/trainer/trainer.hooks";
-import { addServiceToCart } from "@/store/cart/cart.slice";
+import {
+  Check,
+  Clock,
+  Globe,
+  Loader2,
+  MapPin,
+  Search,
+  Star,
+  User,
+  Users,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { servicesService } from "@/services/services.service";
-import { hiringService, type HiringItem } from "@/services/hiring.service";
+import TrainerEvaluations from "../trainer-evaluations/trainer-evaluations";
+import { Button } from "../ui/button";
 
 const ServiceExpanded = () => {
   const { id } = useParams();
@@ -248,9 +248,9 @@ const ServiceExpanded = () => {
             </section>
             <section>
               <TrainerEvaluations
-                evaluations={[]}
-                totalEvaluations={service.totalReviews}
-                trainerName={service.category}
+                trainerId={service.trainerId}
+                trainerName={service.trainerName}
+                serviceId={service.id}
               />
             </section>
           </article>
