@@ -16,7 +16,10 @@ export type GetServicesResponseDTO = {
     }[];
     trainerImage: string;
     rating: number;
-    pendings: number;
+    pendings: {
+        name: string;
+        email: string;
+    }[];
     totalReviews: number;
     visualizations: number;
     clients: number;
