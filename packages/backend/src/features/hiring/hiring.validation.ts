@@ -1,12 +1,10 @@
 import { z } from "zod";
 
-// Custom validator for MongoDB ObjectId
 const objectIdRegex = /^[0-9a-fA-F]{24}$/;
 const objectId = z.string().refine((val) => objectIdRegex.test(val), {
     message: "Fecha inválida",
 });
 
-// Custom validator for credit card number (basic)
 const cardNumberRegex = /^\d{16}$/;
 const cardNumber = z
     .string()
@@ -14,7 +12,6 @@ const cardNumber = z
         message: "Número de tarjeta inválido",
     });
 
-// Custom validator for CVV
 const cvvRegex = /^\d{3,4}$/;
 const cvv = z.string().refine((val) => cvvRegex.test(val), {
     message: "CVV inválido",

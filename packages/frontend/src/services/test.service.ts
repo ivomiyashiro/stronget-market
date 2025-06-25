@@ -18,5 +18,4 @@ export class TestService {
   }
 }
 
-// Create singleton instance
 export const testService = new TestService();

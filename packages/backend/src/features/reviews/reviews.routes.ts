@@ -17,7 +17,6 @@ import {
 const router = Router();
 const reviewsController = new ReviewsController();
 
-// Create a new review
 router.post(
   "/",
   authenticateToken,
@@ -25,21 +24,18 @@ router.post(
   reviewsController.createReview
 );
 
-// Get reviews by service ID
 router.get(
   "/service/:serviceId",
   validateParams(serviceReviewsSchema),
   reviewsController.getReviewsByService
 );
 
-// Get reviews by trainer ID
 router.get(
   "/trainer/:trainerId",
   validateParams(trainerReviewsSchema),
   reviewsController.getReviewsByTrainer
 );
 
-// Respond to review (must come before /:id route)
 router.patch(
   "/:id/response",
   authenticateToken,
@@ -48,14 +44,12 @@ router.patch(
   reviewsController.respondToReview
 );
 
-// Get review by ID
 router.get(
   "/:id",
   validateParams(reviewIdSchema),
   reviewsController.getReviewById
 );
 
-// Update review
 router.put(
   "/:id",
   authenticateToken,
@@ -64,7 +58,6 @@ router.put(
   reviewsController.updateReview
 );
 
-// Delete review
 router.delete(
   "/:id",
   authenticateToken,

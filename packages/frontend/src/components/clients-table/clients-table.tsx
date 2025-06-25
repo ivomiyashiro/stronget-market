@@ -51,7 +51,6 @@ const ClientsTable = () => {
   const [clients, setClients] = useState<ServiceClient[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // State for action confirmation dialogs
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<"complete" | "cancel">(
     "complete"
@@ -60,7 +59,6 @@ const ClientsTable = () => {
     null
   );
 
-  // State for files modal
   const [filesModalOpen, setFilesModalOpen] = useState(false);
   const [currentClientFiles, setCurrentClientFiles] = useState<ArchiveFile[]>(
     []
@@ -114,7 +112,6 @@ const ClientsTable = () => {
         newStatus
       );
 
-      // Update the client status in the local state
       setClients((prevClients) =>
         prevClients.map((client) =>
           client.id === clientToAction.id
@@ -172,14 +169,11 @@ const ClientsTable = () => {
         file
       );
 
-      // Add the new file to the current files list
       setCurrentClientFiles((prevFiles) => [uploadedFile, ...prevFiles]);
 
-      // Reset the input
       event.target.value = "";
     } catch (error) {
       console.error("Error uploading file:", error);
-      // You could add a toast notification here
     } finally {
       setUploadLoading(false);
     }
@@ -189,7 +183,6 @@ const ClientsTable = () => {
     try {
       await archivesService.deleteFile(fileId);
 
-      // Remove the file from the current files list
       setCurrentClientFiles((prevFiles) =>
         prevFiles.filter((file) => file._id !== fileId)
       );
@@ -384,7 +377,6 @@ const ClientsTable = () => {
         </div>
       )}
 
-      {/* Action Confirmation Dialog */}
       <AlertDialog open={actionDialogOpen} onOpenChange={setActionDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -411,7 +403,6 @@ const ClientsTable = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Files Modal */}
       <Dialog open={filesModalOpen} onOpenChange={handleCloseFilesModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>

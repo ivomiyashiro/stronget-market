@@ -6,7 +6,6 @@ import { CreateReviewRequestDTO, UpdateReviewRequestDTO } from "./dtos";
 
 export class ReviewsService {
   async createReview(userId: string, reviewData: CreateReviewRequestDTO) {
-    // Check if user has hired this service and it's confirmed or completed
     const hiring = await Hiring.findOne({
       clientId: new Types.ObjectId(userId),
       serviceId: new Types.ObjectId(reviewData.serviceId),
@@ -19,7 +18,6 @@ export class ReviewsService {
       );
     }
 
-    // Check if user already reviewed this service
     const existingReview = await Review.findOne({
       user: new Types.ObjectId(userId),
       serviceId: new Types.ObjectId(reviewData.serviceId),
@@ -38,7 +36,6 @@ export class ReviewsService {
 
     await review.save();
 
-    // Update service rating
     await this.updateServiceRating(reviewData.serviceId);
 
     return review.populate([
@@ -90,7 +87,6 @@ export class ReviewsService {
     Object.assign(review, reviewData, { updatedAt: new Date() });
     await review.save();
 
-    // Update service rating if calification changed
     if (reviewData.calification !== undefined) {
       await this.updateServiceRating(review.serviceId.toString());
     }
@@ -117,7 +113,6 @@ export class ReviewsService {
     const serviceId = review.serviceId.toString();
     await Review.findByIdAndDelete(id);
 
-    // Update service rating after deletion
     await this.updateServiceRating(serviceId);
 
     return { message: "Review deleted successfully" };
@@ -172,7 +167,7 @@ export class ReviewsService {
     const averageRating = totalRating / reviews.length;
 
     await Service.findByIdAndUpdate(serviceId, {
-      rating: Math.round(averageRating * 10) / 10, // Round to 1 decimal
+      rating: Math.round(averageRating * 10) / 10,
       totalReviews: reviews.length,
     });
   }

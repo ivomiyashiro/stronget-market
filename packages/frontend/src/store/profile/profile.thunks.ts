@@ -2,7 +2,6 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { Profile } from "./profile.types";
 import userService from "@/services/user.service";
 
-// Fetch user profile
 export const fetchProfile = createAsyncThunk<
   Profile,
   string,
@@ -18,7 +17,6 @@ export const fetchProfile = createAsyncThunk<
   }
 });
 
-// Update user profile
 export const updateProfile = createAsyncThunk<
   Profile,
   { userId: string; profileData: Partial<Profile> },
@@ -38,7 +36,6 @@ export const updateProfile = createAsyncThunk<
   }
 );
 
-// Upload avatar
 export const uploadAvatar = createAsyncThunk<
   { avatarUrl: string },
   { userId: string; file: File },
@@ -55,11 +52,9 @@ export const uploadAvatar = createAsyncThunk<
   }
 });
 
-// Clear profile data (for logout)
 export const clearProfile = createAsyncThunk(
   "profile/clearProfile",
   async () => {
-    // This is a simple action that doesn't need API call
     return null;
   }
 );

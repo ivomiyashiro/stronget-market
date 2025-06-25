@@ -15,13 +15,15 @@ export class StorageService {
   private readonly bucketName = "avatars";
 
   constructor() {
-    this.supabase = createClient(config.supabase.url, config.supabase.serviceRoleKey);
+    this.supabase = createClient(
+      config.supabase.url,
+      config.supabase.serviceRoleKey
+    );
     this.ensureBucketExists();
   }
 
   private async ensureBucketExists(): Promise<void> {
     try {
-      // Check if bucket exists
       const { data: buckets, error: listError } =
         await this.supabase.storage.listBuckets();
 
@@ -30,23 +32,31 @@ export class StorageService {
         return;
       }
 
-      const bucketExists = buckets?.some((bucket) => bucket.name === this.bucketName);
+      const bucketExists = buckets?.some(
+        (bucket) => bucket.name === this.bucketName
+      );
 
       if (!bucketExists) {
-        // Create public bucket
         const { error: createError } = await this.supabase.storage.createBucket(
           this.bucketName,
           {
             public: true,
-            allowedMimeTypes: ["image/jpeg", "image/jpg", "image/png", "image/webp"],
-            fileSizeLimit: 5242880, // 5MB
+            allowedMimeTypes: [
+              "image/jpeg",
+              "image/jpg",
+              "image/png",
+              "image/webp",
+            ],
+            fileSizeLimit: 5242880,
           }
         );
 
         if (createError) {
           console.error("Error creating bucket:", createError.message);
         } else {
-          console.log(`Public bucket '${this.bucketName}' created successfully`);
+          console.log(
+            `Public bucket '${this.bucketName}' created successfully`
+          );
         }
       }
     } catch (error) {
@@ -98,7 +108,6 @@ export class StorageService {
     file: MulterFile,
     oldFilePath?: string
   ): Promise<{ url: string; path: string }> {
-    // Delete old avatar if exists
     if (oldFilePath) {
       try {
         await this.deleteAvatar(oldFilePath);
@@ -107,12 +116,13 @@ export class StorageService {
       }
     }
 
-    // Upload new avatar
     return this.uploadAvatar(userId, file);
   }
 
   getPublicUrl(filePath: string): string {
-    const { data } = this.supabase.storage.from(this.bucketName).getPublicUrl(filePath);
+    const { data } = this.supabase.storage
+      .from(this.bucketName)
+      .getPublicUrl(filePath);
 
     return data.publicUrl;
   }

@@ -45,7 +45,12 @@ export interface Service {
   }[];
   trainerId: string;
   hiringId?: string; // Optional hiring ID for client services
-  hiringStatus?: "pending" | "confirmed" | "cancelled" | "rejected" | "completed"; // Optional hiring status for client services
+  hiringStatus?:
+    | "pending"
+    | "confirmed"
+    | "cancelled"
+    | "rejected"
+    | "completed"; // Optional hiring status for client services
 }
 
 export interface GetServicesParams {
@@ -148,13 +153,16 @@ export class ServicesService {
   }
 
   async trackVisualization(serviceId: string): Promise<{ message: string }> {
-    return await baseService.post<{ message: string }>(`/services/${serviceId}/track-visualization`);
+    return await baseService.post<{ message: string }>(
+      `/services/${serviceId}/track-visualization`
+    );
   }
 
   async getServiceClients(serviceId: string): Promise<ServiceClient[]> {
-    return await baseService.get<ServiceClient[]>(`/services/${serviceId}/clients`);
+    return await baseService.get<ServiceClient[]>(
+      `/services/${serviceId}/clients`
+    );
   }
 }
 
-// Create singleton instance
 export const servicesService = new ServicesService();

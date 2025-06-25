@@ -5,10 +5,10 @@ const archiveSchema = new mongoose.Schema({
   uploadedBy: { type: Types.ObjectId, ref: "User", required: true },
   fileName: { type: String, required: true },
   originalName: { type: String, required: true },
-  fileSize: { type: Number, required: true }, // in bytes
+  fileSize: { type: Number, required: true },
   mimeType: { type: String, required: true },
-  fileUrl: { type: String, required: true }, // Third-party service URL
-  fileKey: { type: String, required: true }, // Key/path in third-party service
+  fileUrl: { type: String, required: true },
+  fileKey: { type: String, required: true },
   uploadDate: { type: Date, default: Date.now },
   isActive: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },

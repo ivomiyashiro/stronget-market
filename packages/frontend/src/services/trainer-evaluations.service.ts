@@ -13,9 +13,10 @@ export interface TrainerEvaluation {
 
 export class TrainerEvaluationsService {
   async getTrainerEvaluations(trainerId: string): Promise<TrainerEvaluation[]> {
-    return await baseService.get<TrainerEvaluation[]>(`/reviews/trainer/${trainerId}`);
+    return await baseService.get<TrainerEvaluation[]>(
+      `/reviews/trainer/${trainerId}`
+    );
   }
 }
 
-// Create singleton instance
-export const trainerEvaluationsService = new TrainerEvaluationsService(); 
+export const trainerEvaluationsService = new TrainerEvaluationsService();
