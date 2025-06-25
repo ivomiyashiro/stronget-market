@@ -76,7 +76,7 @@ const Login = () => {
           />
         </div>
         <Link
-          to="/forgot-password"
+          to="/password-recovery"
           className="font-normal text-center underline"
         >
           Olvidé mi contraseña

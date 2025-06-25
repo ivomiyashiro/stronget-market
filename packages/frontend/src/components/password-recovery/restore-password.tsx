@@ -1,9 +1,20 @@
 import { Dumbbell } from "lucide-react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 
 const RestorePassword = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const email = sessionStorage.getItem('resetEmail');
+    if (!email) {
+      navigate('/password-recovery');
+    }
+  }, [navigate]);
+
   return (
     <section className="flex h-full items-center justify-center">
       <form className="flex flex-col gap-6 rounded-lg border p-8">
