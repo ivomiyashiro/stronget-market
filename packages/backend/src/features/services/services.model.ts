@@ -17,6 +17,7 @@ const serviceSchema = new mongoose.Schema({
         },
     ],
     visualizations: { type: Number, default: 0 },
+    viewedBy: [{ type: Types.ObjectId, ref: "User" }], // Track which users have viewed this service
     isActive: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },

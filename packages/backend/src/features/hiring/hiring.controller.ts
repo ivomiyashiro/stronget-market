@@ -231,4 +231,64 @@ export class HiringController {
             });
         }
     };
+
+    acceptHiring = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+        try {
+            const trainerId = req.user?.id;
+            if (!trainerId) {
+                res.status(401).json({ message: "Unauthorized" });
+                return;
+            }
+
+            const { clientId, serviceId } = req.body;
+
+            if (!clientId || !serviceId) {
+                res.status(400).json({
+                    message: "Client ID and Service ID are required",
+                });
+                return;
+            }
+
+            const hiring = await this.hiringService.acceptHiringByClientAndService(
+                clientId,
+                serviceId,
+                trainerId
+            );
+            res.status(200).json(hiring);
+        } catch (error) {
+            res.status(400).json({
+                message: error instanceof Error ? error.message : "Accept hiring failed",
+            });
+        }
+    };
+
+    rejectHiring = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+        try {
+            const trainerId = req.user?.id;
+            if (!trainerId) {
+                res.status(401).json({ message: "Unauthorized" });
+                return;
+            }
+
+            const { clientId, serviceId } = req.body;
+
+            if (!clientId || !serviceId) {
+                res.status(400).json({
+                    message: "Client ID and Service ID are required",
+                });
+                return;
+            }
+
+            const hiring = await this.hiringService.rejectHiringByClientAndService(
+                clientId,
+                serviceId,
+                trainerId
+            );
+            res.status(200).json(hiring);
+        } catch (error) {
+            res.status(400).json({
+                message: error instanceof Error ? error.message : "Reject hiring failed",
+            });
+        }
+    };
 }

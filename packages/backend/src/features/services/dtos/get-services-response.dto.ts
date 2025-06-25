@@ -21,11 +21,13 @@ export type GetServicesResponseDTO = {
         id: Types.ObjectId;
         name: string;
         email: string;
+        avatarUrl: string;
     }[];
     totalReviews: number;
     visualizations: number;
     clients: number;
     trainerId: Types.ObjectId;
     hiringId?: Types.ObjectId; // Optional hiring ID for client services
+    hiringStatus?: "pending" | "confirmed" | "cancelled" | "completed"; // Optional hiring status for client services
     files: string[];
 };

@@ -83,4 +83,12 @@ router.delete(
     servicesController.deleteService
 );
 
+// Track service visualization
+router.post(
+    "/:serviceId/track-visualization",
+    authenticateToken,
+    validateParams(serviceIdSchema),
+    servicesController.trackVisualization
+);
+
 export default router;

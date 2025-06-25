@@ -35,18 +35,23 @@ interface EditingForm {
 }
 
 const Profile = () => {
-  const { user } = useAuth();
-  const { isLoading } = useProfile();
+  const { user: loggedInUser } = useAuth();
+  const {
+    profile: profileUser,
+    isLoading,
+    error,
+    fetchUserProfile,
+  } = useProfile();
   const dispatch = useAppDispatch();
   const [isEditing, setIsEditing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [editingForm, setEditingForm] = useState<EditingForm>({
-    name: user?.name || "",
-    surname: user?.surname || "",
-    email: user?.email || "",
-    birthDay: user?.birthDay || "",
+    name: "",
+    surname: "",
+    email: "",
+    birthDay: "",
   });
 
   const userId = useParams().id;
@@ -54,14 +59,33 @@ const Profile = () => {
   // Trainer-specific state
   const trainerStatistics = useTrainerStatistics();
   const trainerLoading = useTrainerLoading();
-  const isTrainer = user?.role === "entrenador";
+  const isTrainer = profileUser?.role === "entrenador";
 
-  // Fetch trainer statistics when user is a trainer
+  // Fetch profile user when component mounts or userId changes
   useEffect(() => {
-    if (isTrainer && userId) {
+    if (userId) {
+      fetchUserProfile(userId);
+    }
+  }, [userId, fetchUserProfile]);
+
+  // Update editing form when profile user data is loaded
+  useEffect(() => {
+    if (profileUser) {
+      setEditingForm({
+        name: profileUser.name || "",
+        surname: profileUser.surname || "",
+        email: profileUser.email || "",
+        birthDay: profileUser.birthDay || "",
+      });
+    }
+  }, [profileUser]);
+
+  // Fetch trainer statistics when profile user is a trainer
+  useEffect(() => {
+    if (isTrainer && userId && userId === loggedInUser?.id) {
       dispatch(getTrainerStatistics({ id: userId }));
     }
-  }, [isTrainer, userId, dispatch]);
+  }, [isTrainer, userId, dispatch, loggedInUser?.id]);
 
   const formatBirthDay = (birthDay: string) => {
     return birthDay.split("T")[0];
@@ -77,18 +101,18 @@ const Profile = () => {
   }, [editingForm]);
 
   const handleUpdate = async () => {
-    if (!user?.id) return;
+    if (!profileUser?.id) return;
 
     // First upload avatar if a new file was selected
     if (selectedFile) {
       await dispatch(
-        uploadAvatar({ userId: user.id, file: selectedFile })
+        uploadAvatar({ userId: profileUser.id, file: selectedFile })
       ).unwrap();
     }
 
     // Then update profile data
     await dispatch(
-      updateProfile({ userId: user.id, profileData: editingForm })
+      updateProfile({ userId: profileUser.id, profileData: editingForm })
     ).unwrap();
 
     // Reset form state
@@ -109,18 +133,6 @@ const Profile = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      alert("Por favor selecciona un archivo de imagen válido");
-      return;
-    }
-
-    // Validate file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      alert("El archivo es demasiado grande. Máximo 5MB.");
-      return;
-    }
-
     setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
 
@@ -133,10 +145,10 @@ const Profile = () => {
   const handleCancel = () => {
     // Reset all form state
     setEditingForm({
-      name: user?.name || "",
-      surname: user?.surname || "",
-      email: user?.email || "",
-      birthDay: user?.birthDay || "",
+      name: profileUser?.name || "",
+      surname: profileUser?.surname || "",
+      email: profileUser?.email || "",
+      birthDay: profileUser?.birthDay || "",
     });
     setSelectedFile(null);
     setPreviewUrl(null);
@@ -144,16 +156,53 @@ const Profile = () => {
   };
 
   // Get the current avatar URL to display
-  const currentAvatarUrl = previewUrl || user?.avatar;
+  const currentAvatarUrl = previewUrl || profileUser?.avatar;
+
+  // Show loading state while fetching profile
+  if (isLoading) {
+    return (
+      <section className="flex h-full p-8 w-full flex-col gap-8">
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </section>
+    );
+  }
+
+  // Show error state if profile not found or other error
+  if (error || !profileUser) {
+    return (
+      <section className="flex h-full p-8 w-full flex-col gap-8">
+        <div className="flex flex-col items-center justify-center py-16 gap-4">
+          <div className="flex items-center justify-center bg-muted rounded-full h-24 w-24">
+            <Users className="size-12 text-muted-foreground" />
+          </div>
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-2">Usuario no encontrado</h2>
+            <p className="text-muted-foreground">
+              El perfil que estás buscando no existe o ha sido eliminado.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => window.history.back()}
+            className="mt-4"
+          >
+            Volver
+          </Button>
+        </div>
+      </section>
+    );
+  }
 
   return !isEditing ? (
     <section className="flex h-full p-8 w-full flex-col gap-8">
       <div className="flex flex-row justify-between w-full">
         <div className="flex flex-row gap-4">
-          {user?.avatar ? (
+          {profileUser?.avatar ? (
             <img
-              src={user?.avatar}
-              alt={`Foto de ${user?.name}`}
+              src={profileUser?.avatar}
+              alt={`Foto de ${profileUser?.name}`}
               className="h-full w-full object-cover rounded-full h-40 w-40 max-h-40 max-w-40"
             />
           ) : (
@@ -169,31 +218,34 @@ const Profile = () => {
           )}
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold text-center">
-              {user?.name} {user?.surname}
+              {profileUser?.name} {profileUser?.surname}
             </h1>
             <Label className="flex flex-row gap-2 items-center text-muted-foreground">
-              <Mail className="size-4" /> {user?.email}
+              <Mail className="size-4" /> {profileUser?.email}
             </Label>
             <Label className="flex flex-row gap-2 items-center text-muted-foreground">
               <Calendar className="size-4" />{" "}
-              {user?.birthDay && formatBirthDay(user.birthDay)}
+              {profileUser?.birthDay && formatBirthDay(profileUser.birthDay)}
             </Label>
           </div>
         </div>
         <div className="flex flex-col gap-6 items-center">
-          <Button
-            variant="secondary"
-            className="rounded-full w-fit"
-            onClick={() => setIsEditing(true)}
-          >
-            <Pencil className="size-4" />
-          </Button>
+          {/* Only show edit button if the logged-in user is viewing their own profile */}
+          {loggedInUser?.id === profileUser?.id && (
+            <Button
+              variant="secondary"
+              className="rounded-full w-fit"
+              onClick={() => setIsEditing(true)}
+            >
+              <Pencil className="size-4" />
+            </Button>
+          )}
           <div className="flex flex-col items-center">
             <Label className="text-sm text-muted-foreground">
               Miembro desde
             </Label>
             <Label className="text-xl">
-              {user?.birthDay && formatBirthDay(user.birthDay)}
+              {profileUser?.birthDay && formatBirthDay(profileUser.birthDay)}
             </Label>
           </div>
         </div>
@@ -201,7 +253,7 @@ const Profile = () => {
       <Separator />
 
       {/* Trainer Statistics Cards */}
-      {isTrainer && (
+      {isTrainer && userId === loggedInUser?.id && (
         <div className="w-full">
           <h2 className="text-2xl font-bold mb-6">Estadísticas</h2>
           {trainerLoading ? (

@@ -248,7 +248,28 @@ export class ServicesController {
         } catch (error) {
             res.status(400).json({
                 message:
-                    error instanceof Error ? error.message : "Get trainer filters failed",
+                    error instanceof Error
+                        ? error.message
+                        : "Get trainer filters failed",
+            });
+        }
+    };
+
+    trackVisualization = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+        try {
+            const { serviceId } = req.params;
+            const userId = req.user?.id;
+
+            if (!userId) {
+                res.status(401).json({ message: "Unauthorized" });
+                return;
+            }
+
+            await this.servicesService.trackVisualization(serviceId, userId);
+            res.status(200).json({ message: "Visualization tracked successfully" });
+        } catch (error) {
+            res.status(400).json({
+                message: error instanceof Error ? error.message : "Track visualization failed",
             });
         }
     };
