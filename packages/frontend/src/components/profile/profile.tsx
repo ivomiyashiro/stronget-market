@@ -269,7 +269,7 @@ const Profile = () => {
           )}
           <div
             className={`flex ${
-              isMobile ? "flex-row" : "flex-col"
+              isMobile ? "flex-col" : "flex-col"
             } items-center`}
           >
             <div className="text-sm text-muted-foreground">Miembro desde</div>
