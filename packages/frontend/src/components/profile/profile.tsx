@@ -415,7 +415,9 @@ const Profile = () => {
   ) : (
     <section className="flex h-full p-8 w-full flex-col">
       <form className="w-full flex flex-col gap-8">
-        <div className="flex flex-row gap-8 w-full">
+        <div
+          className={`flex ${isMobile ? "flex-col" : "flex-row"} gap-8 w-full`}
+        >
           <div
             className="relative group cursor-pointer"
             onClick={handleAvatarClick}
@@ -431,7 +433,7 @@ const Profile = () => {
                 <Image className="size-12 text-muted-foreground" />
               </div>
             )}
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className=" absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <Upload className="size-10 text-white bg-black/50 rounded-full p-2" />
             </div>
             {isLoading && (
@@ -447,7 +449,11 @@ const Profile = () => {
             onChange={handleFileChange}
             className="hidden"
           />
-          <div className="grid grid-cols-2 gap-4 flex-1">
+          <div
+            className={`grid ${
+              isMobile ? "grid-cols-1" : "grid-cols-2"
+            } gap-4 flex-1`}
+          >
             <RequiredInput
               label="Nombre"
               value={editingForm.name}
