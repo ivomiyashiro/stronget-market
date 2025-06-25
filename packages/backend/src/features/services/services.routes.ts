@@ -9,6 +9,7 @@ import {
     createServiceSchema,
     updateServiceSchema,
     serviceIdSchema,
+    serviceIdParamSchema,
     trainerIdSchema,
     getServicesParamsSchema,
 } from "./services.validation";
@@ -89,6 +90,15 @@ router.post(
     authenticateToken,
     validateParams(serviceIdSchema),
     servicesController.trackVisualization
+);
+
+// Get all clients for a service
+router.get(
+    "/:serviceId/clients",
+    authenticateToken,
+    requireRole(["entrenador"]),
+    validateParams(serviceIdParamSchema),
+    servicesController.getServiceClients
 );
 
 export default router;

@@ -7,6 +7,14 @@ export interface Profile {
   surname: string;
   birthDay: string;
   role: string;
+  evaluations?: Evaluation[];
+}
+
+export interface Evaluation {
+  user: string;
+  date: string;
+  comment: string;
+  rating: number;
 }
 
 export interface ProfileState {

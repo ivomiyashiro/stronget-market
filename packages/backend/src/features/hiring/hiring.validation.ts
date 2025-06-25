@@ -37,10 +37,10 @@ export const createHiringSchema = z.object({
 });
 
 export const updateHiringStatusSchema = z.object({
-    status: z.enum(["pending", "confirmed", "cancelled", "completed"], {
+    status: z.enum(["pending", "confirmed", "cancelled", "rejected", "completed"], {
         errorMap: () => ({
             message:
-                "El estado debe ser uno de: pending, confirmed, cancelled, completed",
+                "El estado debe ser uno de: pending, confirmed, cancelled, rejected, completed",
         }),
     }),
 });

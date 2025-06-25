@@ -42,10 +42,16 @@ import {
   getUserServices,
 } from "@/store/services/services.thunks";
 import { hiringService } from "@/services/hiring.service";
+import { servicesService } from "@/services/services.service";
 import type { AppDispatch } from "@/store/store";
-import type { Service, GetServicesParams } from "@/services/services.service";
+import type {
+  Service,
+  GetServicesParams,
+  ServiceClient,
+} from "@/services/services.service";
 import CreateReviewPopup from "../create-review/create-review-popup";
 import PendingModal from "./pending-modal";
+import ClientsModal from "./clients-modal";
 
 // Interface for pending clients
 interface PendingClient {
@@ -80,6 +86,10 @@ const ServicesTable = () => {
   const [pendingModalOpen, setPendingModalOpen] = useState(false);
   const [pendingClients, setPendingClients] = useState<PendingClient[]>([]);
   const [currentServiceId, setCurrentServiceId] = useState<string | null>(null);
+
+  // State for clients modal
+  const [clientsModalOpen, setClientsModalOpen] = useState(false);
+  const [clients, setClients] = useState<ServiceClient[]>([]);
 
   const getDeleteDialogContent = () => {
     if (isTrainer) {
@@ -279,6 +289,26 @@ const ServicesTable = () => {
     setCurrentServiceId(null);
   };
 
+  const handleOpenClientsModal = async (service: Service) => {
+    try {
+      const clientsData = await servicesService.getServiceClients(service.id);
+      setClients(clientsData);
+      setClientsModalOpen(true);
+      setCurrentServiceId(service.id);
+    } catch (error) {
+      console.error("Error fetching service clients:", error);
+    }
+  };
+
+  const handleCloseClientsModal = () => {
+    setClientsModalOpen(false);
+    setClients([]);
+    setCurrentServiceId(null);
+  };
+
+
+  console.log(services);
+
   return (
     <section>
       <div className="flex justify-between items-center mb-6">
@@ -356,7 +386,16 @@ const ServicesTable = () => {
                     <TableCell className="px-4">
                       {service.visualizations}
                     </TableCell>
-                    <TableCell className="px-4">{service.clients}</TableCell>
+                    <TableCell className="px-4">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleOpenClientsModal(service)}
+                        className="cursor-pointer w-fit"
+                      >
+                        {service.clients}
+                      </Button>
+                    </TableCell>
                     <TableCell className="px-4">
                       {service.visualizations > 0
                         ? `${(
@@ -473,12 +512,18 @@ const ServicesTable = () => {
                                 ? "bg-yellow-100 text-yellow-800"
                                 : service.hiringStatus === "cancelled"
                                 ? "bg-red-100 text-red-800"
+                                : service.hiringStatus === "rejected"
+                                ? "bg-orange-100 text-orange-800"
+                                : service.hiringStatus === "completed"
+                                ? "bg-blue-100 text-blue-800"
                                 : "bg-gray-100 text-gray-800"
                             }`}
                           >
                             {service.hiringStatus === "pending"
                               ? "Pendiente"
                               : service.hiringStatus === "cancelled"
+                              ? "Cancelado"
+                              : service.hiringStatus === "rejected"
                               ? "Rechazado"
                               : service.hiringStatus === "completed"
                               ? "Completado"
@@ -530,6 +575,12 @@ const ServicesTable = () => {
         handleAccept={handleAccept}
         handleReject={handleReject}
         pendingClients={pendingClients}
+        setCurrentServiceId={setCurrentServiceId}
+      />
+      <ClientsModal
+        clientsModalOpen={clientsModalOpen}
+        setClientsModalOpen={handleCloseClientsModal}
+        clients={clients}
         setCurrentServiceId={setCurrentServiceId}
       />
     </section>

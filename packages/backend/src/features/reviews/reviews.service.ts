@@ -14,12 +14,14 @@ export class ReviewsService {
     });
 
     if (!hiring) {
-      throw new Error("You can only review services you have hired and confirmed");
+      throw new Error(
+        "You can only review services you have hired and confirmed"
+      );
     }
 
     // Check if user already reviewed this service
     const existingReview = await Review.findOne({
-      userId: new Types.ObjectId(userId),
+      user: new Types.ObjectId(userId),
       serviceId: new Types.ObjectId(reviewData.serviceId),
     });
 
@@ -29,7 +31,7 @@ export class ReviewsService {
 
     const review = new Review({
       ...reviewData,
-      userId: new Types.ObjectId(userId),
+      user: new Types.ObjectId(userId),
       serviceId: new Types.ObjectId(reviewData.serviceId),
       trainerId: new Types.ObjectId(reviewData.trainerId),
     });
@@ -40,7 +42,7 @@ export class ReviewsService {
     await this.updateServiceRating(reviewData.serviceId);
 
     return review.populate([
-      { path: "userId", select: "name surname" },
+      { path: "user", select: "name surname" },
       { path: "trainerId", select: "name surname" },
       { path: "serviceId", select: "category description" },
     ]);
@@ -48,14 +50,14 @@ export class ReviewsService {
 
   async getReviewsByService(serviceId: string) {
     return Review.find({ serviceId: new Types.ObjectId(serviceId) })
-      .populate("userId", "name surname")
+      .populate("user", "_id name surname avatar")
       .sort({ date: -1 });
   }
 
   async getReviewsByTrainer(trainerId: string) {
     return Review.find({ trainerId: new Types.ObjectId(trainerId) })
       .populate([
-        { path: "userId", select: "name surname" },
+        { path: "user", select: "_id name surname avatar" },
         { path: "serviceId", select: "category description" },
       ])
       .sort({ date: -1 });
@@ -63,20 +65,26 @@ export class ReviewsService {
 
   async getReviewById(id: string) {
     return Review.findById(id).populate([
-      { path: "userId", select: "name surname" },
+      { path: "user", select: "_id name surname avatar" },
       { path: "trainerId", select: "name surname" },
       { path: "serviceId", select: "category description" },
     ]);
   }
 
-  async updateReview(id: string, userId: string, reviewData: UpdateReviewRequestDTO) {
+  async updateReview(
+    id: string,
+    userId: string,
+    reviewData: UpdateReviewRequestDTO
+  ) {
     const review = await Review.findOne({
       _id: new Types.ObjectId(id),
-      userId: new Types.ObjectId(userId),
+      user: new Types.ObjectId(userId),
     });
 
     if (!review) {
-      throw new Error("Review not found or you don't have permission to update it");
+      throw new Error(
+        "Review not found or you don't have permission to update it"
+      );
     }
 
     Object.assign(review, reviewData, { updatedAt: new Date() });
@@ -88,7 +96,7 @@ export class ReviewsService {
     }
 
     return review.populate([
-      { path: "userId", select: "name surname" },
+      { path: "user", select: "name surname" },
       { path: "trainerId", select: "name surname" },
       { path: "serviceId", select: "category description" },
     ]);
@@ -97,11 +105,13 @@ export class ReviewsService {
   async deleteReview(id: string, userId: string) {
     const review = await Review.findOne({
       _id: new Types.ObjectId(id),
-      userId: new Types.ObjectId(userId),
+      user: new Types.ObjectId(userId),
     });
 
     if (!review) {
-      throw new Error("Review not found or you don't have permission to delete it");
+      throw new Error(
+        "Review not found or you don't have permission to delete it"
+      );
     }
 
     const serviceId = review.serviceId.toString();
@@ -113,8 +123,39 @@ export class ReviewsService {
     return { message: "Review deleted successfully" };
   }
 
+  async respondToReview(
+    reviewId: string,
+    trainerId: string,
+    responseText: string
+  ) {
+    const review = await Review.findById(reviewId);
+    if (!review) {
+      throw new Error("Review not found");
+    }
+    if (review.trainerId.toString() !== trainerId) {
+      throw new Error("You are not authorized to respond to this review");
+    }
+    if (review.response) {
+      throw new Error("This review already has a response");
+    }
+
+    const updatedReview = await Review.findByIdAndUpdate(
+      reviewId,
+      { response: responseText },
+      { new: true, runValidators: false }
+    );
+
+    return updatedReview!.populate([
+      { path: "user", select: "_id name surname avatar" },
+      { path: "trainerId", select: "name surname" },
+      { path: "serviceId", select: "category description" },
+    ]);
+  }
+
   private async updateServiceRating(serviceId: string) {
-    const reviews = await Review.find({ serviceId: new Types.ObjectId(serviceId) });
+    const reviews = await Review.find({
+      serviceId: new Types.ObjectId(serviceId),
+    });
 
     if (reviews.length === 0) {
       await Service.findByIdAndUpdate(serviceId, {
@@ -124,7 +165,10 @@ export class ReviewsService {
       return;
     }
 
-    const totalRating = reviews.reduce((sum, review) => sum + review.calification, 0);
+    const totalRating = reviews.reduce(
+      (sum, review) => sum + review.calification,
+      0
+    );
     const averageRating = totalRating / reviews.length;
 
     await Service.findByIdAndUpdate(serviceId, {

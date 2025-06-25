@@ -32,6 +32,7 @@ const PendingModal = ({
         setPendingModalOpen(false);
         setCurrentServiceId(null);
       }}
+      className="w-[600px]"
     >
       <div className="p-4">
         <div className="flex flex-col gap-2">

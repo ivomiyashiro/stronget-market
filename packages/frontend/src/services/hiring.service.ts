@@ -43,7 +43,7 @@ export interface HiringItem {
     };
     day: string;
     time: string;
-    status: "pending" | "confirmed" | "cancelled" | "completed";
+    status: "pending" | "confirmed" | "cancelled" | "rejected" | "completed";
     createdAt: string;
     updatedAt: string;
 }

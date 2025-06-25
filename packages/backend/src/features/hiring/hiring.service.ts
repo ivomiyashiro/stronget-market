@@ -229,7 +229,11 @@ export class HiringService {
       },
       cancelled: {
         from: ["pending", "confirmed"],
-        allowedBy: ["trainer", "client"], // Both can cancel
+        allowedBy: ["client"], // Only clients can cancel
+      },
+      rejected: {
+        from: ["pending"],
+        allowedBy: ["trainer"], // Only trainers can reject
       },
       completed: {
         from: ["confirmed"],
@@ -353,8 +357,8 @@ export class HiringService {
       throw new Error("Pending hiring not found");
     }
 
-    // Update the hiring status to cancelled
-    hiring.status = "cancelled";
+    // Update the hiring status to rejected (trainer rejected the client)
+    hiring.status = "rejected";
     hiring.updatedAt = new Date();
     await hiring.save();
 
@@ -388,10 +392,10 @@ export class HiringService {
       throw new Error("You can only remove your own hirings");
     }
 
-    // Check if hiring can be removed based on status
+    // Check if hiring can be cancelled based on status
     const allowedStatuses = ["pending", "confirmed"];
     if (!allowedStatuses.includes(hiring.status)) {
-      throw new Error(`Cannot remove hiring with status: ${hiring.status}`);
+      throw new Error(`Cannot cancel hiring with status: ${hiring.status}`);
     }
 
     // Check if hiring is too close to the scheduled time (e.g., less than 24 hours)
@@ -405,18 +409,20 @@ export class HiringService {
       );
     }
 
-    // Remove the hiring (delete from database)
-    await Hiring.findByIdAndDelete(id);
+    // Change the hiring status to cancelled instead of deleting
+    hiring.status = "cancelled";
+    hiring.updatedAt = new Date();
+    await hiring.save();
 
-    // Notify the trainer about the removal
+    // Notify the trainer about the cancellation
     const trainer = await User.findById(hiring.trainerId);
     if (trainer) {
       trainer.notifications?.push({
         message: `${
           (hiring.clientId as any).name
-        } has removed their booking for ${
+        } ha cancelado su reserva para ${
           (hiring.serviceId as any).category
-        } on ${hiring.day} at ${hiring.time}`,
+        } el ${hiring.day} a las ${hiring.time}`,
         leido: false,
         date: new Date(),
       } as any);
@@ -431,11 +437,11 @@ export class HiringService {
   }
 
   async getTrainerAvailableSlots(trainerId: string, day: string) {
-    // Get all bookings for this trainer on this day of the week
+    // Get all active bookings for this trainer on this day of the week
     const bookings = await Hiring.find({
       trainerId: new Types.ObjectId(trainerId),
       day: day,
-      status: { $in: ["pending", "confirmed"] },
+      status: { $in: ["pending", "confirmed"] }, // Only consider pending and confirmed bookings
     })
       .populate("serviceId", "duration")
       .sort({ time: 1 });

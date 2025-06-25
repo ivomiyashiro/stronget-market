@@ -64,6 +64,10 @@ export const serviceIdSchema = z.object({
   id: objectId,
 });
 
+export const serviceIdParamSchema = z.object({
+  serviceId: objectId,
+});
+
 export const trainerIdSchema = z.object({
   trainerId: objectId,
 });

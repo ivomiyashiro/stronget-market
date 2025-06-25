@@ -43,3 +43,10 @@ export const serviceReviewsSchema = z.object({
 export const trainerReviewsSchema = z.object({
   trainerId: objectId,
 });
+
+export const reviewResponseSchema = z.object({
+  response: z
+    .string()
+    .min(1, "Response cannot be empty")
+    .max(500, "Response cannot exceed 500 characters"),
+});

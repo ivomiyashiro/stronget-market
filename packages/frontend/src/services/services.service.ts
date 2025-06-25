@@ -43,7 +43,7 @@ export interface Service {
   }[];
   trainerId: string;
   hiringId?: string; // Optional hiring ID for client services
-  hiringStatus?: "pending" | "confirmed" | "cancelled" | "completed"; // Optional hiring status for client services
+  hiringStatus?: "pending" | "confirmed" | "cancelled" | "rejected" | "completed"; // Optional hiring status for client services
 }
 
 export interface GetServicesParams {
@@ -63,6 +63,17 @@ export interface GetServicesParams {
 export interface GetServicesResponse {
   services: Service[];
   total: number;
+}
+
+export interface ServiceClient {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl: string;
+  hiringId: string;
+  status: "pending" | "confirmed" | "cancelled" | "rejected" | "completed";
+  day: string;
+  time: string;
 }
 
 export class ServicesService {
@@ -135,6 +146,10 @@ export class ServicesService {
 
   async trackVisualization(serviceId: string): Promise<{ message: string }> {
     return await baseService.post<{ message: string }>(`/services/${serviceId}/track-visualization`);
+  }
+
+  async getServiceClients(serviceId: string): Promise<ServiceClient[]> {
+    return await baseService.get<ServiceClient[]>(`/services/${serviceId}/clients`);
   }
 }
 
