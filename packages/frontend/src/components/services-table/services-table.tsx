@@ -303,6 +303,7 @@ const ServicesTable = () => {
   };
 
   const handleOpenClientsModal = async (service: Service) => {
+    if (service.clients === 0) return;
     try {
       const clientsData = await servicesService.getServiceClients(service.id);
       setClients(clientsData);

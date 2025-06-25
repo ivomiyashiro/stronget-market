@@ -28,7 +28,7 @@ export class TrainersService {
                 : 0;
 
         const performance =
-            totalVisualizations > 0 ? hirings.length / totalVisualizations : 0;
+            totalVisualizations > 0 ? (hirings.length / totalVisualizations) * 100 : 0;
 
         return {
             totalServices: services.length,
