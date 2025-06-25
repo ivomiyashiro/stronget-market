@@ -58,6 +58,7 @@ export const getServicesParamsSchema = z.object({
   duration: z.number().optional(),
   language: z.string().optional(),
   mode: z.enum(["online", "in-person"]).optional(),
+  search: z.string().optional(),
 });
 
 export const serviceIdSchema = z.object({

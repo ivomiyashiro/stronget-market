@@ -1,21 +1,21 @@
 import { Router } from "express";
 import {
-  validateBody,
-  validateParams,
-  validateQuery,
+    validateBody,
+    validateParams,
+    validateQuery,
 } from "../../middleware/validation.middleware";
 import {
-  authenticateToken,
-  requireRole,
-  optionalAuthentication,
+    authenticateToken,
+    requireRole,
+    optionalAuthentication,
 } from "../../middleware/auth.middleware";
 import {
-  createServiceSchema,
-  updateServiceSchema,
-  serviceIdSchema,
-  serviceIdParamSchema,
-  trainerIdSchema,
-  getServicesParamsSchema,
+    createServiceSchema,
+    updateServiceSchema,
+    serviceIdSchema,
+    serviceIdParamSchema,
+    trainerIdSchema,
+    getServicesParamsSchema,
 } from "./services.validation";
 import { servicesController } from "./services.controller";
 
@@ -26,87 +26,78 @@ router.get("/filters", servicesController.getFilters);
 
 // Get filters for client services (only filters that client has confirmed)
 router.get(
-  "/filters/client",
-  authenticateToken,
-  requireRole(["cliente"]),
-  servicesController.getClientFilters
+    "/filters/client",
+    authenticateToken,
+    requireRole(["cliente"]),
+    servicesController.getClientFilters
 );
 
 // Get filters for trainer services (only filters for services created by the trainer)
 router.get(
-  "/filters/trainer",
-  authenticateToken,
-  requireRole(["entrenador"]),
-  servicesController.getTrainerFilters
+    "/filters/trainer",
+    authenticateToken,
+    requireRole(["entrenador"]),
+    servicesController.getTrainerFilters
 );
 
 // Create a new service
 router.post(
-  "/",
-  authenticateToken,
-  requireRole(["entrenador"]),
-  validateBody(createServiceSchema),
-  servicesController.createService
+    "/",
+    authenticateToken,
+    requireRole(["entrenador"]),
+    validateBody(createServiceSchema),
+    servicesController.createService
 );
 
 // Get services - behavior depends on authenticated user:
 // - If authenticated client: returns their hired services
 // - Otherwise: returns all services with filters
-router.get(
-  "/",
-  optionalAuthentication,
-  validateQuery(getServicesParamsSchema),
-  servicesController.getServices
-);
+router.get("/", optionalAuthentication, servicesController.getServices);
 
 // Get service by ID
-router.get(
-  "/:id",
-  validateParams(serviceIdSchema),
-  servicesController.getServiceById
-);
+router.get("/:id", validateParams(serviceIdSchema), servicesController.getServiceById);
 
 // Get services by trainer ID
 router.get(
-  "/trainer/:trainerId",
-  validateParams(trainerIdSchema),
-  servicesController.getServicesByTrainerId
+    "/trainer/:trainerId",
+    validateParams(trainerIdSchema),
+    servicesController.getServicesByTrainerId
 );
 
 // Update service
 router.put(
-  "/:id",
-  authenticateToken,
-  requireRole(["entrenador"]),
-  validateBody(updateServiceSchema),
-  validateParams(serviceIdSchema),
-  servicesController.updateService
+    "/:id",
+    authenticateToken,
+    requireRole(["entrenador"]),
+    validateBody(updateServiceSchema),
+    validateParams(serviceIdSchema),
+    servicesController.updateService
 );
 
 // Delete service
 router.delete(
-  "/:id",
-  authenticateToken,
-  requireRole(["entrenador"]),
-  validateParams(serviceIdSchema),
-  servicesController.deleteService
+    "/:id",
+    authenticateToken,
+    requireRole(["entrenador"]),
+    validateParams(serviceIdSchema),
+    servicesController.deleteService
 );
 
 // Track service visualization
 router.post(
-  "/:serviceId/track-visualization",
-  authenticateToken,
-  validateParams(serviceIdParamSchema),
-  servicesController.trackVisualization
+    "/:serviceId/track-visualization",
+    authenticateToken,
+    validateParams(serviceIdParamSchema),
+    servicesController.trackVisualization
 );
 
 // Get all clients for a service
 router.get(
-  "/:serviceId/clients",
-  authenticateToken,
-  requireRole(["entrenador"]),
-  validateParams(serviceIdParamSchema),
-  servicesController.getServiceClients
+    "/:serviceId/clients",
+    authenticateToken,
+    requireRole(["entrenador"]),
+    validateParams(serviceIdParamSchema),
+    servicesController.getServiceClients
 );
 
 export default router;

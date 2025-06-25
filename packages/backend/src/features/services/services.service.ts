@@ -25,124 +25,122 @@ export class ServicesService {
   async getServices(
     params: GetServicesParams
   ): Promise<GetServicesResponseDTO[]> {
-    const query: any = { isActive: true };
+      const query: any = { isActive: true };
 
-    if (params.category) query.category = { $in: params.category.split(",") };
-    if (params.zone) query.zone = { $in: params.zone.split(",") };
-    if (params.mode) query.mode = { $in: params.mode.split(",") };
-    if (params.language) query.language = { $in: params.language.split(",") };
+      // Apply the same filtering logic as getServices
+      if (params.category) query.category = { $in: params.category.split(",") };
+      if (params.zone) query.zone = { $in: params.zone.split(",") };
+      if (params.mode) query.mode = { $in: params.mode.split(",") };
+      if (params.language) query.language = { $in: params.language.split(",") };
 
-    if (params.minPrice) query.price = { $gte: params.minPrice };
-    if (params.maxPrice) {
-      query.price = { ...query.price, $lte: params.maxPrice };
-    }
-    if (params.minDuration) query.duration = { $gte: params.minDuration };
-    if (params.maxDuration) {
-      query.duration = { ...query.duration, $lte: params.maxDuration };
-    }
+      if (params.minPrice) query.price = { $gte: params.minPrice };
+      if (params.maxPrice) {
+          query.price = { ...query.price, $lte: params.maxPrice };
+      }
+      if (params.minDuration) query.duration = { $gte: params.minDuration };
+      if (params.maxDuration) {
+          query.duration = { ...query.duration, $lte: params.maxDuration };
+      }
 
-    let services;
+      let services;
 
-    if (params.search) {
-      const matchingTrainers = await User.find({
-        $or: [
-          { name: { $regex: params.search, $options: "i" } },
-          { surname: { $regex: params.search, $options: "i" } },
-        ],
-      }).select("_id");
+      if (params.search) {
+          // First, find trainers that match the search term
+          const matchingTrainers = await User.find({
+              $or: [
+                  { name: { $regex: params.search, $options: "i" } },
+                  { surname: { $regex: params.search, $options: "i" } },
+              ],
+          }).select("_id");
 
-      const trainerIds = matchingTrainers.map((trainer) => trainer._id);
+          const trainerIds = matchingTrainers.map((trainer) => trainer._id);
 
-      query.$or = [
-        { description: { $regex: params.search, $options: "i" } },
-        { category: { $regex: params.search, $options: "i" } },
-        { zone: { $regex: params.search, $options: "i" } },
-        { language: { $regex: params.search, $options: "i" } },
-        { mode: { $regex: params.search, $options: "i" } },
-        { trainerId: { $in: trainerIds } },
-      ];
-    }
+          // Add trainer search to the query
+          query.$or = [
+              { description: { $regex: params.search, $options: "i" } },
+              { category: { $regex: params.search, $options: "i" } },
+              { zone: { $regex: params.search, $options: "i" } },
+              { language: { $regex: params.search, $options: "i" } },
+              { mode: { $regex: params.search, $options: "i" } },
+              { trainerId: { $in: trainerIds } },
+          ];
+      }
 
-    services = await Service.find(query)
-      .populate(
-        "trainerId",
-        "name surname profileImage averageCalification avatar"
-      )
-      .sort({ createdAt: -1 });
+      services = await Service.find(query)
+          .populate("trainerId", "name surname profileImage averageCalification avatar")
+          .sort({ createdAt: -1 });
 
-    if (services.length === 0) {
-      return [];
-    }
+      if (services.length === 0) {
+          return [];
+      }
 
-    // Get statistics for each service
-    const servicesWithStats = await Promise.all(
-      services.map(async (service: any) => {
-        const pendings = await Hiring.countDocuments({
-          serviceId: service._id,
-          status: "pending",
-        });
+      // Get statistics for each service
+      const servicesWithStats = await Promise.all(
+          services.map(async (service: any) => {
+              const pendings = await Hiring.countDocuments({
+                  serviceId: service._id,
+                  status: "pending",
+              });
 
-        // Get pending users information
-        const pendingHirings = await Hiring.find({
-          serviceId: service._id,
-          status: "pending",
-        }).populate("clientId", "name email avatar");
+              // Get pending users information
+              const pendingHirings = await Hiring.find({
+                  serviceId: service._id,
+                  status: "pending",
+              }).populate("clientId", "name email avatar");
 
-        // Filter out hirings with null clientId (in case user was deleted)
-        const validPendingHirings = pendingHirings.filter(
-          (hiring: any) => hiring.clientId !== null
-        );
+              // Filter out hirings with null clientId (in case user was deleted)
+              const validPendingHirings = pendingHirings.filter(
+                  (hiring: any) => hiring.clientId !== null
+              );
 
-        const pendingUsers = validPendingHirings.map((hiring: any) => ({
-          id: hiring.clientId._id,
-          name: `${hiring.clientId.name}`,
-          email: hiring.clientId.email,
-          avatarUrl: hiring.clientId.avatar || "",
-          hiringId: hiring._id,
-        }));
+              const pendingUsers = validPendingHirings.map((hiring: any) => ({
+                  id: hiring.clientId._id,
+                  name: `${hiring.clientId.name}`,
+                  email: hiring.clientId.email,
+                  avatarUrl: hiring.clientId.avatar || "",
+                  hiringId: hiring._id,
+              }));
 
-        const totalReviews = await Review.countDocuments({
-          serviceId: service._id,
-        });
+              const totalReviews = await Review.countDocuments({
+                  serviceId: service._id,
+              });
 
-        const ratingResult = await Review.aggregate([
-          { $match: { serviceId: service._id } },
-          { $group: { _id: null, average: { $avg: "$calification" } } },
-        ]);
+              const ratingResult = await Review.aggregate([
+                  { $match: { serviceId: service._id } },
+                  { $group: { _id: null, average: { $avg: "$calification" } } },
+              ]);
 
-        const clients = await Hiring.countDocuments({
-          serviceId: service._id,
-        });
+              const clients = await Hiring.countDocuments({
+                  serviceId: service._id,
+              });
 
-        const trainer = (await User.findById(service.trainerId)) as any;
+              const trainer = (await User.findById(service.trainerId)) as any;
 
-        return {
-          id: service._id,
-          trainerName: `${trainer?.name || ""} ${
-            trainer?.surname || ""
-          }`.trim(),
-          category: service.category,
-          description: service.description,
-          duration: service.duration,
-          price: service.price,
-          mode: service.mode,
-          zone: service.zone,
-          language: service.language,
-          maxPeople: service.maxPeople,
-          availability: service.availability,
-          trainerImage: trainer?.avatar || "",
-          rating: ratingResult[0]?.average || 0,
-          pendings: pendingUsers,
-          totalReviews: totalReviews,
-          visualizations: service.visualizations,
-          clients: clients,
-          trainerId: trainer?._id || new Types.ObjectId(),
-          files: [],
-        };
-      })
-    );
+              return {
+                  id: service._id,
+                  trainerName: `${trainer?.name || ""} ${trainer?.surname || ""}`.trim(),
+                  category: service.category,
+                  description: service.description,
+                  duration: service.duration,
+                  price: service.price,
+                  mode: service.mode,
+                  zone: service.zone,
+                  language: service.language,
+                  maxPeople: service.maxPeople,
+                  availability: service.availability,
+                  trainerImage: trainer?.avatar || "",
+                  rating: ratingResult[0]?.average || 0,
+                  pendings: pendingUsers,
+                  totalReviews: totalReviews,
+                  visualizations: service.visualizations,
+                  clients: clients,
+                  trainerId: trainer?._id || new Types.ObjectId(),
+                  files: [],
+              };
+          })
+      );
 
-    return servicesWithStats;
+      return servicesWithStats;
   }
 
   async getClientServices(

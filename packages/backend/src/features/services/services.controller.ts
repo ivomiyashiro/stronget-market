@@ -53,7 +53,7 @@ export class ServicesController {
                 mode: req.query.mode as "online" | "in-person" | undefined,
                 search: req.query.search as string | undefined,
             };
-
+            
             const services = await this.servicesService.getServices(params);
 
             res.status(200).json(services);
