@@ -17,7 +17,6 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 import { Archive, Eye, Loader2, Pencil, Plus, Star, Trash2 } from "lucide-react";
@@ -31,6 +30,7 @@ import {
     deleteService,
     getUserServices,
 } from "@/store/services/services.thunks";
+import { hiringService } from "@/services/hiring.service";
 import type { AppDispatch } from "@/store/store";
 import type { Service, GetServicesParams } from "@/services/services.service";
 
@@ -51,6 +51,24 @@ const ServicesTable = () => {
     // State for delete confirmation dialog
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
+
+    const getDeleteDialogContent = () => {
+        if (isTrainer) {
+            return {
+                title: "¿Eliminar servicio?",
+                description:
+                    "Esta acción no se puede deshacer. El servicio será eliminado permanentemente.",
+                action: "Eliminar",
+            };
+        } else {
+            return {
+                title: "¿Abandonar servicio?",
+                description:
+                    "Esta acción no se puede deshacer. Te desuscribirás del servicio permanentemente.",
+                action: "Abandonar",
+            };
+        }
+    };
 
     const fetchServices = useCallback(
         (filters?: GetServicesParams) => {
@@ -83,28 +101,47 @@ const ServicesTable = () => {
         navigate("/create-service");
     };
 
-    const handleDeleteService = (serviceId: string) => {
-        setServiceToDelete(serviceId);
+    const handleDeleteService = (service: Service) => {
+        setServiceToDelete(service.id);
         setDeleteDialogOpen(true);
     };
 
     const confirmDeleteService = () => {
         if (serviceToDelete) {
-            dispatch(
-                deleteService({
-                    id: serviceToDelete,
-                    onSuccess: () => {
-                        // Refresh the services list after successful deletion
+            const service = services.find((s) => s.id === serviceToDelete);
+
+            if (isTrainer) {
+                // For trainers, delete the service
+                dispatch(
+                    deleteService({
+                        id: serviceToDelete,
+                        onSuccess: () => {
+                            // Refresh the services list after successful deletion
+                            fetchServices();
+                            setDeleteDialogOpen(false);
+                            setServiceToDelete(null);
+                        },
+                        onError: (error) => {
+                            console.error("Delete service error:", error);
+                            // Keep the dialog open so user can see the error
+                        },
+                    })
+                );
+            } else if (isClient && service?.hiringId) {
+                // For clients, remove the hiring
+                hiringService
+                    .removeHiring(service.hiringId)
+                    .then(() => {
+                        // Refresh the services list after successful removal
                         fetchServices();
                         setDeleteDialogOpen(false);
                         setServiceToDelete(null);
-                    },
-                    onError: (error) => {
-                        console.error("Delete service error:", error);
+                    })
+                    .catch((error) => {
+                        console.error("Remove hiring error:", error);
                         // Keep the dialog open so user can see the error
-                    },
-                })
-            );
+                    });
+            }
         }
     };
 
@@ -204,7 +241,7 @@ const ServicesTable = () => {
                     <TableHeader>
                         {isTrainer ? (
                             <TableRow>
-                                <TableHead className="w-[250px]">Título</TableHead>
+                                <TableHead className="w-[250px]">Descripción</TableHead>
                                 <TableHead>Visualizaciones</TableHead>
                                 <TableHead>Clientes</TableHead>
                                 <TableHead>Tasa de conversión</TableHead>
@@ -229,7 +266,7 @@ const ServicesTable = () => {
                             ? services.map((service: Service, index) => (
                                   <TableRow key={index}>
                                       <TableCell className="max-w-[250px] overflow-hidden text-ellipsis px-4">
-                                          {service.category}
+                                          {service.description}
                                       </TableCell>
                                       <TableCell className="px-4">
                                           {service.visualizations}
@@ -278,53 +315,15 @@ const ServicesTable = () => {
                                               >
                                                   <Pencil className="size-4" />
                                               </Button>
-                                              <AlertDialog
-                                                  open={deleteDialogOpen}
-                                                  onOpenChange={setDeleteDialogOpen}
+                                              <Button
+                                                  variant="ghost"
+                                                  size="icon"
+                                                  onClick={() =>
+                                                      handleDeleteService(service)
+                                                  }
                                               >
-                                                  <AlertDialogTrigger asChild>
-                                                      <Button
-                                                          variant="ghost"
-                                                          size="icon"
-                                                          onClick={() =>
-                                                              handleDeleteService(
-                                                                  service.id
-                                                              )
-                                                          }
-                                                      >
-                                                          <Trash2 className="size-4" />
-                                                      </Button>
-                                                  </AlertDialogTrigger>
-                                                  <AlertDialogContent>
-                                                      <AlertDialogHeader>
-                                                          <AlertDialogTitle>
-                                                              ¿Eliminar servicio?
-                                                          </AlertDialogTitle>
-                                                          <AlertDialogDescription>
-                                                              Esta acción no se puede
-                                                              deshacer. El servicio será
-                                                              eliminado permanentemente.
-                                                          </AlertDialogDescription>
-                                                      </AlertDialogHeader>
-                                                      <AlertDialogFooter>
-                                                          <AlertDialogCancel
-                                                              onClick={
-                                                                  cancelDeleteService
-                                                              }
-                                                          >
-                                                              Cancelar
-                                                          </AlertDialogCancel>
-                                                          <AlertDialogAction
-                                                              onClick={
-                                                                  confirmDeleteService
-                                                              }
-                                                              className="bg-red-600 hover:bg-red-700"
-                                                          >
-                                                              Eliminar
-                                                          </AlertDialogAction>
-                                                      </AlertDialogFooter>
-                                                  </AlertDialogContent>
-                                              </AlertDialog>
+                                                  <Trash2 className="size-4" />
+                                              </Button>
                                           </div>
                                       </TableCell>
                                   </TableRow>
@@ -379,6 +378,15 @@ const ServicesTable = () => {
                                               >
                                                   <Star className="size-4" />
                                               </Button>
+                                              <Button
+                                                  variant="ghost"
+                                                  size="icon"
+                                                  onClick={() =>
+                                                      handleDeleteService(service)
+                                                  }
+                                              >
+                                                  <Trash2 className="size-4" />
+                                              </Button>
                                           </div>
                                       </TableCell>
                                   </TableRow>
@@ -386,6 +394,30 @@ const ServicesTable = () => {
                     </TableBody>
                 </Table>
             )}
+
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {getDeleteDialogContent().title}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {getDeleteDialogContent().description}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={cancelDeleteService}>
+                            Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDeleteService}
+                            className="bg-red-600 hover:bg-red-700"
+                        >
+                            {getDeleteDialogContent().action}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </section>
     );
 };

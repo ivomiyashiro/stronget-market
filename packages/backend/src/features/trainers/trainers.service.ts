@@ -24,16 +24,19 @@ export class TrainersService {
     }
 
     async getTrainerNotifications(id: string): Promise<GetTrainerNotificationResponse[]> {
-        const user = await User.findById(id);
+        const user = await User.findById(id).populate("notifications");
 
         if (!user || !user.notifications) return [];
 
-        return user.notifications.map((notification) => ({
-            id: notification._id,
-            message: notification.message,
-            leido: notification.leido,
-            date: notification.date,
-        }));
+        return user.notifications
+            .filter((notification) => !notification.leido)
+            .map((notification) => ({
+                id: notification._id,
+                message: notification.message,
+                leido: notification.leido,
+                date: notification.date,
+            }))
+            .sort((a, b) => b.date.getTime() - a.date.getTime());
     }
 
     async updateSeenNotifications(id: string): Promise<void> {

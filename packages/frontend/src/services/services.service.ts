@@ -35,6 +35,7 @@ export interface Service {
         startTime: string;
     }[];
     trainerId: string;
+    hiringId?: string; // Optional hiring ID for client services
 }
 
 export interface GetServicesParams {

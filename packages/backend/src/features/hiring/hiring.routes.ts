@@ -68,6 +68,14 @@ router.patch(
     hiringController.confirmHiring
 );
 
+// Remove hiring (clients only - completely removes the hiring)
+router.delete(
+    "/:id",
+    authenticateToken,
+    validateParams(hiringIdSchema),
+    hiringController.removeHiring
+);
+
 // Get trainer available slots for a specific day
 router.get(
     "/trainer/:trainerId/availability/:day",

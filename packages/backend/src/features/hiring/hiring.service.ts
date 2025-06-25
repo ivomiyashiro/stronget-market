@@ -63,7 +63,7 @@ export class HiringService {
 
         // Add notification to trainer about new booking request
         trainer.notifications?.push({
-            message: `New booking request for your ${service.category} service on ${hiringData.day} at ${hiringData.time}`,
+            message: `Nuevo pedido de reserva para tu servicio ${service.category} el ${hiringData.day} a las ${hiringData.time}`,
             leido: false,
             date: new Date(),
         } as any);
@@ -234,17 +234,21 @@ export class HiringService {
 
         const transition = allowedTransitions[status];
         if (!transition) {
-            throw new Error(`Invalid status: ${status}`);
+            throw new Error(`Estado inválido: ${status}`);
         }
 
         if (!transition.from.includes(currentStatus)) {
-            throw new Error(`Cannot change status from ${currentStatus} to ${status}`);
+            throw new Error(
+                `No puedes cambiar el estado de ${currentStatus} a ${status}`
+            );
         }
 
         const userRole = isTrainer ? "trainer" : "client";
         if (!transition.allowedBy.includes(userRole)) {
             throw new Error(
-                `Only ${transition.allowedBy.join(" or ")} can set status to ${status}`
+                `Solo ${transition.allowedBy.join(
+                    " o "
+                )} puede cambiar el estado a ${status}`
             );
         }
 
@@ -289,6 +293,64 @@ export class HiringService {
 
     async confirmHiring(id: string, trainerId: string) {
         return this.updateHiringStatus(id, "confirmed", trainerId);
+    }
+
+    async removeHiring(id: string, clientId: string) {
+        // Find the hiring and validate it belongs to the client
+        const hiring = await Hiring.findById(id)
+            .populate("clientId", "name")
+            .populate("trainerId", "name")
+            .populate("serviceId", "category");
+
+        if (!hiring) {
+            throw new Error("Hiring not found");
+        }
+
+        // Verify the hiring belongs to the requesting client
+        if ((hiring.clientId as any)._id.toString() !== clientId) {
+            throw new Error("You can only remove your own hirings");
+        }
+
+        // Check if hiring can be removed based on status
+        const allowedStatuses = ["pending", "confirmed"];
+        if (!allowedStatuses.includes(hiring.status)) {
+            throw new Error(`Cannot remove hiring with status: ${hiring.status}`);
+        }
+
+        // Check if hiring is too close to the scheduled time (e.g., less than 24 hours)
+        const scheduledDateTime = this.parseDateTime(hiring.day, hiring.time);
+        const now = new Date();
+        const minCancellationTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
+
+        if (scheduledDateTime <= minCancellationTime) {
+            throw new Error(
+                "No puedes cancelar la reserva menos de 24 horas antes de la hora programada"
+            );
+        }
+
+        // Remove the hiring (delete from database)
+        await Hiring.findByIdAndDelete(id);
+
+        // Notify the trainer about the removal
+        const trainer = await User.findById(hiring.trainerId);
+        if (trainer) {
+            trainer.notifications?.push({
+                message: `${
+                    (hiring.clientId as any).name
+                } has removed their booking for ${
+                    (hiring.serviceId as any).category
+                } on ${hiring.day} at ${hiring.time}`,
+                leido: false,
+                date: new Date(),
+            } as any);
+            await trainer.save();
+        }
+
+        return {
+            id: hiring._id.toString(),
+            message: "Reserva cancelada correctamente",
+            scheduledTime: `${hiring.day} at ${hiring.time}`,
+        };
     }
 
     async getTrainerAvailableSlots(trainerId: string, day: string) {
@@ -353,16 +415,19 @@ export class HiringService {
                 "name"
             );
             if (!service) {
-                return { canBook: false, reason: "Service not found" };
+                return { canBook: false, reason: "Servicio no encontrado" };
             }
 
             if (!service.isActive) {
-                return { canBook: false, reason: "Service is no longer available" };
+                return { canBook: false, reason: "Servicio no disponible" };
             }
 
             // Check if client is trying to book their own service
             if (clientId === (service.trainerId as any)._id.toString()) {
-                return { canBook: false, reason: "You cannot book your own service" };
+                return {
+                    canBook: false,
+                    reason: "No puedes reservar tu propio servicio",
+                };
             }
 
             // Validate day and time format
@@ -376,7 +441,10 @@ export class HiringService {
                 "Sabado",
             ];
             if (!dayNames.includes(day)) {
-                return { canBook: false, reason: "Día inválido" };
+                return {
+                    canBook: false,
+                    reason: "Día inválido, por favor selecciona un día válido",
+                };
             }
 
             const [hours, minutes] = time.split(":").map(Number);
@@ -388,7 +456,10 @@ export class HiringService {
                 minutes < 0 ||
                 minutes > 59
             ) {
-                return { canBook: false, reason: "Formato de hora inválido" };
+                return {
+                    canBook: false,
+                    reason: "Formato de hora inválido, por favor selecciona una hora válida",
+                };
             }
 
             // Check if the requested time is at least 2 hours from now
@@ -399,7 +470,7 @@ export class HiringService {
             if (requestedDateTime <= minBookingTime) {
                 return {
                     canBook: false,
-                    reason: "La reserva debe ser como mínimo 2 horas en adelante",
+                    reason: "La reserva debe ser como mínimo 2 horas en adelante, por favor selecciona una hora válida",
                 };
             }
 
@@ -418,7 +489,7 @@ export class HiringService {
                 reason:
                     error instanceof Error
                         ? error.message
-                        : "Validación de reserva falló",
+                        : "Validación de reserva falló, por favor intenta nuevamente",
             };
         }
     }

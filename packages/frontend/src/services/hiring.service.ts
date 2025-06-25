@@ -47,6 +47,15 @@ export interface HiringItem {
     updatedAt: string;
 }
 
+export interface RemoveHiringResponse {
+    message: string;
+    hiring: {
+        id: string;
+        message: string;
+        scheduledTime: string;
+    };
+}
+
 export class HiringService extends BaseService {
     private readonly endpoint = "/hirings";
 
@@ -76,6 +85,13 @@ export class HiringService extends BaseService {
      */
     async cancelHiring(id: string): Promise<HiringItem> {
         return this.patch<HiringItem>(`${this.endpoint}/${id}/cancel`);
+    }
+
+    /**
+     * Remove a hiring (completely delete it)
+     */
+    async removeHiring(id: string): Promise<RemoveHiringResponse> {
+        return this.delete<RemoveHiringResponse>(`${this.endpoint}/${id}`);
     }
 
     /**

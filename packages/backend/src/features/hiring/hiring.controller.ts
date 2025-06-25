@@ -209,4 +209,26 @@ export class HiringController {
             });
         }
     };
+
+    removeHiring = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+        try {
+            const clientId = req.user?.id;
+            if (!clientId) {
+                res.status(401).json({ message: "Unauthorized" });
+                return;
+            }
+
+            const { id } = req.params;
+
+            const result = await this.hiringService.removeHiring(id, clientId);
+            res.status(200).json({
+                message: "Hiring removed successfully",
+                hiring: result,
+            });
+        } catch (error) {
+            res.status(400).json({
+                message: error instanceof Error ? error.message : "Remove hiring failed",
+            });
+        }
+    };
 }

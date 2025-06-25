@@ -21,5 +21,6 @@ export type GetServicesResponseDTO = {
     visualizations: number;
     clients: number;
     trainerId: Types.ObjectId;
+    hiringId?: Types.ObjectId; // Optional hiring ID for client services
     files: string[];
 };

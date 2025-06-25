@@ -191,6 +191,7 @@ export class ServicesService {
                     visualizations: service.visualizations || 0,
                     clients: clients,
                     trainerId: trainer?._id || new Types.ObjectId(),
+                    hiringId: hiring._id, // Include hiring ID for client services
                     files: [],
                 };
             })
