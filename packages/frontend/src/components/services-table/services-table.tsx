@@ -22,6 +22,7 @@ import {
 import {
   Archive,
   Eye,
+  EyeOff,
   FileText,
   Loader2,
   Pencil,
@@ -41,6 +42,7 @@ import {
   getServicesByTrainerId,
   deleteService,
   getUserServices,
+  updateService,
 } from "@/store/services/services.thunks";
 import { hiringService } from "@/services/hiring.service";
 import { servicesService } from "@/services/services.service";
@@ -86,6 +88,12 @@ const ServicesTable = () => {
   // State for delete confirmation dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
+
+  // State for unpublish confirmation dialog
+  const [unpublishDialogOpen, setUnpublishDialogOpen] = useState(false);
+  const [serviceToUnpublish, setServiceToUnpublish] = useState<Service | null>(
+    null
+  );
 
   // State for review popup
   const [reviewPopupOpen, setReviewPopupOpen] = useState(false);
@@ -200,6 +208,41 @@ const ServicesTable = () => {
   const cancelDeleteService = () => {
     setDeleteDialogOpen(false);
     setServiceToDelete(null);
+  };
+
+  const handleUnpublishService = (service: Service) => {
+    setServiceToUnpublish(service);
+    setUnpublishDialogOpen(true);
+  };
+
+  const confirmUnpublishService = () => {
+    if (serviceToUnpublish) {
+      const newStatus =
+        serviceToUnpublish.status === "active" ? "inactive" : "active";
+      const actionText = newStatus === "active" ? "publicar" : "despublicar";
+
+      dispatch(
+        updateService({
+          id: serviceToUnpublish.id,
+          data: { status: newStatus },
+          onSuccess: () => {
+            // Refresh the services list after successful status update
+            fetchServices();
+            setUnpublishDialogOpen(false);
+            setServiceToUnpublish(null);
+          },
+          onError: (error) => {
+            console.error(`${actionText} service error:`, error);
+            // Keep the dialog open so user can see the error
+          },
+        })
+      );
+    }
+  };
+
+  const cancelUnpublishService = () => {
+    setUnpublishDialogOpen(false);
+    setServiceToUnpublish(null);
   };
 
   const handleViewService = (serviceId: string) => {
@@ -398,6 +441,7 @@ const ServicesTable = () => {
                 <TableHead>Tasa de conversión</TableHead>
                 <TableHead>Evaluaciones</TableHead>
                 <TableHead>Pendientes</TableHead>
+                <TableHead>Estado</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
             ) : (
@@ -470,6 +514,21 @@ const ServicesTable = () => {
                       </Button>
                     </TableCell>
                     <TableCell className="px-4">
+                      <div className="flex items-center">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            service.status === "active"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {service.status === "active"
+                            ? "Publicado"
+                            : "Despublicado"}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-4">
                       <div className="flex items-center gap-2">
                         <Button
                           variant="ghost"
@@ -484,6 +543,25 @@ const ServicesTable = () => {
                           onClick={() => handleEditService(service.id)}
                         >
                           <Pencil className="size-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleUnpublishService(service)}
+                          title={
+                            service.status === "active"
+                              ? "Despublicar"
+                              : "Publicar"
+                          }
+                          className={
+                            service.status === "inactive" ? "text-gray-400" : ""
+                          }
+                        >
+                          {service.status === "active" ? (
+                            <EyeOff className="size-4" />
+                          ) : (
+                            <Eye className="size-4" />
+                          )}
                         </Button>
                         <Button
                           variant="ghost"
@@ -609,6 +687,44 @@ const ServicesTable = () => {
               className="bg-red-600 hover:bg-red-700"
             >
               {getDeleteDialogContent().action}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Unpublish Confirmation Dialog */}
+      <AlertDialog
+        open={unpublishDialogOpen}
+        onOpenChange={setUnpublishDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {serviceToUnpublish?.status === "active"
+                ? "¿Despublicar servicio?"
+                : "¿Publicar servicio?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {serviceToUnpublish?.status === "active"
+                ? "El servicio ya no será visible en la página principal, pero seguirá existiendo y podrás volver a publicarlo cuando quieras."
+                : "El servicio será visible nuevamente en la página principal para que los clientes puedan contratarlo."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelUnpublishService}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmUnpublishService}
+              className={
+                serviceToUnpublish?.status === "active"
+                  ? "bg-orange-600 hover:bg-orange-700"
+                  : "bg-green-600 hover:bg-green-700"
+              }
+            >
+              {serviceToUnpublish?.status === "active"
+                ? "Despublicar"
+                : "Publicar"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

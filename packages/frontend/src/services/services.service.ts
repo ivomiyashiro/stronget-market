@@ -9,6 +9,7 @@ export interface CreateServiceRequest {
   zone: string;
   language: string;
   maxPeople: number;
+  status?: "active" | "inactive";
   availability: {
     day: string;
     startTime: string;
@@ -37,6 +38,7 @@ export interface Service {
   zone: string;
   clients: number;
   maxPeople: number;
+  status: "active" | "inactive";
   availability: {
     day: string;
     startTime: string;
