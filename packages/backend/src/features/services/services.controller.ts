@@ -26,6 +26,8 @@ export class ServicesController {
                 return;
             }
 
+            // Service will be created with status "active" by default if not provided
+            // Client can optionally provide status: "active" | "inactive"
             const service = await this.servicesService.createService(trainerId, req.body);
             res.status(201).json(service);
         } catch (error) {
@@ -187,6 +189,8 @@ export class ServicesController {
                 return;
             }
 
+            // Service can be updated with status: "active" | "inactive"
+            // This allows trainers to activate/deactivate their services
             const service = await this.servicesService.updateService(
                 id,
                 trainerId,
