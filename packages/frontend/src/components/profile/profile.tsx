@@ -228,7 +228,7 @@ const Profile = () => {
               <div className="flex items-center gap-2 mt-1">
                 <Star className="size-4 text-yellow-400 fill-yellow-400" />
                 <span className="font-semibold text-lg">
-                  {averageRating.toFixed(1)}
+                  {averageRating?.toFixed(1) || 0}
                 </span>
                 <span className="mx-1">·</span>
                 <span className="text-base text-muted-foreground">
@@ -345,7 +345,7 @@ const Profile = () => {
                           Promedio de calificaciones y evaluaciones totales.
                         </p>
                         <p className="text-muted-foreground mt-1">
-                          {trainerStatistics.averageRating.toFixed(1)} / 5.0
+                          {trainerStatistics.averageRating?.toFixed(1) || 0} / 5.0
                         </p>
                       </div>
                       <div className="mt-2">
@@ -354,7 +354,7 @@ const Profile = () => {
                             className="bg-yellow-500 h-2 rounded-full transition-all duration-300 ease-in-out"
                             style={{
                               width: `${
-                                (trainerStatistics.averageRating / 5) * 100
+                                (trainerStatistics.averageRating || 0 / 5) * 100
                               }%`,
                             }}
                           ></div>
@@ -376,7 +376,7 @@ const Profile = () => {
                           Promedio de calificaciones y evaluaciones totales.
                         </p>
                         <p className="text-muted-foreground mt-1">
-                          {trainerStatistics.performance.toFixed(1)}%
+                          {trainerStatistics.performance?.toFixed(1) || 0}%
                         </p>
                       </div>
                       <div className="mt-2">
@@ -385,7 +385,7 @@ const Profile = () => {
                             className="bg-green-500 h-2 rounded-full transition-all duration-300 ease-in-out"
                             style={{
                               width: `${Math.min(
-                                trainerStatistics.performance,
+                                trainerStatistics.performance || 0,
                                 100
                               )}%`,
                             }}
