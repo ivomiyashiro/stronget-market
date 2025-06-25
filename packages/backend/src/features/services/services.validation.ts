@@ -7,7 +7,7 @@ const objectId = z.string().refine((val) => objectIdRegex.test(val), {
 });
 
 export const createServiceSchema = z.object({
-  category: z.string().min(1, "Category is required"),
+  categoryId: z.string().min(1, "Category is required"),
   duration: z.number().min(15, "Duration must be at least 15 minutes"),
   description: z.string().min(1, "Description is required"),
   price: z.number().min(0, "Price must be positive"),
@@ -16,6 +16,7 @@ export const createServiceSchema = z.object({
   }),
   zone: z.string().min(1, "Zone is required"),
   language: z.string().min(1, "Language is required"),
+  maxPeople: z.number().min(1, "Max people must be at least 1"),
   availability: z
     .array(
       z.object({
@@ -27,9 +28,9 @@ export const createServiceSchema = z.object({
 });
 
 export const updateServiceSchema = z.object({
-    category: z.string().min(1, "Category is required").optional(),
+    categoryId: z.string().min(1, "Category is required").optional(),
     duration: z.number().min(15, "Duration must be at least 15 minutes").optional(),
-    description: z.string().min(1, "Description is required"),
+    description: z.string().min(1, "Description is required").optional(),
     price: z.number().min(0, "Price must be positive").optional(),
     mode: z
         .enum(["online", "in-person"], {
@@ -38,6 +39,7 @@ export const updateServiceSchema = z.object({
         .optional(),
     zone: z.string().min(1, "Zone is required").optional(),
     language: z.string().min(1, "Language is required").optional(),
+    maxPeople: z.number().min(1, "Max people must be at least 1").optional(),
     availability: z
         .array(
             z.object({

@@ -6,6 +6,7 @@ export type UpdateServiceRequestDTO = {
   mode?: "online" | "in-person";
   zone?: string;
   language?: string;
+  maxPeople?: number;
   availability?: {
     day: string;
     startTime: string;

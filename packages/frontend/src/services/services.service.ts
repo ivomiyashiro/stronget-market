@@ -1,13 +1,14 @@
 import { baseService } from "./base.service";
 
 export interface CreateServiceRequest {
-    category: string;
+    categoryId: string;
     description: string;
     duration: number;
     price: number;
     mode: "online" | "in-person";
     zone: string;
     language: string;
+    maxPeople: number;
     availability: {
         day: string;
         startTime: string;
@@ -30,6 +31,7 @@ export interface Service {
     visualizations: number;
     zone: string;
     clients: number;
+    maxPeople: number;
     availability: {
         day: string;
         startTime: string;
