@@ -14,3 +14,8 @@ export const getTrainerSchema = z.object({
 export const updateSeenNotificationsSchema = z.object({
     id: objectId,
 });
+
+export const markNotificationAsReadSchema = z.object({
+    id: objectId,
+    notificationId: objectId,
+});

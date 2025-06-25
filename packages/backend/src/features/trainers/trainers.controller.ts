@@ -99,4 +99,32 @@ export class TrainersController {
             });
         }
     };
+
+    markNotificationAsRead = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ): Promise<void> => {
+        try {
+            const { id, notificationId } = req.params;
+            const userId = req.user?.id;
+
+            // Only allow trainers to update their own notifications
+            if (userId !== id) {
+                res.status(403).json({
+                    message: "Access denied. You can only update your own notifications.",
+                });
+                return;
+            }
+
+            await this.trainersService.markNotificationAsRead(id, notificationId);
+            res.status(200).json({ message: "Notification marked as read" });
+        } catch (error) {
+            res.status(400).json({
+                message:
+                    error instanceof Error
+                        ? error.message
+                        : "Mark notification as read failed",
+            });
+        }
+    };
 }

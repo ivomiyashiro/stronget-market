@@ -41,6 +41,10 @@ export class TrainerService {
   async updateSeenNotifications(id: string): Promise<{ message: string }> {
     return await baseService.put<{ message: string }>(`/trainers/${id}/notifications/seen`);
   }
+
+  async markNotificationAsRead(id: string, notificationId: string): Promise<{ message: string }> {
+    return await baseService.put<{ message: string }>(`/trainers/${id}/notifications/${notificationId}/read`);
+  }
 }
 
 // Create singleton instance

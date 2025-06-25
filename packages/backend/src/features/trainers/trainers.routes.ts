@@ -2,7 +2,7 @@ import { Router } from "express";
 import { TrainersController } from "./trainers.controller";
 import { validateParams } from "../../middleware/validation.middleware";
 import { authenticateToken, requireRole } from "../../middleware/auth.middleware";
-import { getTrainerSchema, updateSeenNotificationsSchema } from "./trainers.validation";
+import { getTrainerSchema, updateSeenNotificationsSchema, markNotificationAsReadSchema } from "./trainers.validation";
 
 const router = Router();
 const trainersController = new TrainersController();
@@ -27,6 +27,13 @@ router.put(
     requireRole(["entrenador"]),
     validateParams(updateSeenNotificationsSchema),
     trainersController.updateSeenNotifications
+);
+router.put(
+    "/:id/notifications/:notificationId/read",
+    authenticateToken,
+    requireRole(["entrenador"]),
+    validateParams(markNotificationAsReadSchema),
+    trainersController.markNotificationAsRead
 );
 
 export default router;

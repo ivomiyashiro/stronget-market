@@ -5,6 +5,7 @@ import servicesReducer from "./services/services.slice";
 import trainerReducer from "./trainer/trainer.slice";
 import trainerEvaluationsReducer from "./trainer-evaluations/trainer-evaluations.slice";
 import cartReducer from "./cart/cart.slice";
+import notificationsReducer from "./notifications/notifications.slice";
 
 export const store = configureStore({
     reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
         trainer: trainerReducer,
         trainerEvaluations: trainerEvaluationsReducer,
         cart: cartReducer,
+        notifications: notificationsReducer,
     },
 });
 

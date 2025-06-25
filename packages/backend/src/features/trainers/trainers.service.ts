@@ -45,4 +45,18 @@ export class TrainersService {
             { $set: { "notifications.$.leido": true } }
         );
     }
+
+    async markNotificationAsRead(id: string, notificationId: string): Promise<void> {
+        await User.updateOne(
+            { 
+                _id: id, 
+                "notifications._id": notificationId 
+            },
+            { 
+                $set: { 
+                    "notifications.$.leido": true 
+                } 
+            }
+        );
+    }
 }
