@@ -267,16 +267,6 @@ const Profile = () => {
               <Pencil className="size-4" />
             </Button>
           )}
-          <div
-            className={`flex ${
-              isMobile ? "flex-col" : "flex-col"
-            } items-center`}
-          >
-            <div className="text-sm text-muted-foreground">Miembro desde</div>
-            <div className="text-xl">
-              {profileUser?.birthDay && formatBirthDay(profileUser.birthDay)}
-            </div>
-          </div>
         </div>
       </div>
       <Separator />
