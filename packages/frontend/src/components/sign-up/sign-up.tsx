@@ -22,6 +22,8 @@ const SignUp = () => {
   });
 
   const [passwordError, setPasswordError] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
 
   const validatePassword = (password: string): string => {
@@ -68,6 +70,14 @@ const SignUp = () => {
     if (passwordValidationError) {
       setPasswordError(passwordValidationError);
       return;
+    }
+
+    // Validate confirm password
+    if (formData.password !== confirmPassword) {
+      setConfirmPasswordError("Las contraseñas no coinciden");
+      return;
+    } else {
+      setConfirmPasswordError("");
     }
 
     try {
@@ -159,6 +169,16 @@ const SignUp = () => {
           value={formData.password}
           onChange={(e) => handleInputChange("password", e.target.value)}
           error={passwordError}
+          required
+          fullSize
+        />
+        <RequiredInput
+          label="Confirmar contraseña"
+          type="password"
+          placeholder="Repite la contraseña"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          error={confirmPasswordError}
           required
           fullSize
         />

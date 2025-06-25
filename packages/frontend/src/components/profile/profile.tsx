@@ -1,32 +1,32 @@
 import { useAuth } from "@/store/auth/auth.hooks";
-import { Label } from "../ui/label";
-import {
-  Calendar,
-  Image,
-  Mail,
-  Pencil,
-  Upload,
-  Users,
-  Star,
-  Eye,
-  TrendingUp,
-  Briefcase,
-} from "lucide-react";
-import { Button } from "../ui/button";
-import { Separator } from "../ui/separator";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { useMemo, useState, useRef, useEffect } from "react";
-import { RequiredInput } from "../common/required-input";
 import { useAppDispatch } from "@/store/hooks";
-import { updateProfile, uploadAvatar } from "@/store/profile/profile.thunks";
 import { useProfile } from "@/store/profile/profile.hooks";
+import { updateProfile, uploadAvatar } from "@/store/profile/profile.thunks";
+import {
+    useTrainerLoading,
+    useTrainerStatistics,
+} from "@/store/trainer/trainer.hooks";
 import { getTrainerStatistics } from "@/store/trainer/trainer.thunks";
 import {
-  useTrainerStatistics,
-  useTrainerLoading,
-} from "@/store/trainer/trainer.hooks";
+    Briefcase,
+    Calendar,
+    Eye,
+    Image,
+    Mail,
+    Pencil,
+    Star,
+    TrendingUp,
+    Upload,
+    Users,
+} from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { RequiredInput } from "../common/required-input";
 import TrainerEvaluations from "../trainer-evaluations/trainer-evaluations";
+import { Button } from "../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Label } from "../ui/label";
+import { Separator } from "../ui/separator";
 
 interface EditingForm {
   name: string;
@@ -61,6 +61,10 @@ const Profile = () => {
   const trainerStatistics = useTrainerStatistics();
   const trainerLoading = useTrainerLoading();
   const isTrainer = profileUser?.role === "entrenador";
+
+  // 1. Agregar estado para promedio y cantidad de evaluaciones
+  const [averageRating, setAverageRating] = useState<number | null>(null);
+  const [totalReviews, setTotalReviews] = useState<number | null>(null);
 
   // Fetch profile user when component mounts or userId changes
   useEffect(() => {
@@ -221,6 +225,14 @@ const Profile = () => {
             <h1 className="text-3xl font-bold text-center">
               {profileUser?.name} {profileUser?.surname}
             </h1>
+            {isTrainer && averageRating !== null && totalReviews !== null && (
+              <div className="flex items-center gap-2 mt-1">
+                <Star className="size-4 text-yellow-400 fill-yellow-400" />
+                <span className="font-semibold text-lg">{averageRating.toFixed(1)}</span>
+                <span className="mx-1">·</span>
+                <span className="text-base text-muted-foreground">{totalReviews} evaluaciones</span>
+              </div>
+            )}
             <Label className="flex flex-row gap-2 items-center text-muted-foreground">
               <Mail className="size-4" /> {profileUser?.email}
             </Label>
@@ -381,6 +393,10 @@ const Profile = () => {
         <TrainerEvaluations
           trainerId={profileUser.id}
           trainerName={profileUser.name}
+          onStatsUpdate={(avg, total) => {
+            setAverageRating(avg);
+            setTotalReviews(total);
+          }}
         />
       )}
     </section>
