@@ -24,6 +24,7 @@ export interface Service {
   language: string;
   mode: "online" | "in-person";
   pendings: {
+    id: string;
     name: string;
     email: string;
   }[];

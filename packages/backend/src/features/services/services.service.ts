@@ -83,6 +83,7 @@ export class ServicesService {
                 }).populate("clientId", "name email");
 
                 const pendingUsers = pendingHirings.map((hiring: any) => ({
+                    id: hiring.clientId._id,
                     name: `${hiring.clientId.name}`,
                     email: hiring.clientId.email,
                 }));
@@ -222,11 +223,6 @@ export class ServicesService {
             throw new Error("Service not found");
         }
 
-        const pendings = await Hiring.countDocuments({
-            serviceId: service._id,
-            status: "pending",
-        });
-
         // Get pending users information
         const pendingHirings = await Hiring.find({
             serviceId: service._id,
@@ -234,6 +230,7 @@ export class ServicesService {
         }).populate("clientId", "name email");
 
         const pendingUsers = pendingHirings.map((hiring: any) => ({
+            id: hiring.clientId._id,
             name: `${hiring.clientId.name}`,
             email: hiring.clientId.email,
         }));
@@ -348,6 +345,7 @@ export class ServicesService {
                 }).populate("clientId", "name email");
 
                 const pendingUsers = pendingHirings.map((hiring: any) => ({
+                    id: hiring.clientId._id,
                     name: `${hiring.clientId.name}`,
                     email: hiring.clientId.email,
                 }));

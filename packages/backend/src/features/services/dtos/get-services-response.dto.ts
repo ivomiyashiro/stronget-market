@@ -18,6 +18,7 @@ export type GetServicesResponseDTO = {
     trainerImage: string;
     rating: number;
     pendings: {
+        id: Types.ObjectId;
         name: string;
         email: string;
     }[];
