@@ -19,6 +19,7 @@ import {
   AvailabilitySelector,
   type DailyAvailability,
 } from "./availability-selector";
+import { useMediaQuery } from "react-responsive";
 
 const DURATION_OPTIONS = ["1 hora", "2 horas", "3 horas", "4 horas", "5 horas"];
 const MODALITY_OPTIONS = ["Virtual", "Presencial"];
@@ -159,6 +160,8 @@ const CreateService = () => {
     }
   };
 
+  const isMobile = useMediaQuery({ query: "(max-width: 600px)" });
+
   const displayLoading = isLoading || updateLoading;
 
   return (
@@ -169,7 +172,7 @@ const CreateService = () => {
       <h1 className="text-2xl font-bold">
         {mode === "edit" ? "Editar Servicio" : "Crear Servicio"}
       </h1>
-      <div className="grid grid-cols-2 gap-4">
+      <div className={`grid ${isMobile ? "grid-cols-1" : "grid-cols-2"} gap-4`}>
         <RequiredInput
           label="Descripción"
           type="text"

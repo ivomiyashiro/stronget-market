@@ -50,14 +50,16 @@ const ServiceCard = ({
           <h3 className="text-lg font-semibold">{name}</h3>
           <div
             className="flex items-center gap-1"
-            aria-label={`Calificación: ${rating} de 5 estrellas con ${amountOfReviews} reseñas`}
+            aria-label={`Calificación: ${Math.round(
+              rating
+            )} de 5 estrellas con ${amountOfReviews} reseñas`}
           >
             <Star
               className="size-4 fill-yellow-400 text-yellow-400"
               aria-hidden="true"
             />
             <span className="text-sm font-medium text-muted-foreground">
-              {rating} ({amountOfReviews})
+              {Math.round(rating)} ({amountOfReviews})
             </span>
           </div>
         </header>
