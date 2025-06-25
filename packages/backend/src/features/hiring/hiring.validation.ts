@@ -22,12 +22,7 @@ const cvv = z.string().refine((val) => cvvRegex.test(val), {
 
 export const createHiringSchema = z.object({
     serviceId: objectId,
-    day: z.enum(
-        ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
-        {
-            errorMap: () => ({ message: "Día inválido" }),
-        }
-    ),
+    day: z.string().min(1, "Día inválido"),
     time: z.string().refine((val) => /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(val), {
         message: "Formato de hora inválido (HH:MM)",
     }),

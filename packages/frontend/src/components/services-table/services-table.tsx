@@ -33,6 +33,7 @@ import {
 import { hiringService } from "@/services/hiring.service";
 import type { AppDispatch } from "@/store/store";
 import type { Service, GetServicesParams } from "@/services/services.service";
+import CreateReviewPopup from "../create-review/create-review-popup";
 
 const ServicesTable = () => {
     const { user } = useAuth();
@@ -51,6 +52,10 @@ const ServicesTable = () => {
     // State for delete confirmation dialog
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
+
+    // State for review popup
+    const [reviewPopupOpen, setReviewPopupOpen] = useState(false);
+    const [serviceToReview, setServiceToReview] = useState<Service | null>(null);
 
     const getDeleteDialogContent = () => {
         if (isTrainer) {
@@ -157,6 +162,16 @@ const ServicesTable = () => {
     const handleApplyFilters = (filters: GetServicesParams) => {
         setCurrentFilters(filters);
         fetchServices(filters);
+    };
+
+    const handleCreateReview = (service: Service) => {
+        setServiceToReview(service);
+        setReviewPopupOpen(true);
+    };
+
+    const handleReviewCreated = () => {
+        // Optionally refresh the services list to update ratings
+        fetchServices();
     };
 
     const getPageTitle = () => {
@@ -371,12 +386,11 @@ const ServicesTable = () => {
                                                   variant="ghost"
                                                   size="icon"
                                                   onClick={() =>
-                                                      navigate(
-                                                          `/trainer-evaluations/${service.trainerId}`
-                                                      )
+                                                      handleCreateReview(service)
                                                   }
+                                                  title="Crear reseña"
                                               >
-                                                  <Star className="size-4 " />
+                                                  <Star className="size-4" />
                                               </Button>
                                               <Button
                                                   variant="ghost"
@@ -418,6 +432,14 @@ const ServicesTable = () => {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* Review Popup */}
+            <CreateReviewPopup
+                isOpen={reviewPopupOpen}
+                onClose={() => setReviewPopupOpen(false)}
+                service={serviceToReview}
+                onReviewCreated={handleReviewCreated}
+            />
         </section>
     );
 };
