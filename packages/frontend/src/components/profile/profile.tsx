@@ -200,8 +200,16 @@ const Profile = () => {
 
   return !isEditing ? (
     <section className="flex h-full p-8 w-full flex-col gap-8">
-      <div className="flex flex-row justify-between w-full">
-        <div className="flex flex-row gap-4">
+      <div
+        className={`flex ${
+          isMobile ? "flex-col items-center" : "flex-row"
+        } justify-between w-full`}
+      >
+        <div
+          className={`flex ${
+            isMobile ? "flex-col items-center" : "flex-row"
+          } gap-4`}
+        >
           {profileUser?.avatar ? (
             <img
               src={profileUser?.avatar}
@@ -244,7 +252,11 @@ const Profile = () => {
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-6 items-center">
+        <div
+          className={`flex ${
+            isMobile ? "flex-row gap-6" : "flex-col gap-6"
+          } items-center`}
+        >
           {/* Only show edit button if the logged-in user is viewing their own profile */}
           {loggedInUser?.id === userId && (
             <Button
@@ -255,7 +267,11 @@ const Profile = () => {
               <Pencil className="size-4" />
             </Button>
           )}
-          <div className="flex flex-col items-center">
+          <div
+            className={`flex ${
+              isMobile ? "flex-row" : "flex-col"
+            } items-center`}
+          >
             <div className="text-sm text-muted-foreground">Miembro desde</div>
             <div className="text-xl">
               {profileUser?.birthDay && formatBirthDay(profileUser.birthDay)}
@@ -382,9 +398,7 @@ const Profile = () => {
                           <div
                             className="bg-green-500 h-2 rounded-full transition-all duration-300 ease-in-out"
                             style={{
-                              width: `${
-                                (trainerStatistics.performance || 0)
-                              }%`,
+                              width: `${trainerStatistics.performance || 0}%`,
                             }}
                           ></div>
                         </div>
