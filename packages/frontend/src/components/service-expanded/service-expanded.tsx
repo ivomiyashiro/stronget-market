@@ -19,7 +19,8 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { Link } from "react-router";
 import { toast } from "sonner";
 import TrainerEvaluations from "../trainer-evaluations/trainer-evaluations";
 import { Button } from "../ui/button";
