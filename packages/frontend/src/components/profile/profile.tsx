@@ -26,6 +26,7 @@ import {
   useTrainerLoading,
 } from "@/store/trainer/trainer.hooks";
 import { useParams } from "react-router-dom";
+import TrainerEvaluations from "../trainer-evaluations/trainer-evaluations";
 
 interface EditingForm {
   name: string;
@@ -260,123 +261,127 @@ const Profile = () => {
             <div className="flex justify-center items-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
-          ) : trainerStatistics ? (
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-row gap-4 w-full">
-                <Card className="w-full">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Total Servicios
-                    </CardTitle>
-                    <Briefcase className="size-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {trainerStatistics.totalServices}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="w-full">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Total Clientes
-                    </CardTitle>
-                    <Users className="size-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {trainerStatistics.totalClients}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="w-full">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Visitas
-                    </CardTitle>
-                    <Eye className="size-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {trainerStatistics.visits}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="flex flex-row gap-4 w-full">
-                <Card className="w-full">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Evaluaciones
-                    </CardTitle>
-                    <Star className="size-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-row items-center justify-between gap-2">
-                      <p className="text-sm text-muted-foreground">
-                        Promedio de calificaciones y evaluaciones totales.
-                      </p>
-                      <p className="text-muted-foreground mt-1">
-                        {trainerStatistics.averageRating.toFixed(1)} / 5.0
-                      </p>
-                    </div>
-                    <div className="mt-2">
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-yellow-500 h-2 rounded-full transition-all duration-300 ease-in-out"
-                          style={{
-                            width: `${
-                              (trainerStatistics.averageRating / 5) * 100
-                            }%`,
-                          }}
-                        ></div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="w-full">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Rendimiento de servicios
-                    </CardTitle>
-                    <TrendingUp className="size-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-row items-center justify-between gap-2">
-                      <p className="text-sm text-muted-foreground">
-                        Promedio de calificaciones y evaluaciones totales.
-                      </p>
-                      <p className="text-muted-foreground mt-1">
-                        {trainerStatistics.performance.toFixed(1)}%
-                      </p>
-                    </div>
-                    <div className="mt-2">
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-green-500 h-2 rounded-full transition-all duration-300 ease-in-out"
-                          style={{
-                            width: `${Math.min(
-                              trainerStatistics.performance,
-                              100
-                            )}%`,
-                          }}
-                        ></div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              No se pudieron cargar las estadísticas
-            </div>
+            trainerStatistics && (
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-row gap-4 w-full">
+                  <Card className="w-full">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        Total Servicios
+                      </CardTitle>
+                      <Briefcase className="size-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {trainerStatistics.totalServices}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="w-full">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        Total Clientes
+                      </CardTitle>
+                      <Users className="size-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {trainerStatistics.totalClients}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="w-full">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        Visitas
+                      </CardTitle>
+                      <Eye className="size-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {trainerStatistics.visits}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="flex flex-row gap-4 w-full">
+                  <Card className="w-full">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        Evaluaciones
+                      </CardTitle>
+                      <Star className="size-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-row items-center justify-between gap-2">
+                        <p className="text-sm text-muted-foreground">
+                          Promedio de calificaciones y evaluaciones totales.
+                        </p>
+                        <p className="text-muted-foreground mt-1">
+                          {trainerStatistics.averageRating.toFixed(1)} / 5.0
+                        </p>
+                      </div>
+                      <div className="mt-2">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-yellow-500 h-2 rounded-full transition-all duration-300 ease-in-out"
+                            style={{
+                              width: `${
+                                (trainerStatistics.averageRating / 5) * 100
+                              }%`,
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="w-full">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        Rendimiento de servicios
+                      </CardTitle>
+                      <TrendingUp className="size-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-row items-center justify-between gap-2">
+                        <p className="text-sm text-muted-foreground">
+                          Promedio de calificaciones y evaluaciones totales.
+                        </p>
+                        <p className="text-muted-foreground mt-1">
+                          {trainerStatistics.performance.toFixed(1)}%
+                        </p>
+                      </div>
+                      <div className="mt-2">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-green-500 h-2 rounded-full transition-all duration-300 ease-in-out"
+                            style={{
+                              width: `${Math.min(
+                                trainerStatistics.performance,
+                                100
+                              )}%`,
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            )
           )}
         </div>
+      )}
+      {isTrainer && profileUser.id && (
+        <TrainerEvaluations
+          trainerId={profileUser.id}
+          trainerName={profileUser.name}
+        />
       )}
     </section>
   ) : (

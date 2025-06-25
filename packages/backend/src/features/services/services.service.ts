@@ -6,6 +6,7 @@ import {
   GetServicesResponseDTO,
   UpdateServiceRequestDTO,
   GetFiltersResponseDTO,
+  GetServiceClientsResponseDTO,
 } from "./dtos";
 import Hiring from "../hiring/hiring.model";
 import Review from "../reviews/reviews.model";
@@ -657,5 +658,25 @@ export class ServicesService {
       service.visualizations = service.viewedBy.length;
       await service.save();
     }
+  }
+
+  async getServiceClients(serviceId: string): Promise<GetServiceClientsResponseDTO> {
+    // Get all hirings for this service with client information
+    const hirings = await Hiring.find({
+      serviceId: new Types.ObjectId(serviceId),
+    }).populate("clientId", "name email avatar");
+
+    const clients = hirings.map((hiring: any) => ({
+      id: hiring.clientId._id,
+      name: `${hiring.clientId.name}`,
+      email: hiring.clientId.email,
+      avatarUrl: hiring.clientId.avatar || "",
+      hiringId: hiring._id,
+      status: hiring.status,
+      day: hiring.day,
+      time: hiring.time,
+    }));
+
+    return clients;
   }
 }

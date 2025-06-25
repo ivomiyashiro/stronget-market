@@ -28,6 +28,6 @@ export type GetServicesResponseDTO = {
     clients: number;
     trainerId: Types.ObjectId;
     hiringId?: Types.ObjectId; // Optional hiring ID for client services
-    hiringStatus?: "pending" | "confirmed" | "cancelled" | "completed"; // Optional hiring status for client services
+    hiringStatus?: "pending" | "confirmed" | "cancelled" | "rejected" | "completed"; // Optional hiring status for client services
     files: string[];
 };

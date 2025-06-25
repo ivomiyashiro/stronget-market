@@ -273,6 +273,31 @@ export class ServicesController {
             });
         }
     };
+
+    getServiceClients = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+        try {
+            const { serviceId } = req.params;
+            const user = req.user;
+
+            if (!user) {
+                res.status(401).json({ message: "Unauthorized" });
+                return;
+            }
+
+            // Only trainers can view clients for their services
+            if (user.role !== "entrenador") {
+                res.status(403).json({ message: "Forbidden: Only trainers can view service clients" });
+                return;
+            }
+
+            const clients = await this.servicesService.getServiceClients(serviceId);
+            res.status(200).json(clients);
+        } catch (error) {
+            res.status(400).json({
+                message: error instanceof Error ? error.message : "Get service clients failed",
+            });
+        }
+    };
 }
 
 export const servicesController = new ServicesController();

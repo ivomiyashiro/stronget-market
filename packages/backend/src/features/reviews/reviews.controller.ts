@@ -111,4 +111,26 @@ export class ReviewsController {
       });
     }
   };
+
+  respondToReview = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const trainerId = req.user?.id;
+      const { response } = req.body;
+      if (!trainerId) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+      if (!response || typeof response !== "string" || !response.trim()) {
+        res.status(400).json({ message: "Response is required" });
+        return;
+      }
+      const updatedReview = await this.reviewsService.respondToReview(id, trainerId, response.trim());
+      res.status(200).json(updatedReview);
+    } catch (error) {
+      res.status(400).json({
+        message: error instanceof Error ? error.message : "Respond to review failed",
+      });
+    }
+  };
 }
