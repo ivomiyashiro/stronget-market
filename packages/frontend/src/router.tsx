@@ -14,6 +14,7 @@ import ServiceExpanded from "@/components/service-expanded/service-expanded";
 import Profile from "./components/profile/profile";
 import ServicesTable from "./components/services-table/services-table";
 import CartConfirmationPage from "./components/cart-confirmation/cart-confirmation.page";
+import ClientsTable from "./components/clients-table/clients-table";
 
 const router = createBrowserRouter([
     {
@@ -113,6 +114,16 @@ const router = createBrowserRouter([
                     <ProtectedRoute allowedRoles="both">
                         <Layout showHeader showFooter>
                             <CartConfirmationPage />
+                        </Layout>
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: "my-services/:id/clients",
+                element: (
+                    <ProtectedRoute allowedRoles="entrenador">
+                        <Layout showHeader showFooter>
+                            <ClientsTable />
                         </Layout>
                     </ProtectedRoute>
                 ),

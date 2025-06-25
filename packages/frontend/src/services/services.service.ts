@@ -74,6 +74,7 @@ export interface ServiceClient {
   status: "pending" | "confirmed" | "cancelled" | "rejected" | "completed";
   day: string;
   time: string;
+  birthDate: Date;
 }
 
 export class ServicesService {

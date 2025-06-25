@@ -6,3 +6,4 @@ export * from "./trainer-evaluations.service";
 export * from "./filters.service";
 export * from "./hiring.service";
 export * from "./reviews.service";
+export * from "./archives.service";

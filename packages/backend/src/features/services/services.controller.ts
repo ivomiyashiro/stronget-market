@@ -91,7 +91,7 @@ export class ServicesController {
             // If user is authenticated and is a client, return their hired services
             // Otherwise, return all services with filters
             if (user && user.role === "cliente") {
-                services = await this.servicesService.getClientServices(user.id);
+                services = await this.servicesService.getClientServices(user.id, params);
             } else {
                 services = await this.servicesService.getServices(params);
             }
@@ -248,14 +248,15 @@ export class ServicesController {
         } catch (error) {
             res.status(400).json({
                 message:
-                    error instanceof Error
-                        ? error.message
-                        : "Get trainer filters failed",
+                    error instanceof Error ? error.message : "Get trainer filters failed",
             });
         }
     };
 
-    trackVisualization = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    trackVisualization = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ): Promise<void> => {
         try {
             const { serviceId } = req.params;
             const userId = req.user?.id;
@@ -269,12 +270,16 @@ export class ServicesController {
             res.status(200).json({ message: "Visualization tracked successfully" });
         } catch (error) {
             res.status(400).json({
-                message: error instanceof Error ? error.message : "Track visualization failed",
+                message:
+                    error instanceof Error ? error.message : "Track visualization failed",
             });
         }
     };
 
-    getServiceClients = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    getServiceClients = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ): Promise<void> => {
         try {
             const { serviceId } = req.params;
             const user = req.user;
@@ -286,7 +291,9 @@ export class ServicesController {
 
             // Only trainers can view clients for their services
             if (user.role !== "entrenador") {
-                res.status(403).json({ message: "Forbidden: Only trainers can view service clients" });
+                res.status(403).json({
+                    message: "Forbidden: Only trainers can view service clients",
+                });
                 return;
             }
 
@@ -294,7 +301,8 @@ export class ServicesController {
             res.status(200).json(clients);
         } catch (error) {
             res.status(400).json({
-                message: error instanceof Error ? error.message : "Get service clients failed",
+                message:
+                    error instanceof Error ? error.message : "Get service clients failed",
             });
         }
     };

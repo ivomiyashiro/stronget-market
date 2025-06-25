@@ -9,4 +9,5 @@ export type GetServiceClientsResponseDTO = {
     status: "pending" | "confirmed" | "cancelled" | "rejected" | "completed";
     day: string;
     time: string;
-}[]; 
+    birthDate: Date;
+}[];
