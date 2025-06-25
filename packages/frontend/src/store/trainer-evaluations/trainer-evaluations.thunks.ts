@@ -6,9 +6,10 @@ export const getTrainerEvaluations = createAsyncThunk(
   "trainerEvaluations/getTrainerEvaluations",
   async (payload: GetTrainerEvaluationsPayload, { rejectWithValue }) => {
     try {
-      const evaluations = await trainerEvaluationsService.getTrainerEvaluations(payload.trainerId);
+      const evaluations = await trainerEvaluationsService.getTrainerEvaluations(
+        payload.trainerId
+      );
 
-      // Call success callback if provided
       if (payload.onSuccess) {
         payload.onSuccess();
       }
@@ -16,9 +17,10 @@ export const getTrainerEvaluations = createAsyncThunk(
       return evaluations;
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch trainer evaluations";
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch trainer evaluations";
 
-      // Call error callback if provided
       if (payload.onError) {
         payload.onError(errorMessage);
       }
@@ -26,4 +28,4 @@ export const getTrainerEvaluations = createAsyncThunk(
       return rejectWithValue(errorMessage);
     }
   }
-); 
+);

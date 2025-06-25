@@ -13,7 +13,6 @@ export const createService = createAsyncThunk(
     try {
       const service = await servicesService.createService(payload.data);
 
-      // Call success callback if provided
       if (payload.onSuccess) {
         payload.onSuccess();
       }
@@ -23,7 +22,6 @@ export const createService = createAsyncThunk(
       const errorMessage =
         error instanceof Error ? error.message : "Failed to create service";
 
-      // Call error callback if provided
       if (payload.onError) {
         payload.onError(errorMessage);
       }
@@ -47,7 +45,7 @@ export const getServices = createAsyncThunk(
   }
 );
 
-export const getUserServices = createAsyncThunk(  
+export const getUserServices = createAsyncThunk(
   "services/getUserServices",
   async (params: GetServicesParams | undefined, { rejectWithValue }) => {
     try {
@@ -55,7 +53,9 @@ export const getUserServices = createAsyncThunk(
       return response;
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch user services";
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch user services";
       return rejectWithValue(errorMessage);
     }
   }
@@ -77,7 +77,10 @@ export const getServiceById = createAsyncThunk(
 
 export const getServicesByTrainerId = createAsyncThunk(
   "services/getServicesByTrainerId",
-  async (payload: { id: string; params?: GetServicesParams }, { rejectWithValue }) => {
+  async (
+    payload: { id: string; params?: GetServicesParams },
+    { rejectWithValue }
+  ) => {
     try {
       const services = await servicesService.getServicesByTrainerId(
         payload.id,
@@ -86,7 +89,9 @@ export const getServicesByTrainerId = createAsyncThunk(
       return services;
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch trainer services";
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch trainer services";
       return rejectWithValue(errorMessage);
     }
   }
@@ -96,9 +101,11 @@ export const updateService = createAsyncThunk(
   "services/updateService",
   async (payload: UpdateServicePayload, { rejectWithValue }) => {
     try {
-      const service = await servicesService.updateService(payload.id, payload.data);
+      const service = await servicesService.updateService(
+        payload.id,
+        payload.data
+      );
 
-      // Call success callback if provided
       if (payload.onSuccess) {
         payload.onSuccess();
       }
@@ -108,7 +115,6 @@ export const updateService = createAsyncThunk(
       const errorMessage =
         error instanceof Error ? error.message : "Failed to update service";
 
-      // Call error callback if provided
       if (payload.onError) {
         payload.onError(errorMessage);
       }
@@ -124,7 +130,6 @@ export const deleteService = createAsyncThunk(
     try {
       const result = await servicesService.deleteService(payload.id);
 
-      // Call success callback if provided
       if (payload.onSuccess) {
         payload.onSuccess();
       }
@@ -134,7 +139,6 @@ export const deleteService = createAsyncThunk(
       const errorMessage =
         error instanceof Error ? error.message : "Failed to delete service";
 
-      // Call error callback if provided
       if (payload.onError) {
         payload.onError(errorMessage);
       }

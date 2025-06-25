@@ -9,7 +9,6 @@ export class HiringService {
         clientId: string,
         hiringData: CreateHiringRequestDTO
     ): Promise<CreateHiringResponseDTO> {
-        // Get service and validate it exists and is active
         const service = await Service.findById(hiringData.serviceId).populate(
             "trainerId",
             "name"
@@ -23,13 +22,11 @@ export class HiringService {
             throw new Error("Service is no longer available");
         }
 
-        // Verify trainer exists
         const trainer = await User.findById((service.trainerId as any)._id);
         if (!trainer) {
             throw new Error("Trainer not found");
         }
 
-        // Check trainer availability for the requested day/time slot
         await this.validateTrainerAvailability(
             (service.trainerId as any)._id.toString(),
             hiringData.serviceId,
@@ -38,7 +35,6 @@ export class HiringService {
             service.duration as number
         );
 
-        // Prevent client from booking their own service (if they're also a trainer)
         if (clientId === (service.trainerId as any)._id.toString()) {
             throw new Error("You cannot book your own service");
         }
@@ -47,12 +43,11 @@ export class HiringService {
             ...hiringData,
             clientId: new Types.ObjectId(clientId),
             trainerId: (service.trainerId as any)._id,
-            status: "pending", // Always starts as pending
+            status: "pending",
         });
 
         await hiring.save();
 
-        // Add notification to trainer about new booking request
         trainer.notifications?.push({
             message: `Nuevo pedido de reserva para tu servicio ${service.category} el ${hiringData.day} a las ${hiringData.time}`,
             leido: false,
@@ -60,7 +55,7 @@ export class HiringService {
         } as any);
         await trainer.save();
 
-        // Populate for response
+                
         const populatedHiring = await Hiring.findById(hiring._id)
             .populate("clientId", "name")
             .populate("trainerId", "name");
@@ -82,7 +77,6 @@ export class HiringService {
     }
 
     private parseDateTime(day: string, time: string): Date {
-        // Parse day (e.g., "Monday", "Tuesday", etc.) and time (e.g., "14:30")
         const today = new Date();
         const dayNames = [
             "Domingo",
@@ -99,17 +93,15 @@ export class HiringService {
             throw new Error("Día inválido");
         }
 
-        // Find the next occurrence of this day
         const todayIndex = today.getDay();
         let daysToAdd = targetDayIndex - todayIndex;
         if (daysToAdd <= 0) {
-            daysToAdd += 7; // Next week
+            daysToAdd += 7;
         }
 
         const targetDate = new Date(today);
         targetDate.setDate(today.getDate() + daysToAdd);
 
-        // Parse time
         const [hours, minutes] = time.split(":").map(Number);
         if (isNaN(hours) || isNaN(minutes)) {
             throw new Error("Formato de hora inválido");
@@ -126,7 +118,6 @@ export class HiringService {
         time: string,
         serviceDuration: number
     ): Promise<void> {
-        // Parse the requested time
         const [requestedHours, requestedMinutes] = time.split(":").map(Number);
         if (isNaN(requestedHours) || isNaN(requestedMinutes)) {
             throw new Error("Formato de hora inválido");
@@ -135,7 +126,6 @@ export class HiringService {
         const requestedStartMinutes = requestedHours * 60 + requestedMinutes;
         const requestedEndMinutes = requestedStartMinutes + serviceDuration;
 
-        // Find all confirmed or pending bookings for this trainer on the same day of the week
         const existingBookings = await Hiring.find({
             trainerId: new Types.ObjectId(trainerId),
             day: day,
@@ -181,7 +171,6 @@ export class HiringService {
             throw new Error("Hiring not found");
         }
 
-        // Validate status transitions and permissions
         const currentStatus = hiring.status;
         const isTrainer = (hiring.trainerId as any)._id.toString() === userId;
         const isClient = (hiring.clientId as any)._id.toString() === userId;
@@ -190,26 +179,25 @@ export class HiringService {
             throw new Error("No tienes permisos para actualizar esta reserva");
         }
 
-        // Define allowed status transitions
         const allowedTransitions: Record<
             string,
             { from: string[]; allowedBy: string[] }
         > = {
             confirmed: {
                 from: ["pending"],
-                allowedBy: ["trainer"], // Only trainers can confirm
+                allowedBy: ["trainer"],
             },
             cancelled: {
                 from: ["pending", "confirmed"],
-                allowedBy: ["client", "trainer"], // Only clients and trainers can cancel
+                allowedBy: ["client", "trainer"],
             },
             rejected: {
                 from: ["pending"],
-                allowedBy: ["trainer"], // Only trainers can reject
+                allowedBy: ["trainer"],
             },
             completed: {
                 from: ["confirmed"],
-                allowedBy: ["trainer"], // Both can mark as completed
+                allowedBy: ["trainer"],
             },
         };
 
@@ -233,9 +221,7 @@ export class HiringService {
             );
         }
 
-        // Additional validation for specific transitions
         if (status === "confirmed" && currentStatus === "pending") {
-            // Re-validate availability when confirming (in case of concurrent bookings)
             const service = await Service.findById(hiring.serviceId);
             if (service) {
                 await this.validateTrainerAvailability(
@@ -252,10 +238,8 @@ export class HiringService {
         hiring.updatedAt = new Date();
         await hiring.save();
 
-        // Send notification to the other party
         const trainer = await User.findById((hiring.trainerId as any)._id);
         if (trainer && !isTrainer) {
-            // Client updated status, notify trainer
             trainer.notifications?.push({
                 message: `Booking status updated to ${status} by ${
                     (hiring.clientId as any).name
@@ -282,7 +266,6 @@ export class HiringService {
         serviceId: string,
         trainerId: string
     ) {
-        // Find the hiring by client ID and service ID
         const hiring = await Hiring.findOne({
             clientId: new Types.ObjectId(clientId),
             serviceId: new Types.ObjectId(serviceId),
@@ -294,12 +277,10 @@ export class HiringService {
             throw new Error("Pending hiring not found");
         }
 
-        // Update the hiring status to confirmed
         hiring.status = "confirmed";
         hiring.updatedAt = new Date();
         await hiring.save();
 
-        // Send notification to the client
         const client = await User.findById(clientId);
         if (client) {
             client.notifications?.push({
@@ -318,7 +299,6 @@ export class HiringService {
         serviceId: string,
         trainerId: string
     ) {
-        // Find the hiring by client ID and service ID
         const hiring = await Hiring.findOne({
             clientId: new Types.ObjectId(clientId),
             serviceId: new Types.ObjectId(serviceId),
@@ -330,12 +310,10 @@ export class HiringService {
             throw new Error("Pending hiring not found");
         }
 
-        // Update the hiring status to rejected (trainer rejected the client)
         hiring.status = "rejected";
         hiring.updatedAt = new Date();
         await hiring.save();
 
-        // Send notification to the client
         const client = await User.findById(clientId);
         if (client) {
             client.notifications?.push({
@@ -350,7 +328,6 @@ export class HiringService {
     }
 
     async removeHiring(id: string, clientId: string) {
-        // Find the hiring and validate it belongs to the client
         const hiring = await Hiring.findById(id)
             .populate("clientId", "name")
             .populate("trainerId", "name")
@@ -360,21 +337,18 @@ export class HiringService {
             throw new Error("Hiring not found");
         }
 
-        // Verify the hiring belongs to the requesting client
         if ((hiring.clientId as any)._id.toString() !== clientId) {
             throw new Error("You can only remove your own hirings");
         }
 
-        // Check if hiring can be cancelled based on status
         const allowedStatuses = ["pending", "confirmed"];
         if (!allowedStatuses.includes(hiring.status)) {
             throw new Error(`Cannot cancel hiring with status: ${hiring.status}`);
         }
 
-        // Check if hiring is too close to the scheduled time (e.g., less than 24 hours)
         const scheduledDateTime = this.parseDateTime(hiring.day, hiring.time);
         const now = new Date();
-        const minCancellationTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
+        const minCancellationTime = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
         if (scheduledDateTime <= minCancellationTime) {
             throw new Error(
@@ -382,12 +356,10 @@ export class HiringService {
             );
         }
 
-        // Change the hiring status to cancelled instead of deleting
         hiring.status = "cancelled";
         hiring.updatedAt = new Date();
         await hiring.save();
 
-        // Notify the trainer about the cancellation
         const trainer = await User.findById(hiring.trainerId);
         if (trainer) {
             trainer.notifications?.push({
@@ -408,19 +380,17 @@ export class HiringService {
     }
 
     async getTrainerAvailableSlots(trainerId: string, day: string) {
-        // Get all active bookings for this trainer on this day of the week
         const bookings = await Hiring.find({
             trainerId: new Types.ObjectId(trainerId),
             day: day,
-            status: { $in: ["pending", "confirmed"] }, // Only consider pending and confirmed bookings
+            status: { $in: ["pending", "confirmed"] },
         })
             .populate("serviceId", "duration")
             .sort({ time: 1 });
 
-        // Generate available time slots (assuming 9 AM to 9 PM working hours)
         const workStartHour = 9;
         const workEndHour = 21;
-        const slotDurationMinutes = 60; // 1 hour slots
+        const slotDurationMinutes = 60;
 
         const availableSlots: string[] = [];
 
@@ -429,7 +399,6 @@ export class HiringService {
             const slotStartMinutes = hour * 60;
             const slotEndMinutes = slotStartMinutes + slotDurationMinutes;
 
-            // Check if this slot conflicts with any booking
             const hasConflict = bookings.some((booking) => {
                 const [bookingHours, bookingMinutes] = booking.time
                     .split(":")
@@ -463,7 +432,6 @@ export class HiringService {
         time: string
     ): Promise<{ canBook: boolean; reason?: string }> {
         try {
-            // Check if service exists and is active
             const service = await Service.findById(serviceId).populate(
                 "trainerId",
                 "name"
@@ -476,7 +444,6 @@ export class HiringService {
                 return { canBook: false, reason: "Servicio no disponible" };
             }
 
-            // Check if client is trying to book their own service
             if (clientId === (service.trainerId as any)._id.toString()) {
                 return {
                     canBook: false,
@@ -484,7 +451,6 @@ export class HiringService {
                 };
             }
 
-            // Validate day and time format
             const dayNames = [
                 "Domingo",
                 "Lunes",
@@ -516,7 +482,6 @@ export class HiringService {
                 };
             }
 
-            // Check if the requested time is at least 2 hours from now
             const requestedDateTime = this.parseDateTime(day, time);
             const now = new Date();
             const minBookingTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
@@ -528,7 +493,6 @@ export class HiringService {
                 };
             }
 
-            // Check trainer availability for this day/time slot
             await this.validateTrainerAvailability(
                 (service.trainerId as any)._id.toString(),
                 serviceId,

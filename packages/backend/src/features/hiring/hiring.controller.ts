@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { HiringService } from "./hiring.service";
 
-// Type extension for authenticated requests
 interface AuthenticatedRequest extends Request {
     user?: {
         id: string;

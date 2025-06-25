@@ -17,7 +17,6 @@ interface TrainerEvaluationsProps {
   onStatsUpdate?: (average: number, total: number) => void;
 }
 
-// Definir la interfaz ReviewWithUserName localmente
 interface ReviewWithUserName extends Review {
   userId?: string;
   userName?: string;
@@ -47,7 +46,6 @@ const TrainerEvaluations = ({
   const { user: loggedInUser } = useAuth();
   const [starFilter, setStarFilter] = useState<number | null>(null);
 
-  // Fetch reviews
   useEffect(() => {
     const fetchReviews = async () => {
       setLoading(true);
@@ -55,7 +53,6 @@ const TrainerEvaluations = ({
         const data = serviceId
           ? await reviewsService.getReviewsByService(serviceId)
           : await reviewsService.getReviewsByTrainer(trainerId);
-        // Obtener nombre de usuario para cada review
         const reviewsWithUserName = await Promise.all(
           data.map(async (review: ReviewWithUserName) => {
             let userName = "Usuario";
@@ -80,7 +77,6 @@ const TrainerEvaluations = ({
     fetchReviews();
   }, [trainerId, serviceId]);
 
-  // Check eligibility
   useEffect(() => {
     const checkEligibility = async () => {
       if (!user || !serviceId) {
@@ -88,14 +84,12 @@ const TrainerEvaluations = ({
         return;
       }
       try {
-        // Get all hirings for this user
         const hirings = await hiringService.getMyHirings();
         const completedOrConfirmed = hirings.some(
           (h) =>
             (h.status === "completed" || h.status === "confirmed") &&
             h.serviceId._id === serviceId
         );
-        // Only allow if not already reviewed
         const alreadyReviewed = reviews.some(
           (r) => r.user?._id === user.id && r.serviceId === serviceId
         );
@@ -107,7 +101,6 @@ const TrainerEvaluations = ({
     checkEligibility();
   }, [user, serviceId, reviews]);
 
-  // Mostrar solo 2 evaluaciones si hay serviceId (es decir, en el contexto de un servicio)
   const displayed: ReviewWithUserName[] = serviceId
     ? reviews.slice(0, 2)
     : reviews.slice(0, 3);
@@ -138,7 +131,7 @@ const TrainerEvaluations = ({
         calification: rating,
         comments: comment.trim(),
       });
-      // Refresh reviews
+
       const data = await reviewsService.getReviewsByService(serviceId);
       setReviews(data);
       setModalContent("list");
@@ -194,7 +187,6 @@ const TrainerEvaluations = ({
     ? reviews.filter((r) => Math.round(r.calification) === starFilter)
     : reviews;
 
-  // Calcular promedio de estrellas y cantidad total de comentarios
   const totalReviews = reviews.length;
   const averageRating =
     totalReviews > 0
@@ -202,7 +194,6 @@ const TrainerEvaluations = ({
         totalReviews
       : 0;
 
-  // Llamar a onStatsUpdate cuando cambian el promedio o la cantidad
   useEffect(() => {
     if (!serviceId && onStatsUpdate) {
       onStatsUpdate(averageRating, totalReviews);
@@ -331,7 +322,6 @@ const TrainerEvaluations = ({
           </div>
         )}
       </div>
-      {/* Botón para mostrar todas las evaluaciones, siempre visible si hay más de 0 reviews */}
       {reviews.length > 0 && (
         <Button
           variant="outline"

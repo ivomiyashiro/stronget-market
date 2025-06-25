@@ -31,21 +31,31 @@ export class TrainerService {
   }
 
   async getTrainerStatistics(id: string): Promise<TrainerStatistics> {
-    return await baseService.get<TrainerStatistics>(`/trainers/${id}/statistics`);
+    return await baseService.get<TrainerStatistics>(
+      `/trainers/${id}/statistics`
+    );
   }
 
   async getTrainerNotifications(id: string): Promise<TrainerNotification[]> {
-    return await baseService.get<TrainerNotification[]>(`/trainers/${id}/notifications`);
+    return await baseService.get<TrainerNotification[]>(
+      `/trainers/${id}/notifications`
+    );
   }
 
   async updateSeenNotifications(id: string): Promise<{ message: string }> {
-    return await baseService.put<{ message: string }>(`/trainers/${id}/notifications/seen`);
+    return await baseService.put<{ message: string }>(
+      `/trainers/${id}/notifications/seen`
+    );
   }
 
-  async markNotificationAsRead(id: string, notificationId: string): Promise<{ message: string }> {
-    return await baseService.put<{ message: string }>(`/trainers/${id}/notifications/${notificationId}/read`);
+  async markNotificationAsRead(
+    id: string,
+    notificationId: string
+  ): Promise<{ message: string }> {
+    return await baseService.put<{ message: string }>(
+      `/trainers/${id}/notifications/${notificationId}/read`
+    );
   }
 }
 
-// Create singleton instance
-export const trainerService = new TrainerService(); 
+export const trainerService = new TrainerService();

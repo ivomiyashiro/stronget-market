@@ -63,7 +63,6 @@ import {
 } from "@/components/ui/dialog";
 import { archivesService, type ArchiveFile } from "@/services/archives.service";
 
-// Interface for pending clients
 interface PendingClient {
   id: string;
   name: string;
@@ -82,20 +81,16 @@ const ServicesTable = () => {
   const services = useServices();
   const isLoading = useServicesLoading();
 
-  // Track current applied filters
   const [currentFilters, setCurrentFilters] = useState<GetServicesParams>({});
 
-  // State for delete confirmation dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
 
-  // State for unpublish confirmation dialog
   const [unpublishDialogOpen, setUnpublishDialogOpen] = useState(false);
   const [serviceToUnpublish, setServiceToUnpublish] = useState<Service | null>(
     null
   );
 
-  // State for review popup
   const [reviewPopupOpen, setReviewPopupOpen] = useState(false);
   const [serviceToReview, setServiceToReview] = useState<Service | null>(null);
 
@@ -103,11 +98,9 @@ const ServicesTable = () => {
   const [pendingClients, setPendingClients] = useState<PendingClient[]>([]);
   const [currentServiceId, setCurrentServiceId] = useState<string | null>(null);
 
-  // State for clients modal
   const [clientsModalOpen, setClientsModalOpen] = useState(false);
   const [clients, setClients] = useState<ServiceClient[]>([]);
 
-  // State for archives modal
   const [archivesModalOpen, setArchivesModalOpen] = useState(false);
   const [archiveFiles, setArchiveFiles] = useState<ArchiveFile[]>([]);
   const [archivesLoading, setArchivesLoading] = useState(false);
@@ -135,12 +128,10 @@ const ServicesTable = () => {
       const filtersToApply = filters !== undefined ? filters : currentFilters;
 
       if (isTrainer && user?.id && user.id.trim() !== "") {
-        // For trainers, fetch their specific services
         dispatch(
           getServicesByTrainerId({ id: user.id, params: filtersToApply })
         );
       } else if (isClient) {
-        // For clients, fetch their hired services from /users/services
         dispatch(getUserServices(filtersToApply));
       }
     },
@@ -150,7 +141,6 @@ const ServicesTable = () => {
   useEffect(() => {
     if (!hasFetched.current && (isTrainer || isClient)) {
       hasFetched.current = true;
-      // Initial load without filters
       fetchServices({});
     }
   }, [isTrainer, isClient, fetchServices, user]);
@@ -171,35 +161,29 @@ const ServicesTable = () => {
   const confirmDeleteService = () => {
     if (serviceToDelete) {
       if (isTrainer) {
-        // For trainers, delete the service
         dispatch(
           deleteService({
             id: serviceToDelete.id,
             onSuccess: () => {
-              // Refresh the services list after successful deletion
               fetchServices();
               setDeleteDialogOpen(false);
               setServiceToDelete(null);
             },
             onError: (error) => {
               console.error("Delete service error:", error);
-              // Keep the dialog open so user can see the error
             },
           })
         );
       } else if (isClient && serviceToDelete.hiringId) {
-        // For clients, remove the hiring
         hiringService
           .removeHiring(serviceToDelete.hiringId)
           .then(() => {
-            // Refresh the services list after successful removal
             fetchServices();
             setDeleteDialogOpen(false);
             setServiceToDelete(null);
           })
           .catch((error) => {
             console.error("Remove hiring error:", error);
-            // Keep the dialog open so user can see the error
           });
       }
     }
@@ -226,14 +210,12 @@ const ServicesTable = () => {
           id: serviceToUnpublish.id,
           data: { status: newStatus },
           onSuccess: () => {
-            // Refresh the services list after successful status update
             fetchServices();
             setUnpublishDialogOpen(false);
             setServiceToUnpublish(null);
           },
           onError: (error) => {
             console.error(`${actionText} service error:`, error);
-            // Keep the dialog open so user can see the error
           },
         })
       );
@@ -260,7 +242,6 @@ const ServicesTable = () => {
   };
 
   const handleReviewCreated = () => {
-    // Optionally refresh the services list to update ratings
     fetchServices();
   };
 
@@ -302,9 +283,7 @@ const ServicesTable = () => {
     }
 
     hiringService.acceptHiring(clientId, currentServiceId).then(() => {
-      // Refresh the services list to update pending counts
       fetchServices();
-      // Close the modal
       handleClosePendingModal();
     });
   };
@@ -316,15 +295,12 @@ const ServicesTable = () => {
     }
 
     hiringService.rejectHiring(clientId, currentServiceId).then(() => {
-      // Refresh the services list to update pending counts
       fetchServices();
-      // Close the modal
       handleClosePendingModal();
     });
   };
 
   const handleOpenPendingModal = (service: Service) => {
-    // Convert service.pendings to PendingClient format
     const pendingClientsData: PendingClient[] = service.pendings.map(
       (client) => ({
         id: client.id,

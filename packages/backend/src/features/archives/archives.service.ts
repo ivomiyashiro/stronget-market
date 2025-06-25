@@ -7,7 +7,6 @@ import { UploadFileRequestDTO } from "./dtos";
 import path from "path";
 import crypto from "crypto";
 
-// Third-party storage service interface
 interface StorageService {
     uploadFile(file: any, key: string): Promise<string>;
     deleteFile(key: string): Promise<void>;
@@ -23,7 +22,6 @@ interface MulterFile {
     buffer: Buffer;
 }
 
-// Supabase Storage implementation
 export class ArchivesService implements StorageService {
     private supabase: SupabaseClient;
     private readonly bucketName = "archives";
@@ -35,7 +33,6 @@ export class ArchivesService implements StorageService {
 
     private async ensureBucketExists(): Promise<void> {
         try {
-            // Check if bucket exists
             const { data: buckets, error: listError } =
                 await this.supabase.storage.listBuckets();
 
@@ -49,11 +46,10 @@ export class ArchivesService implements StorageService {
             );
 
             if (!bucketExists) {
-                // Create public bucket for archives
                 const { error: createError } = await this.supabase.storage.createBucket(
                     this.bucketName,
                     {
-                        public: false, // Private bucket for sensitive documents
+                        public: false,
                         allowedMimeTypes: [
                             "application/pdf",
                             "application/msword",
@@ -65,7 +61,7 @@ export class ArchivesService implements StorageService {
                             "application/zip",
                             "application/x-rar-compressed",
                         ],
-                        fileSizeLimit: 10485760, // 10MB
+                        fileSizeLimit: 10485760,
                     }
                 );
 
@@ -87,14 +83,13 @@ export class ArchivesService implements StorageService {
             .from(this.bucketName)
             .upload(key, file.buffer, {
                 contentType: file.mimetype,
-                upsert: false, // Don't overwrite existing files
+                    upsert: false,
             });
 
         if (error) {
             throw new Error(`Supabase upload error: ${error.message}`);
         }
 
-        // For private buckets, we'll store the path and generate signed URLs when needed
         return key;
     }
 
@@ -107,7 +102,6 @@ export class ArchivesService implements StorageService {
     }
 
     getFileUrl(key: string): string {
-        // For private buckets, return the key - we'll generate signed URLs when needed
         return key;
     }
 
@@ -123,12 +117,10 @@ export class ArchivesService implements StorageService {
         return data.signedUrl;
     }
 
-    // Database interaction methods
     async uploadFileWithMetadata(
         file: MulterFile,
         requestData: UploadFileRequestDTO & { uploadedBy: string }
     ) {
-        // Validate file type
         const allowedTypes = [
             "application/pdf",
             "application/msword",
@@ -147,22 +139,18 @@ export class ArchivesService implements StorageService {
             );
         }
 
-        // Validate hiring exists
         const hiring = await Hiring.findById(requestData.hiringId);
         if (!hiring) {
             throw new Error("Hiring not found");
         }
 
-        // Generate unique file key
         const fileExtension = path.extname(file.originalname);
         const fileName = `${crypto.randomUUID()}${fileExtension}`;
         const fileKey = `hirings/${requestData.hiringId}/${fileName}`;
 
         try {
-            // Upload to Supabase storage using the storage interface method
             const storagePath = await this.uploadFile(file, fileKey);
 
-            // Save metadata to DB
             const archive = new Archive({
                 hiringId: new Types.ObjectId(requestData.hiringId),
                 uploadedBy: new Types.ObjectId(requestData.uploadedBy),
@@ -178,7 +166,6 @@ export class ArchivesService implements StorageService {
 
             const populatedArchive = await archive.populate("uploadedBy", "name surname");
 
-            // Generate signed URL for immediate access
             try {
                 const signedUrl = await this.getSignedUrl(archive.fileKey, 3600);
                 return {
@@ -213,7 +200,6 @@ export class ArchivesService implements StorageService {
             .populate("uploadedBy", "name surname")
             .sort({ uploadDate: -1 });
 
-        // Generate signed URLs for file access
         const archivesWithUrls = await Promise.all(
             archives.map(async (archive) => {
                 try {
@@ -247,7 +233,6 @@ export class ArchivesService implements StorageService {
             throw new Error("File not found");
         }
 
-        // Generate signed URL for file download
         try {
             const signedUrl = await this.getSignedUrl(archive.fileKey, 3600);
             return {
@@ -271,10 +256,8 @@ export class ArchivesService implements StorageService {
         }
 
         try {
-            // Delete from Supabase storage using the storage interface method
             await this.deleteFile(archive.fileKey);
 
-            // Soft delete from DB
             archive.isActive = false;
             archive.updatedAt = new Date();
             await archive.save();
@@ -297,7 +280,6 @@ export class ArchivesService implements StorageService {
             .populate("hiringId", "date status")
             .sort({ uploadDate: -1 });
 
-        // Generate signed URLs for files
         const archivesWithUrls = await Promise.all(
             archives.map(async (archive) => {
                 try {

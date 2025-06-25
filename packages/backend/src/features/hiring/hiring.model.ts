@@ -21,7 +21,6 @@ const hiringSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now },
 });
 
-// Index for efficient querying
 hiringSchema.index({ clientId: 1, day: 1, time: 1 });
 hiringSchema.index({ trainerId: 1, day: 1, time: 1 });
 hiringSchema.index({ serviceId: 1 });

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Custom validator for MongoDB ObjectId
+      
 const objectIdRegex = /^[0-9a-fA-F]{24}$/;
 const objectId = z.string().refine((val) => objectIdRegex.test(val), {
   message: "Invalid ObjectId format",
@@ -22,10 +22,8 @@ export const deleteFileSchema = z.object({
   id: objectId,
 });
 
-// File validation for multer middleware
 export const fileUploadValidation = {
   fileFilter: (req: any, file: any, cb: any) => {
-    // Allow common file types
     const allowedTypes = [
       "image/jpeg",
       "image/png",
@@ -45,6 +43,6 @@ export const fileUploadValidation = {
     }
   },
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB max file size
+    fileSize: 10 * 1024 * 1024,
   },
 };

@@ -5,7 +5,6 @@ import userService, {
 } from "@/services/user.service";
 import type { RegisterData, LoginData } from "./auth.types";
 
-// Register user
 export const register = createAsyncThunk<
   RegisterResponse,
   RegisterData,
@@ -21,7 +20,6 @@ export const register = createAsyncThunk<
   }
 });
 
-// Login user
 export const login = createAsyncThunk<
   LoginResponse,
   LoginData,
@@ -37,8 +35,6 @@ export const login = createAsyncThunk<
   }
 });
 
-// Logout user
 export const logout = createAsyncThunk("auth/logout", async () => {
-  // This is a simple action that doesn't need API call
   return null;
 });

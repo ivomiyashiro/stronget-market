@@ -59,23 +59,19 @@ const Profile = () => {
 
   const isMobile = useMediaQuery({ query: "(max-width: 600px)" });
 
-  // Trainer-specific state
   const trainerStatistics = useTrainerStatistics();
   const trainerLoading = useTrainerLoading();
   const isTrainer = profileUser?.role === "entrenador";
 
-  // 1. Agregar estado para promedio y cantidad de evaluaciones
   const [averageRating, setAverageRating] = useState<number | null>(null);
   const [totalReviews, setTotalReviews] = useState<number | null>(null);
 
-  // Fetch profile user when component mounts or userId changes
   useEffect(() => {
     if (userId) {
       fetchUserProfile(userId);
     }
   }, [userId, fetchUserProfile]);
 
-  // Update editing form when profile user data is loaded
   useEffect(() => {
     if (profileUser) {
       setEditingForm({
@@ -87,7 +83,6 @@ const Profile = () => {
     }
   }, [profileUser]);
 
-  // Fetch trainer statistics when profile user is a trainer
   useEffect(() => {
     if (isTrainer && userId && userId === loggedInUser?.id) {
       dispatch(getTrainerStatistics({ id: userId }));
@@ -110,19 +105,16 @@ const Profile = () => {
   const handleUpdate = async () => {
     if (!profileUser?.id) return;
 
-    // First upload avatar if a new file was selected
     if (selectedFile) {
       await dispatch(
         uploadAvatar({ userId: profileUser.id, file: selectedFile })
       ).unwrap();
     }
 
-    // Then update profile data
     await dispatch(
       updateProfile({ userId: profileUser.id, profileData: editingForm })
     ).unwrap();
 
-    // Reset form state
     setSelectedFile(null);
     setPreviewUrl(null);
     setIsEditing(false);
@@ -139,14 +131,12 @@ const Profile = () => {
     setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
 
-    // Reset the file input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
   const handleCancel = () => {
-    // Reset all form state
     setEditingForm({
       name: profileUser?.name || "",
       surname: profileUser?.surname || "",
@@ -158,10 +148,8 @@ const Profile = () => {
     setIsEditing(false);
   };
 
-  // Get the current avatar URL to display
   const currentAvatarUrl = previewUrl || profileUser?.avatar;
 
-  // Show loading state while fetching profile
   if (isLoading) {
     return (
       <section className="flex h-full p-8 w-full flex-col gap-8">
@@ -172,7 +160,6 @@ const Profile = () => {
     );
   }
 
-  // Show error state if profile not found or other error
   if (error || !profileUser) {
     return (
       <section className="flex h-full p-8 w-full flex-col gap-8">
@@ -257,7 +244,6 @@ const Profile = () => {
             isMobile ? "flex-row gap-6" : "flex-col gap-6"
           } items-center`}
         >
-          {/* Only show edit button if the logged-in user is viewing their own profile */}
           {loggedInUser?.id === userId && (
             <Button
               variant="secondary"
@@ -271,7 +257,6 @@ const Profile = () => {
       </div>
       <Separator />
 
-      {/* Trainer Statistics Cards */}
       {isTrainer && userId === loggedInUser?.id && (
         <div className="w-full">
           <h2 className="text-2xl font-bold mb-6">Estadísticas</h2>

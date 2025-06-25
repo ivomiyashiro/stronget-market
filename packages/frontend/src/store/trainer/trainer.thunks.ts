@@ -13,7 +13,6 @@ export const getTrainerById = createAsyncThunk(
     try {
       const trainer = await trainerService.getTrainerById(payload.id);
 
-      // Call success callback if provided
       if (payload.onSuccess) {
         payload.onSuccess();
       }
@@ -23,7 +22,6 @@ export const getTrainerById = createAsyncThunk(
       const errorMessage =
         error instanceof Error ? error.message : "Failed to fetch trainer";
 
-      // Call error callback if provided
       if (payload.onError) {
         payload.onError(errorMessage);
       }
@@ -39,7 +37,6 @@ export const getTrainerStatistics = createAsyncThunk(
     try {
       const statistics = await trainerService.getTrainerStatistics(payload.id);
 
-      // Call success callback if provided
       if (payload.onSuccess) {
         payload.onSuccess();
       }
@@ -47,9 +44,10 @@ export const getTrainerStatistics = createAsyncThunk(
       return statistics;
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch trainer statistics";
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch trainer statistics";
 
-      // Call error callback if provided
       if (payload.onError) {
         payload.onError(errorMessage);
       }
@@ -63,9 +61,10 @@ export const getTrainerNotifications = createAsyncThunk(
   "trainer/getTrainerNotifications",
   async (payload: GetTrainerNotificationsPayload, { rejectWithValue }) => {
     try {
-      const notifications = await trainerService.getTrainerNotifications(payload.id);
+      const notifications = await trainerService.getTrainerNotifications(
+        payload.id
+      );
 
-      // Call success callback if provided
       if (payload.onSuccess) {
         payload.onSuccess();
       }
@@ -73,9 +72,10 @@ export const getTrainerNotifications = createAsyncThunk(
       return notifications;
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch trainer notifications";
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch trainer notifications";
 
-      // Call error callback if provided
       if (payload.onError) {
         payload.onError(errorMessage);
       }
@@ -91,7 +91,6 @@ export const updateSeenNotifications = createAsyncThunk(
     try {
       const result = await trainerService.updateSeenNotifications(payload.id);
 
-      // Call success callback if provided
       if (payload.onSuccess) {
         payload.onSuccess();
       }
@@ -99,9 +98,10 @@ export const updateSeenNotifications = createAsyncThunk(
       return result;
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to update seen notifications";
+        error instanceof Error
+          ? error.message
+          : "Failed to update seen notifications";
 
-      // Call error callback if provided
       if (payload.onError) {
         payload.onError(errorMessage);
       }
@@ -109,4 +109,4 @@ export const updateSeenNotifications = createAsyncThunk(
       return rejectWithValue(errorMessage);
     }
   }
-); 
+);

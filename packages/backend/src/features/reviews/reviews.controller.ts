@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { ReviewsService } from "./reviews.service";
 
-// Type extension for authenticated requests
 interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
@@ -17,7 +16,10 @@ export class ReviewsController {
     this.reviewsService = new ReviewsService();
   }
 
-  createReview = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  createReview = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -29,7 +31,8 @@ export class ReviewsController {
       res.status(201).json(review);
     } catch (error) {
       res.status(400).json({
-        message: error instanceof Error ? error.message : "Create review failed",
+        message:
+          error instanceof Error ? error.message : "Create review failed",
       });
     }
   };
@@ -41,7 +44,8 @@ export class ReviewsController {
       res.status(200).json(reviews);
     } catch (error) {
       res.status(400).json({
-        message: error instanceof Error ? error.message : "Get service reviews failed",
+        message:
+          error instanceof Error ? error.message : "Get service reviews failed",
       });
     }
   };
@@ -53,7 +57,8 @@ export class ReviewsController {
       res.status(200).json(reviews);
     } catch (error) {
       res.status(400).json({
-        message: error instanceof Error ? error.message : "Get trainer reviews failed",
+        message:
+          error instanceof Error ? error.message : "Get trainer reviews failed",
       });
     }
   };
@@ -74,7 +79,10 @@ export class ReviewsController {
     }
   };
 
-  updateReview = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  updateReview = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const userId = req.user?.id;
@@ -84,16 +92,24 @@ export class ReviewsController {
         return;
       }
 
-      const review = await this.reviewsService.updateReview(id, userId, req.body);
+      const review = await this.reviewsService.updateReview(
+        id,
+        userId,
+        req.body
+      );
       res.status(200).json(review);
     } catch (error) {
       res.status(400).json({
-        message: error instanceof Error ? error.message : "Update review failed",
+        message:
+          error instanceof Error ? error.message : "Update review failed",
       });
     }
   };
 
-  deleteReview = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  deleteReview = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const userId = req.user?.id;
@@ -107,12 +123,16 @@ export class ReviewsController {
       res.status(200).json(result);
     } catch (error) {
       res.status(400).json({
-        message: error instanceof Error ? error.message : "Delete review failed",
+        message:
+          error instanceof Error ? error.message : "Delete review failed",
       });
     }
   };
 
-  respondToReview = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  respondToReview = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const trainerId = req.user?.id;
@@ -125,11 +145,16 @@ export class ReviewsController {
         res.status(400).json({ message: "Response is required" });
         return;
       }
-      const updatedReview = await this.reviewsService.respondToReview(id, trainerId, response.trim());
+      const updatedReview = await this.reviewsService.respondToReview(
+        id,
+        trainerId,
+        response.trim()
+      );
       res.status(200).json(updatedReview);
     } catch (error) {
       res.status(400).json({
-        message: error instanceof Error ? error.message : "Respond to review failed",
+        message:
+          error instanceof Error ? error.message : "Respond to review failed",
       });
     }
   };
